@@ -267,7 +267,7 @@ class EcomAdapter:
                             )
                         except Exception:
                             continue
-                        items = list(getattr(r, "items", []) or [])
+                        items = list(getattr(r, "paths", []) or [])
                         if idx == 0:
                             hits_before = len(items)
                         for p in items:
@@ -278,7 +278,7 @@ class EcomAdapter:
                                     break
                         if len(union) >= req.limit:
                             break
-                    resp = ecom_pb2.FindResponse(items=union)
+                    resp = ecom_pb2.FindResponse(paths=union)
                     _LOG.info(
                         "[OPT_A] find rewrite root=%s name=%r variants=%s "
                         "hits_before=%d hits_after=%d",
@@ -294,10 +294,10 @@ class EcomAdapter:
                         )
                     )
                     if _OPT_A_FIND_CI:
-                        items = list(getattr(resp, "items", []) or [])
+                        hits = list(getattr(resp, "paths", []) or [])
                         _LOG.info(
                             "[OPT_A] find no-rewrite root=%s name=%r hits=%d",
-                            req.root, name_in, len(items),
+                            req.root, name_in, len(hits),
                         )
                 return self._finish(start, resp, refs=())
             if isinstance(req, Req_Search):
