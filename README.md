@@ -184,6 +184,35 @@ bitgn-agent run-benchmark --smoke --output artifacts/bench/smoke.json
 Benchmark results in `artifacts/bench/` follow the naming convention:
 `<git-sha>_<label>_<model>_<timestamp>_<env>_runs<n>.json`
 
+### Local harness (no PROD VM required)
+
+`scripts/local_runner.py` drives `AgentLoop` against an on-disk
+workspace served by `LocalEcomClient`. Useful for prompt/tool
+iteration without burning real ECOM trials.
+
+```bash
+# Sanity-check the prepass against a snapshot — no LLM call
+python scripts/local_runner.py \
+    --workspace tests/fixtures/local_ecom \
+    --prepass-only
+
+# Full agent run against the fixture (uses your CLIPROXY env)
+python scripts/local_runner.py \
+    --workspace tests/fixtures/local_ecom \
+    --instruction "How many paid orders are in the catalogue? Use SQL." \
+    --context-date 2026-05-08T12:00:00Z
+```
+
+The fixture under `tests/fixtures/local_ecom/` ships an `/AGENTS.MD`,
+a couple of CSVs, and a SQLite catalogue (`catalogue.db`) with
+`orders` and `customers` tables. Copy the directory and edit it to
+build new local replay cases. The mock `/bin/sql` attaches every
+`*.db` / `*.sqlite` file under the workspace root, so a snapshot can
+expose multiple catalogues without code changes.
+
+`tests/local/` covers every ECOM RPC against the fixture (21 tests)
+and runs in well under a second.
+
 ---
 
 ## Provenance

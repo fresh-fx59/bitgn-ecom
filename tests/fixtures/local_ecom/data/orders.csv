@@ -1,0 +1,6 @@
+id,customer_id,total,status
+1,10,4500,paid
+2,10,1200,paid
+3,11,8900,refunded
+4,12,3300,paid
+5,11,200,paid
