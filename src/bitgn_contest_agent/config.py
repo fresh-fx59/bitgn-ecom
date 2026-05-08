@@ -22,7 +22,7 @@ class AgentConfig:
     cliproxy_api_key: str
 
     # Benchmark
-    benchmark: str = "bitgn/pac1-dev"
+    benchmark: str = "bitgn/ecom1-dev"
 
     # Model
     model: str = "gpt-5.3-codex"
@@ -78,8 +78,8 @@ def _build_backoff_schedule() -> Tuple[int, ...]:
 
     The built-in schedule (16s total) is tuned for a healthy remote.
     Local inference (LM Studio on a single GPU) crashes or reloads for
-    tens of seconds at a time, and PAC1 can return a brief 502 during
-    a deploy — neither recovers inside 16s. Setting
+    tens of seconds at a time, and the BitGN harness can return a
+    brief 502 during a deploy — neither recovers inside 16s. Setting
     AGENT_MAX_BACKOFF_SEC=N appends a 30s bridge step and a final
     N-second step so a single backend call can survive an outage up
     to ~(16 + 30 + N) seconds before giving up. The trial-level
@@ -104,7 +104,7 @@ def load_from_env() -> AgentConfig:
         bitgn_api_key=_require("BITGN_API_KEY"),
         cliproxy_base_url=_require("CLIPROXY_BASE_URL"),
         cliproxy_api_key=_require("CLIPROXY_API_KEY"),
-        benchmark=os.environ.get("BITGN_BENCHMARK", "bitgn/pac1-dev"),
+        benchmark=os.environ.get("BITGN_BENCHMARK", "bitgn/ecom1-dev"),
         model=os.environ.get("AGENT_MODEL", "gpt-5.3-codex"),
         reasoning_effort=os.environ.get("AGENT_REASONING_EFFORT", "medium"),
         max_steps=_int_env("MAX_STEPS", 40),

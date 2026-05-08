@@ -50,7 +50,7 @@ from bitgn_contest_agent.trace_writer import TraceWriter
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="bitgn-agent", description="BitGN PAC1 contest agent")
+    parser = argparse.ArgumentParser(prog="bitgn-agent", description="BitGN ECOM contest agent")
     parser.add_argument("--version", action="version", version=f"bitgn-agent {__version__}")
     subs = parser.add_subparsers(dest="command", required=True)
 
