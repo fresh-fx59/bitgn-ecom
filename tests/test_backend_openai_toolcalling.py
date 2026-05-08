@@ -63,14 +63,17 @@ def _mk_completion(*, tool_name: str, arguments: dict[str, Any] | str,
     return completion
 
 
-def test_tool_catalog_includes_filesystem_and_preflight_tools() -> None:
+def test_tool_catalog_includes_ecom_tool_surface() -> None:
+    """Tool catalog must mirror the ECOM RPC surface exactly.
+
+    Drift from the schemas.NextStep union shows up here first — if
+    build_tool_catalog falls behind a schema change, model-side
+    structured-output validation will reject every NextStep on PROD."""
     cat = build_tool_catalog()
     names = {t["function"]["name"] for t in cat}
     expected = {
-        "read", "write", "delete", "mkdir", "move",
-        "list", "tree", "find", "search", "context",
-        "preflight_schema", "preflight_inbox", "preflight_finance",
-        "preflight_entity", "preflight_project", "preflight_doc_migration",
+        "read", "write", "delete",
+        "list", "tree", "find", "search", "stat", "exec", "context",
         "report_completion",
     }
     assert names == expected

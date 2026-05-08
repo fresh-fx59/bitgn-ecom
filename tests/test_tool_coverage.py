@@ -4,14 +4,14 @@ If a future bitgn SDK release adds a new *Request type, this test fails
 until the Union is updated. Likewise if a Req_* model is added without a
 corresponding RPC, we catch it here.
 
-Source of truth on the RPC side: bitgn.vm.pcm_pb2 — any class whose name
-ends with ``Request`` AND does not inherit from another Request.
+Source of truth on the RPC side: bitgn.vm.ecom.ecom_pb2 — any class whose
+name ends with ``Request``.
 """
 from __future__ import annotations
 
 import inspect
 
-from bitgn.vm import pcm_pb2
+from bitgn.vm.ecom import ecom_pb2
 
 from bitgn_contest_agent.schemas import REQ_MODELS, ReportTaskCompletion
 
@@ -30,9 +30,9 @@ IGNORED_PROTO_NAMES = frozenset(
 )
 
 
-def _discover_pcm_request_types() -> set[str]:
+def _discover_ecom_request_types() -> set[str]:
     names: set[str] = set()
-    for name, obj in inspect.getmembers(pcm_pb2):
+    for name, obj in inspect.getmembers(ecom_pb2):
         if name in IGNORED_PROTO_NAMES:
             continue
         if not inspect.isclass(obj):
@@ -44,26 +44,18 @@ def _discover_pcm_request_types() -> set[str]:
 
 
 def _req_model_rpc_names() -> set[str]:
-    """Map each Req_* model to the proto class name it shadows.
-
-    Preflight models are client-side only (no PCM proto backing); they are
-    registered here to pass the assertion but excluded from the proto-coverage
-    check via CLIENT_SIDE_ONLY.
-    """
+    """Map each Req_* model to the proto class name it shadows."""
     mapping: dict[str, str] = {
         "Req_Read": "ReadRequest",
         "Req_Write": "WriteRequest",
         "Req_Delete": "DeleteRequest",
-        "Req_MkDir": "MkDirRequest",
-        "Req_Move": "MoveRequest",
         "Req_List": "ListRequest",
         "Req_Tree": "TreeRequest",
         "Req_Find": "FindRequest",
         "Req_Search": "SearchRequest",
+        "Req_Stat": "StatRequest",
+        "Req_Exec": "ExecRequest",
         "Req_Context": "ContextRequest",
-        # Client-side preflight tools — no PCM proto backing.
-        "Req_PreflightSchema": "PREFLIGHT_SchemaRequest",
-        "Req_PreflightSemanticIndex": "PREFLIGHT_SemanticIndexRequest",
     }
     names: set[str] = set()
     for model in REQ_MODELS:
@@ -76,18 +68,9 @@ def _req_model_rpc_names() -> set[str]:
     return names
 
 
-# Client-side-only pseudo-proto names that do not appear in pcm_pb2.
-_CLIENT_SIDE_ONLY: frozenset[str] = frozenset(
-    {
-        "PREFLIGHT_SchemaRequest",
-        "PREFLIGHT_SemanticIndexRequest",
-    }
-)
-
-
-def test_pcm_request_types_exactly_covered_by_union():
-    rpc_requests = _discover_pcm_request_types()
-    covered = (_req_model_rpc_names() | {TERMINAL_RPC}) - _CLIENT_SIDE_ONLY
+def test_ecom_request_types_exactly_covered_by_union():
+    rpc_requests = _discover_ecom_request_types()
+    covered = _req_model_rpc_names() | {TERMINAL_RPC}
 
     missing = rpc_requests - covered
     extra = covered - rpc_requests
@@ -106,9 +89,8 @@ def test_report_task_completion_outcome_matches_proto_enum():
     """Our Literal outcome set must match the proto Outcome enum exactly,
     minus the OUTCOME_UNSPECIFIED placeholder."""
     proto_outcomes = {
-        name for name in dir(pcm_pb2) if name.startswith("OUTCOME_")
+        name for name in ecom_pb2.Outcome.keys() if name.startswith("OUTCOME_")
     }
-    # Pydantic Literal args are exposed via __args__ on the annotation.
     from typing import get_args
 
     literal = ReportTaskCompletion.model_fields["outcome"].annotation

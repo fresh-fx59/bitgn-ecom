@@ -133,42 +133,17 @@ def _make_v1_1_summary_with_failures(failures: dict[str, str]) -> str:
     return _json.dumps(summary)
 
 
-def test_triage_cli_single_summary(tmp_path, capsys):
-    """triage <summary.json> prints cluster -> list of task_ids."""
-    summary = tmp_path / "s.json"
-    summary.write_text(_make_v1_1_summary_with_failures({
-        "t02": "inbox", "t08": "false_refusal", "t30": "timeout",
-    }))
-    from bitgn_contest_agent.cli import main
-    rc = main(["triage", str(summary)])
-    assert rc == 0
-    out = capsys.readouterr().out
-    assert "inbox" in out and "t02" in out
-    assert "timeout" in out and "t30" in out
-
-
-def test_triage_cli_diff_mode(tmp_path, capsys):
-    """triage --before A.json --after B.json prints +/- changes per cluster."""
-    before = tmp_path / "a.json"
-    before.write_text(_make_v1_1_summary_with_failures({"t02": "inbox", "t08": "false_refusal"}))
-    after = tmp_path / "b.json"
-    after.write_text(_make_v1_1_summary_with_failures({"t08": "false_refusal", "t30": "timeout"}))
-    from bitgn_contest_agent.cli import main
-    rc = main(["triage", "--before", str(before), "--after", str(after)])
-    assert rc == 0
-    out = capsys.readouterr().out
-    assert "-t02" in out  # inbox cleared
-    assert "+t30" in out  # timeout added
-
-
 def test_smoke_tasks_are_fixed():
+    """The smoke suite is intentionally fixed so smoke failures are
+    unambiguous. ECOM smoke uses the first five trials in benchmark
+    order until anchor tasks are picked from real run evidence."""
     from bitgn_contest_agent.bench.smoke import (
         SMOKE_TASKS,
         SMOKE_CEILING_SEC,
         SMOKE_MAX_PARALLEL,
         SMOKE_MAX_INFLIGHT_LLM,
     )
-    assert SMOKE_TASKS == ["t02", "t42", "t41", "t15", "t43"]
+    assert SMOKE_TASKS == ["t01", "t02", "t03", "t04", "t05"]
     assert SMOKE_CEILING_SEC == 180
     assert SMOKE_MAX_PARALLEL == 5
     assert SMOKE_MAX_INFLIGHT_LLM == 8

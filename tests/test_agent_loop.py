@@ -438,17 +438,17 @@ def test_agent_loop_dispatches_parallel_reads(tmp_path: Path) -> None:
         identity_verified=True,
         observation="read 3 entity files in parallel",
         outcome_leaning="GATHERING_INFORMATION",
-        function={"tool": "read", "path": "10_entities/cast/foo.md"},
+        function={"tool": "read", "path": "/data/orders/foo.csv"},
         parallel_reads=[
-            {"tool": "read", "path": "10_entities/cast/bar.md"},
-            {"tool": "list", "name": "60_outbox"},
+            {"tool": "read", "path": "/data/orders/bar.csv"},
+            {"tool": "list", "path": "/data/customers"},
         ],
     )
     terminal_step = _mk_step(
         {
             "tool": "report_completion",
             "message": "ok",
-            "grounding_refs": ["10_entities/cast/foo.md", "10_entities/cast/bar.md"],
+            "grounding_refs": ["/data/orders/foo.csv", "/data/orders/bar.csv"],
             "rulebook_notes": "n",
             "outcome_justification": "read three sources",
             "completed_steps_laconic": ["batched 3 reads"],

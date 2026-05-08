@@ -40,7 +40,7 @@ def test_closed_enum_sets_are_frozen_and_cover_spec() -> None:
     assert "report_completion" in TERMINATED_BY_VALUES
     assert "cancel" in TERMINATED_BY_VALUES
     assert "RPC_DEADLINE" in ERROR_CODE_VALUES
-    assert "PCM_ERROR" in ERROR_CODE_VALUES
+    assert "RUNTIME_ERROR" in ERROR_CODE_VALUES
 
 
 def test_meta_roundtrips() -> None:

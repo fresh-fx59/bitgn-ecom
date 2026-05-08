@@ -42,9 +42,9 @@ def test_critique_injection_formats_verdict_reasons() -> None:
 
 
 def test_loop_nudge_references_repeated_tuple() -> None:
-    text = prompts.loop_nudge(("read", "AGENTS.md"))
+    text = prompts.loop_nudge(("read", "/AGENTS.MD"))
     assert "read" in text
-    assert "AGENTS.md" in text
+    assert "/AGENTS.MD" in text
 
 
 def test_system_prompt_no_category_if_blocks() -> None:
@@ -63,16 +63,15 @@ def test_system_prompt_no_category_if_blocks() -> None:
 
 
 def test_system_prompt_retains_universal_rules() -> None:
-    """Universal rules that MUST remain in the base prompt after the
-    category-specific blocks are deleted."""
+    """Universal rules that MUST remain in the base prompt regardless
+    of domain. ECOM bootstrap reads /AGENTS.MD (uppercase) rather than
+    AGENTS.md — that is the only string change from the PAC1 lineage."""
     p = prompts.system_prompt()
     assert "NextStep" in p
     assert "OUTCOME_OK" in p
     assert "OUTCOME_DENIED_SECURITY" in p
-    assert "AGENTS.md" in p
+    assert "/AGENTS.MD" in p
     assert "grounding_refs" in p
-    # New universal rule — enforcer will validate YAML frontmatter.
-    assert "YAML frontmatter" in p
 
 
 def test_system_prompt_retains_grounding_and_anchor_rules() -> None:
@@ -94,11 +93,13 @@ def test_system_prompt_denies_url_capture_as_security() -> None:
     assert "DENIED_SECURITY" in p
 
 
-def test_entity_graph_finance_guidance_in_prompt() -> None:
-    """Entity-graph traversal guidance for finance lookups must be present."""
+def test_ecom_specific_guidance_in_prompt() -> None:
+    """ECOM-shaped discipline must be present: catalogue queries via
+    /bin/sql through `exec`, with stat as the cheap existence probe."""
     p = prompts.system_prompt()
-    assert "canonical identifier" in p.lower() or "canonical identifiers" in p.lower()
-    assert "finance" in p.lower()
+    assert "/bin/sql" in p
+    assert "exec" in p
+    assert "stat" in p
 
 
 def test_system_prompt_stays_bit_identical_for_cache_hits() -> None:

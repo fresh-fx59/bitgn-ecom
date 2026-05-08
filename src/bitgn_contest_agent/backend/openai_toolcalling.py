@@ -22,7 +22,6 @@ from __future__ import annotations
 import json as _json
 import logging
 import re as _re
-import uuid as _uuid
 from contextlib import nullcontext
 from typing import Any, ContextManager, Dict, List, Optional, Sequence, Tuple, TypeVar
 
@@ -41,7 +40,6 @@ from bitgn_contest_agent.backend.base import (
     NextStepResult,
     TransientBackendError,
 )
-from bitgn_contest_agent.backend import lmstudio_watchdog
 from bitgn_contest_agent.schemas import (
     NextStep,
     REQ_MODELS,
@@ -49,36 +47,14 @@ from bitgn_contest_agent.schemas import (
 )
 
 
-# Grace period subtracted from ``llm_http_timeout_sec``. The watchdog
-# must fire BEFORE the HTTP client raises, otherwise the ``with`` block
-# exits (via httpx's timeout exception), which cancels the Timer before
-# its callback can run — unload never fires. Firing 10s early lets the
-# unload run while the HTTP call is still in flight; the client's
-# timeout then surfaces (or the unload itself drops the connection
-# earlier), the retry wrapper sees the exception, and the next call
-# hits a cleanly freed slot.
-_WATCHDOG_GRACE_SEC: float = 10.0
-
-
 def _watchdog_guard(adapter: Any, model: str) -> ContextManager[None]:
-    """Return a watchdog guard CM when ``adapter`` targets LM Studio.
-
-    For non-LM-Studio backends (remote qwen3.6 gateway), returns a
-    no-op ``nullcontext`` so the call site can unconditionally ``with``.
-    """
-    host = getattr(adapter.profile, "lmstudio_host", None)
-    if host is None:
-        return nullcontext()
-    deadline = max(
-        adapter.profile.llm_http_timeout_sec - _WATCHDOG_GRACE_SEC,
-        5.0,
-    )
-    return lmstudio_watchdog.guard(
-        request_id=_uuid.uuid4().hex[:8],
-        model=model,
-        host=host,
-        deadline_sec=deadline,
-    )
+    """No-op stub. The PAC1 lineage shipped an LM-Studio-specific
+    watchdog that force-unloaded a hung local model on
+    ``llm_http_timeout_sec − 10s``; ECOM targets remote OpenAI-compat
+    backends where the HTTP client's timeout is sufficient. The call
+    site is preserved so re-introducing a watchdog later is one
+    function-body change."""
+    return nullcontext()
 
 
 _TRANSIENT_EXCEPTIONS: tuple[type[Exception], ...] = (

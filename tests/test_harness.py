@@ -76,14 +76,40 @@ def test_end_task_calls_end_trial_and_returns_score() -> None:
     assert call.trial_id == "trial-xyz"
 
 
-def test_start_run_posts_raw_json_and_returns_run_id_and_trials() -> None:
-    """start_run bypasses the connectrpc client (the local protobuf
-    descriptor is stale and has no api_key field) and POSTs raw JSON
-    via urllib. Mock urlopen and assert the request envelope shape:
+def test_start_run_uses_connectrpc_with_api_key() -> None:
+    """start_run goes through the connectrpc client. The 0.10.x SDK pin
+    ships StartRunRequest with `api_key`, so the urllib fallback the
+    PAC1 lineage carried for the stale 0.9.x descriptor is gated
+    behind BITGN_HARNESS_RAW_JSON=1 (not used in normal runs)."""
+    fake_client = MagicMock()
+    fake_client.start_run.return_value = MagicMock(
+        run_id="run-42",
+        trial_ids=["trial-a", "trial-b", "trial-c"],
+    )
 
-      URL:  {base_url}/bitgn.harness.HarnessService/StartRun
-      body: {"benchmark_id": ..., "name": ..., "api_key": ...}
-    """
+    h = BitgnHarness(
+        harness_client=fake_client,
+        runtime_client_factory=MagicMock(),
+        benchmark="bitgn/ecom1-dev",
+        base_url="https://api.example.test",
+        api_key="bgn-test-key",
+    )
+
+    run_id, trial_ids = h.start_run(name="ecom-baseline-run0")
+
+    assert run_id == "run-42"
+    assert trial_ids == ["trial-a", "trial-b", "trial-c"]
+    fake_client.start_run.assert_called_once()
+    sent = fake_client.start_run.call_args.args[0]
+    assert sent.benchmark_id == "bitgn/ecom1-dev"
+    assert sent.name == "ecom-baseline-run0"
+    assert sent.api_key == "bgn-test-key"
+
+
+def test_start_run_raw_json_fallback_when_env_set(monkeypatch) -> None:
+    """BITGN_HARNESS_RAW_JSON=1 keeps the urllib path alive — useful
+    when a future SDK pin lags the proto schema again."""
+    monkeypatch.setenv("BITGN_HARNESS_RAW_JSON", "1")
     fake_client = MagicMock()
 
     captured: dict = {}
@@ -91,12 +117,9 @@ def test_start_run_posts_raw_json_and_returns_run_id_and_trials() -> None:
     def fake_urlopen(req, timeout=None):
         captured["url"] = req.full_url
         captured["data"] = req.data
-        captured["headers"] = dict(req.headers)
-        captured["timeout"] = timeout
         body = json.dumps({
-            "runId": "run-42",
-            "benchmarkId": "bitgn/pac1-dev",
-            "trialIds": ["trial-a", "trial-b", "trial-c"],
+            "runId": "run-7",
+            "trialIds": ["t1", "t2"],
         }).encode("utf-8")
 
         class _Resp(io.BytesIO):
@@ -111,25 +134,29 @@ def test_start_run_posts_raw_json_and_returns_run_id_and_trials() -> None:
     h = BitgnHarness(
         harness_client=fake_client,
         runtime_client_factory=MagicMock(),
-        benchmark="bitgn/pac1-dev",
+        benchmark="bitgn/ecom1-dev",
         base_url="https://api.example.test",
         api_key="bgn-test-key",
     )
-    with patch("bitgn_contest_agent.harness.urllib.request.urlopen", side_effect=fake_urlopen):
-        run_id, trial_ids = h.start_run(name="plan-b-baseline-abc123-run0")
+    with patch(
+        "bitgn_contest_agent.harness.urllib.request.urlopen",
+        side_effect=fake_urlopen,
+    ):
+        run_id, trial_ids = h.start_run(name="raw-fallback")
 
-    assert run_id == "run-42"
-    assert trial_ids == ["trial-a", "trial-b", "trial-c"]
-    assert captured["url"] == "https://api.example.test/bitgn.harness.HarnessService/StartRun"
+    assert run_id == "run-7"
+    assert trial_ids == ["t1", "t2"]
+    assert (
+        captured["url"]
+        == "https://api.example.test/bitgn.harness.HarnessService/StartRun"
+    )
     sent = json.loads(captured["data"].decode("utf-8"))
     assert sent == {
-        "benchmark_id": "bitgn/pac1-dev",
-        "name": "plan-b-baseline-abc123-run0",
+        "benchmark_id": "bitgn/ecom1-dev",
+        "name": "raw-fallback",
         "api_key": "bgn-test-key",
     }
-    # urllib normalizes header casing — accept either form
-    assert captured["headers"].get("Content-type") == "application/json"
-    # connectrpc client must NOT be used for StartRun
+    # connectrpc client must NOT be used when the fallback is enabled.
     assert not fake_client.start_run.called
 
 
