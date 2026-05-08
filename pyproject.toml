@@ -3,19 +3,21 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "bitgn-contest-agent"
-version = "0.1.28"
-description = "BitGN PAC1 contest agent (single-session, provider-agnostic SGR)"
+name = "bitgn-ecom-agent"
+version = "0.1.0"
+description = "BitGN ECOM contest agent — port of the PAC1 agent (104/104, gpt-5.4) to bitgn/ecom1-dev"
 requires-python = ">=3.12"
 dependencies = [
   "pydantic>=2.6",
   "openai>=1.40",
   "PyYAML>=6.0",
+  "annotated-types>=0.7.0",
   # BitGN proto/connectrpc stubs are published via buf.build/gen/python
-  # (the same source sample-agents/pac1-py pins). The local-sdk path that
-  # used to live here only existed on the Linux dev box.
-  "bitgn-api-connectrpc-python==0.9.0.1.20260324104753+6b18c777b19a",
-  "bitgn-api-protocolbuffers-python==34.1.0.1.20260324104753+6b18c777b19a",
+  # (the same pins used by sample-agents/ecom-py). 0.10.x is the first
+  # SDK release that ships the bitgn.vm.ecom module; the 0.9.x pin used
+  # by the PAC1 agent only carries bitgn.vm.pcm.
+  "bitgn-api-connectrpc-python==0.10.0.1.20260508124000+434a5d933432",
+  "bitgn-api-protocolbuffers-python==34.1.0.1.20260508124000+434a5d933432",
   "connectrpc",
 ]
 
@@ -26,6 +28,9 @@ dev = [
 ]
 
 [project.scripts]
+# CLI command stays `bitgn-agent` to match the PAC1 muscle-memory and the
+# READMEs across the lineage. The Python package keeps its `bitgn_contest_agent`
+# import path for the same reason (and to keep test imports stable).
 bitgn-agent = "bitgn_contest_agent.cli:main"
 
 [tool.setuptools.packages.find]

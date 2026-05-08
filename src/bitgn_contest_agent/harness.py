@@ -23,6 +23,7 @@ sibling bitgn_pac1_adapter.py).
 from __future__ import annotations
 
 import json
+import os
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -35,22 +36,18 @@ from bitgn.harness_pb2 import (
     GetRunRequest,
     GetTrialRequest,
     StartPlaygroundRequest,
+    StartRunRequest,
     StartTrialRequest,
     SubmitRunRequest,
 )
-# NOTE: StartRunRequest is intentionally NOT imported. The locally
-# installed bitgn wheel ships a stale protobuf descriptor whose
-# StartRunRequest is {benchmark_id, name} and is missing the `api_key`
-# field (upstream proto has `string api_key = 3;`). The live server
-# requires api_key in the JSON request body (verified 2026-04-11 via
-# curl probe — Bearer header returns 401 "missing BitGN API Key").
-# Until the wheel is refreshed we bypass the connectrpc client for
-# StartRun only and POST raw JSON via urllib. Every other RPC
-# (StartTrial, EndTrial, SubmitRun, GetBenchmark, StartPlayground)
-# continues to use the normal connectrpc client — those RPCs have not
-# changed shape and StartTrial/EndTrial/SubmitRun self-authenticate
-# via the trial_id / run_id in their request body.
-from bitgn.vm.pcm_connect import PcmRuntimeClientSync
+# NOTE: the PAC1 lineage of this file kept a urllib-based StartRun
+# fallback because the bitgn wheel pinned at 0.9.0.1.20260324 shipped a
+# stale StartRunRequest descriptor without the `api_key` field. The
+# 0.10.x pin we use for ECOM (see pyproject.toml) ships the current
+# descriptor with api_key, so StartRun goes through the regular
+# connectrpc client path now. The urllib fallback is retained behind
+# a feature flag in case a future pin lags again.
+from bitgn.vm.ecom.ecom_connect import EcomRuntimeClientSync
 # PLAN DEVIATION: the plan imports MetadataInterceptorSync from
 # connectrpc.client_sync, but the installed connectrpc wheel exposes it
 # under connectrpc.interceptor. The sibling bitgn_pac1_adapter.py used
@@ -74,7 +71,7 @@ class StartedTask:
     benchmark_id: str
     instruction: str
     harness_url: str
-    runtime_client: PcmRuntimeClientSync
+    runtime_client: EcomRuntimeClientSync
 
 
 class BitgnHarness:
@@ -82,7 +79,7 @@ class BitgnHarness:
         self,
         *,
         harness_client: HarnessServiceClientSync,
-        runtime_client_factory: Callable[[str], PcmRuntimeClientSync],
+        runtime_client_factory: Callable[[str], EcomRuntimeClientSync],
         benchmark: str,
         base_url: str = "",
         api_key: str = "",
@@ -101,7 +98,7 @@ class BitgnHarness:
         harness_client = HarnessServiceClientSync(bitgn_base_url, interceptors=interceptors)
         return cls(
             harness_client=harness_client,
-            runtime_client_factory=lambda url: PcmRuntimeClientSync(url, interceptors=interceptors),
+            runtime_client_factory=lambda url: EcomRuntimeClientSync(url, interceptors=interceptors),
             benchmark=benchmark,
             base_url=bitgn_base_url,
             api_key=bitgn_api_key,
@@ -170,23 +167,32 @@ class BitgnHarness:
         `start_trial(trial_id)` per trial to provision per-task runtime.
         The task_id is not returned here; it is revealed by start_trial.
 
-        Bypasses the connectrpc client and POSTs raw JSON so we can
-        include the `api_key` field that the live server requires and
-        the stale local proto descriptor does not know about. The
-        response is Connect-RPC's canonical JSON shape with camelCase
-        field names (`runId`, `trialIds`).
+        Uses the connectrpc client. The 0.10.x SDK pin ships
+        StartRunRequest with the `api_key` field intact (see module
+        docstring); the urllib fallback that the PAC1 lineage carried
+        is retained behind BITGN_HARNESS_RAW_JSON=1 in case a future
+        pin lags again.
         """
-        resp = self._connect_post_json(
-            "StartRun",
-            {
-                "benchmark_id": self._benchmark,
-                "name": name,
-                "api_key": self._api_key,
-            },
+        if os.environ.get("BITGN_HARNESS_RAW_JSON") == "1":
+            resp = self._connect_post_json(
+                "StartRun",
+                {
+                    "benchmark_id": self._benchmark,
+                    "name": name,
+                    "api_key": self._api_key,
+                },
+            )
+            run_id = resp.get("runId") or resp.get("run_id") or ""
+            trial_ids = resp.get("trialIds") or resp.get("trial_ids") or []
+            return str(run_id), [str(t) for t in trial_ids]
+        resp = self._harness.start_run(
+            StartRunRequest(
+                benchmark_id=self._benchmark,
+                name=name,
+                api_key=self._api_key,
+            )
         )
-        run_id = resp.get("runId") or resp.get("run_id") or ""
-        trial_ids = resp.get("trialIds") or resp.get("trial_ids") or []
-        return str(run_id), [str(t) for t in trial_ids]
+        return str(resp.run_id), [str(t) for t in resp.trial_ids]
 
     def start_trial(self, trial_id: str) -> StartedTask:
         """Leaderboard flow step 2: provision runtime for a reserved trial.

@@ -1,9 +1,15 @@
-"""Workspace role discovery — identifies which directories hold inbox,
-entities, finance, projects, outbox, rulebook, workflows, schemas by
-inspecting frontmatter signatures of the files inside.
+"""Workspace role discovery — historically identified which directories
+held inbox, entities, finance, projects, etc. for the PAC1 Obsidian-vault
+benchmark by inspecting frontmatter signatures of the files inside.
 
-Path-agnostic: no directory name is hardcoded. Discovery is by content
-signature only.
+ECOM port: the runtime is an ecommerce-ops VM (catalogue tables, /bin/sql,
+shell-shaped tools) with no vault-style role layout, so
+`run_preflight_schema` is now a no-op stub that returns an empty
+WorkspaceSchema. The dataclass and `parse_schema_content` are kept for
+shape compatibility with the adapter's PrepassResult — same call-sites,
+empty data. The richer parsing helpers below (`parse_record_metadata`,
+`_parse_frontmatter_yaml`, etc.) are kept because they are
+domain-agnostic and remain useful for any markdown the agent reads.
 """
 from __future__ import annotations
 
@@ -416,61 +422,15 @@ def discover_schema_from_fs(root: Path) -> WorkspaceSchema:
 
 
 def run_preflight_schema(client: Any, workspace_ctx: Any) -> ToolResult:
-    """PCM-backed entry point. Walks the workspace via the PCM list/tree
-    RPC, parses frontmatters via read RPC, returns a ToolResult.
+    """ECOM no-op stub. Kept for shape compatibility with PAC1 callers
+    that imported this name; the ECOM adapter's prepass no longer
+    invokes it (see adapter/pcm.py:run_prepass).
 
-    `workspace_ctx` carries the root path or handle the adapter uses to
-    talk to PCM. For the PCM client the adapter will pass `client`'s own
-    workspace root.
+    Returns an empty `WorkspaceSchema` envelope so any residual caller
+    receives a well-formed ToolResult and parses to an empty schema
+    rather than crashing.
     """
-    from bitgn.vm import pcm_pb2  # local import to keep schema module light
-
     schema = WorkspaceSchema()
-    try:
-        # Tree walk from root. TreeResponse.root is a recursive TreeEntry
-        # with (name, is_dir, children). Walk it to collect directories
-        # that contain .md files, then list+read each to classify.
-        tree_resp = client.tree(pcm_pb2.TreeRequest(root="/"))
-        dirs: list[str] = []
-
-        def _walk(entry, prefix: str) -> None:
-            path = (
-                f"{prefix}/{entry.name}".lstrip("/")
-                if entry.name
-                else prefix.lstrip("/")
-            )
-            if entry.is_dir:
-                has_md = any(
-                    _is_md_name(c.name) and not c.is_dir
-                    for c in entry.children
-                )
-                if has_md and path:
-                    dirs.append(path)
-                for c in entry.children:
-                    _walk(c, path)
-
-        _walk(tree_resp.root, "")
-        dirs.sort()
-        per_role: dict[str, list[str]] = {}
-        for d in dirs:
-            list_resp = client.list(pcm_pb2.ListRequest(name=d))
-            md_names = [
-                e.name for e in list_resp.entries
-                if _is_md_name(e.name) and not e.is_dir
-            ][:50]
-            frontmatters = []
-            for name in md_names:
-                read_resp = client.read(
-                    pcm_pb2.ReadRequest(path=f"{d}/{name}")
-                )
-                frontmatters.append(parse_record_metadata(read_resp.content))
-            roles = _classify_dir(frontmatters)
-            for role in roles:
-                per_role.setdefault(role, []).append(d)
-        _assign_roles(schema, per_role)
-    except Exception as exc:
-        schema.errors.append(f"pcm walk failed: {exc}")
-
     content = build_response(summary=schema.summary(), data=schema.as_data())
     return ToolResult(
         ok=True,

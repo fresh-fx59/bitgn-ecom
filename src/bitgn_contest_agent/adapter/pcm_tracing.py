@@ -1,18 +1,23 @@
-"""TracingPcmClient — a proxy around PcmRuntimeClientSync that writes
+"""TracingPcmClient — a proxy around EcomRuntimeClientSync that writes
 one `pcm_op` trace record per runtime call.
 
-Motivation: the BitGN dashboard's "steps" metric counts PCM runtime
-ops (list/read/tree/find/search/context/write/...), not LLM iterations
-or high-level tool calls. Until we logged this layer, reconciling the
-dashboard against a local trace required shuttling screenshots or
-pastebins. With this wrapper, the local JSONL trace contains the same
-ops in the same order, so `jq 'select(.kind=="pcm_op")' trace.jsonl`
-gives you the dashboard view verbatim.
+Naming note: kept as `TracingPcmClient` / `pcm_op` for log-format
+continuity with the PAC1 lineage (so existing dashboards and
+`jq` queries keep working). The wrapped runtime is ECOM.
 
-Wrapping the runtime (not the adapter) is load-bearing: preflight_*
-tools receive the runtime directly and make raw `client.list()` /
-`client.read()` calls that bypass PcmAdapter.dispatch. Tracing at the
-adapter would miss those.
+Motivation: the BitGN dashboard's "steps" metric counts runtime
+ops (list/read/tree/find/search/stat/exec/context/write/...), not LLM
+iterations or high-level tool calls. Until we logged this layer,
+reconciling the dashboard against a local trace required shuttling
+screenshots or pastebins. With this wrapper, the local JSONL trace
+contains the same ops in the same order, so
+`jq 'select(.kind=="pcm_op")' trace.jsonl` gives you the dashboard
+view verbatim.
+
+Wrapping the runtime (not the adapter) is load-bearing: anything that
+takes the runtime directly (e.g. helper modules, fan-out scripts)
+makes raw `client.list()` / `client.read()` calls that bypass
+PcmAdapter.dispatch. Tracing at the adapter would miss those.
 """
 from __future__ import annotations
 
@@ -27,7 +32,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator, Optional
 
-from bitgn.vm import pcm_pb2
+from bitgn.vm.ecom import ecom_pb2
 
 try:
     from google.protobuf.json_format import MessageToJson
@@ -189,31 +194,31 @@ def _classify_exception(exc: BaseException) -> str:
         return "RPC_UNAVAILABLE"
     if "InvalidArgument" in name or isinstance(exc, (TypeError, ValueError)):
         return "INVALID_ARG"
-    if "PcmError" in name:
-        return "PCM_ERROR"
+    if "EcomError" in name or "PcmError" in name:
+        return "RUNTIME_ERROR"
     return "UNKNOWN"
 
 
 # Map request proto type → (op label, attribute to extract as `path`).
-# For Move, we compose "from → to" at call time.
 _REQUEST_PATH_ATTR: dict[type, tuple[str, Optional[str]]] = {
-    pcm_pb2.ReadRequest: ("read", "path"),
-    pcm_pb2.WriteRequest: ("write", "path"),
-    pcm_pb2.DeleteRequest: ("delete", "path"),
-    pcm_pb2.MkDirRequest: ("mk_dir", "path"),
-    pcm_pb2.ListRequest: ("list", "name"),
-    pcm_pb2.TreeRequest: ("tree", "root"),
-    pcm_pb2.FindRequest: ("find", "root"),
-    pcm_pb2.SearchRequest: ("search", "root"),
-    pcm_pb2.ContextRequest: ("context", None),
-    pcm_pb2.AnswerRequest: ("answer", None),
+    ecom_pb2.ReadRequest: ("read", "path"),
+    ecom_pb2.WriteRequest: ("write", "path"),
+    ecom_pb2.DeleteRequest: ("delete", "path"),
+    ecom_pb2.ListRequest: ("list", "path"),
+    ecom_pb2.TreeRequest: ("tree", "root"),
+    ecom_pb2.FindRequest: ("find", "root"),
+    ecom_pb2.SearchRequest: ("search", "root"),
+    ecom_pb2.StatRequest: ("stat", "path"),
+    ecom_pb2.ExecRequest: ("exec", "path"),
+    ecom_pb2.ContextRequest: ("context", None),
+    ecom_pb2.AnswerRequest: ("answer", None),
 }
 
 
 class TracingPcmClient:
-    """Drop-in replacement for `PcmRuntimeClientSync` that records
+    """Drop-in replacement for `EcomRuntimeClientSync` that records
     every call to a `TraceWriter`. Methods mirror the underlying
-    client; unknown attributes are delegated verbatim so future PCM
+    client; unknown attributes are delegated verbatim so future ECOM
     methods work without a wrapper update (they just won't be traced).
     """
 
@@ -230,34 +235,33 @@ class TracingPcmClient:
 
     # -- traced proxies --------------------------------------------------
 
-    def read(self, req: "pcm_pb2.ReadRequest") -> Any:
+    def read(self, req: "ecom_pb2.ReadRequest") -> Any:
         return self._traced(req, self._runtime.read)
 
-    def write(self, req: "pcm_pb2.WriteRequest") -> Any:
+    def write(self, req: "ecom_pb2.WriteRequest") -> Any:
         return self._traced(req, self._runtime.write)
 
-    def delete(self, req: "pcm_pb2.DeleteRequest") -> Any:
+    def delete(self, req: "ecom_pb2.DeleteRequest") -> Any:
         return self._traced(req, self._runtime.delete)
 
-    def mk_dir(self, req: "pcm_pb2.MkDirRequest") -> Any:
-        return self._traced(req, self._runtime.mk_dir)
-
-    def move(self, req: "pcm_pb2.MoveRequest") -> Any:
-        path = f"{getattr(req, 'from_name', '')} → {getattr(req, 'to_name', '')}"
-        return self._traced(req, self._runtime.move, op="move", path=path)
-
-    def list(self, req: "pcm_pb2.ListRequest") -> Any:
+    def list(self, req: "ecom_pb2.ListRequest") -> Any:
         return self._traced(req, self._runtime.list)
 
-    def tree(self, req: "pcm_pb2.TreeRequest") -> Any:
+    def tree(self, req: "ecom_pb2.TreeRequest") -> Any:
         return self._traced(req, self._runtime.tree)
 
-    def find(self, req: "pcm_pb2.FindRequest") -> Any:
+    def find(self, req: "ecom_pb2.FindRequest") -> Any:
         return self._traced(req, self._runtime.find)
 
-    def search(self, req: "pcm_pb2.SearchRequest") -> Any:
+    def stat(self, req: "ecom_pb2.StatRequest") -> Any:
+        return self._traced(req, self._runtime.stat)
+
+    def exec(self, req: "ecom_pb2.ExecRequest") -> Any:
+        return self._traced(req, self._runtime.exec)
+
+    def search(self, req: "ecom_pb2.SearchRequest") -> Any:
         resp = self._traced(req, self._runtime.search)
-        # PROD PCM search is case-sensitive substring match. Agents often
+        # PROD search is case-sensitive substring match. Agents often
         # feed entity aliases in lowercase ("badger") while workspace
         # content is title-cased ("Badger"), producing zero-hit false
         # negatives that read as "no evidence exists". If the first pass
@@ -287,11 +291,10 @@ class TracingPcmClient:
         retry_resp = self._traced(retry_req, self._runtime.search)
         return retry_resp if list(getattr(retry_resp, "matches", []) or []) else resp
 
-    def context(self, req: "pcm_pb2.ContextRequest | None" = None) -> Any:
-        # LocalPcmAdapter calls client.context() with no args (LocalPcmClient
-        # tolerates req=None). Prod adapter passes pcm_pb2.ContextRequest().
-        # Pass req as-is when set, otherwise invoke the no-arg form so both
-        # backends work.
+    def context(self, req: "ecom_pb2.ContextRequest | None" = None) -> Any:
+        # Local emulation may call client.context() with no args. Prod
+        # adapter passes ecom_pb2.ContextRequest(). Pass req as-is when
+        # set, otherwise invoke the no-arg form so both backends work.
         if req is None:
             start = time.monotonic()
             try:
@@ -314,7 +317,7 @@ class TracingPcmClient:
             return resp
         return self._traced(req, self._runtime.context)
 
-    def answer(self, req: "pcm_pb2.AnswerRequest") -> Any:
+    def answer(self, req: "ecom_pb2.AnswerRequest") -> Any:
         return self._traced(req, self._runtime.answer)
 
     # -- unknown method passthrough --------------------------------------

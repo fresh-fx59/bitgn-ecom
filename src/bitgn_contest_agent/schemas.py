@@ -1,8 +1,21 @@
 """Pydantic schemas for the planner tool surface.
 
-Single source of truth: the NextStep Union mirrors the PcmRuntime RPC
+Single source of truth: the `NextStep` Union mirrors the EcomRuntime RPC
 surface exactly. The coverage test in tests/test_tool_coverage.py keeps
 this correspondence mechanical.
+
+ECOM tool surface (vs the PAC1/PCM lineage this is forked from):
+
+  Added:    stat, exec
+  Removed:  mkdir, move (not part of the ECOM RPC surface)
+  Removed:  preflight_schema, preflight_semantic_index
+            (workspace-schema/semantic-index discovery was a vault-only
+            concept; ECOM tasks ground via tree+context+/AGENTS.MD)
+  Adjusted: read gains start_line / end_line / number (line slicing)
+            list keys on `path` (was `name`)
+            tree gains `level` cap
+            find keys on `kind` (was `type`); allowed values are
+            "all" / "files" / "dirs"
 """
 from __future__ import annotations
 
@@ -17,6 +30,20 @@ NonEmptyStr = Annotated[str, StringConstraints(min_length=1)]
 class Req_Read(BaseModel):
     tool: Literal["read"]
     path: NonEmptyStr
+    number: bool = Field(
+        default=False,
+        description="Return 1-based line numbers in the output (`cat -n`).",
+    )
+    start_line: int = Field(
+        default=0,
+        ge=0,
+        description="1-based inclusive start line; 0 means from the first line.",
+    )
+    end_line: int = Field(
+        default=0,
+        ge=0,
+        description="1-based inclusive end line; 0 means through the last line.",
+    )
 
 
 class Req_Write(BaseModel):
@@ -30,58 +57,63 @@ class Req_Delete(BaseModel):
     path: NonEmptyStr
 
 
-class Req_MkDir(BaseModel):
-    tool: Literal["mkdir"]
-    path: NonEmptyStr
-
-
-class Req_Move(BaseModel):
-    tool: Literal["move"]
-    from_name: NonEmptyStr
-    to_name: NonEmptyStr
-
-
 class Req_List(BaseModel):
     tool: Literal["list"]
-    name: NonEmptyStr
+    path: NonEmptyStr
 
 
 class Req_Tree(BaseModel):
     tool: Literal["tree"]
     root: NonEmptyStr
+    level: int = Field(
+        default=2,
+        ge=0,
+        le=10,
+        description="Max tree depth; 0 means unlimited.",
+    )
 
 
 class Req_Find(BaseModel):
     tool: Literal["find"]
-    root: NonEmptyStr
-    name: str = ""
-    type: Literal["TYPE_ALL", "TYPE_FILES", "TYPE_DIRS"] = "TYPE_ALL"
-    limit: int = Field(default=100, ge=1, le=10_000)
+    name: NonEmptyStr
+    root: str = "/"
+    kind: Literal["all", "files", "dirs"] = "all"
+    limit: int = Field(default=10, ge=1, le=20)
 
 
 class Req_Search(BaseModel):
     tool: Literal["search"]
-    root: NonEmptyStr
     pattern: NonEmptyStr
-    limit: int = Field(default=100, ge=1, le=10_000)
+    root: str = "/"
+    limit: int = Field(default=10, ge=1, le=20)
+
+
+class Req_Stat(BaseModel):
+    tool: Literal["stat"]
+    path: NonEmptyStr
+
+
+class Req_Exec(BaseModel):
+    tool: Literal["exec"]
+    path: NonEmptyStr = Field(
+        description=(
+            "Absolute path of the executable (e.g. `/bin/sql` for catalogue "
+            "queries). Provided by the ECOM runtime — see context() / "
+            "/AGENTS.MD for the live inventory."
+        ),
+    )
+    args: List[str] = Field(default_factory=list)
+    stdin: str = Field(
+        default="",
+        description=(
+            "Standard input fed to the program. For `/bin/sql` this is the "
+            "SQL query body."
+        ),
+    )
 
 
 class Req_Context(BaseModel):
     tool: Literal["context"]
-
-
-class Req_PreflightSchema(BaseModel):
-    """Discover the workspace layout (roots and roles). Always safe to call."""
-    tool: Literal["preflight_schema"]
-
-
-class Req_PreflightSemanticIndex(BaseModel):
-    """Emit a compact per-record digest of cast and projects so the agent
-    can match informal descriptors (role phrases, lane labels) against
-    canonical IDs. Runs once per task in the prepass, after schema
-    discovery. Always safe to call.
-    """
-    tool: Literal["preflight_semantic_index"]
 
 
 class ReportTaskCompletion(BaseModel):
@@ -105,15 +137,13 @@ FunctionUnion = Annotated[
         Req_Read,
         Req_Write,
         Req_Delete,
-        Req_MkDir,
-        Req_Move,
         Req_List,
         Req_Tree,
         Req_Find,
         Req_Search,
+        Req_Stat,
+        Req_Exec,
         Req_Context,
-        Req_PreflightSchema,
-        Req_PreflightSemanticIndex,
         ReportTaskCompletion,
     ],
     Field(discriminator="tool"),
@@ -127,6 +157,7 @@ ReadOnlyFunctionUnion = Annotated[
         Req_Tree,
         Req_Find,
         Req_Search,
+        Req_Stat,
         Req_Context,
     ],
     Field(discriminator="tool"),
@@ -139,6 +170,7 @@ READ_ONLY_REQ_TYPES: tuple[type[BaseModel], ...] = (
     Req_Tree,
     Req_Find,
     Req_Search,
+    Req_Stat,
     Req_Context,
 )
 
@@ -163,13 +195,13 @@ class NextStep(BaseModel):
             max_length=8,
             description=(
                 "Optional batch of additional read-only ops "
-                "(read/list/tree/find/search/context) dispatched in "
+                "(read/list/tree/find/search/stat/context) dispatched in "
                 "parallel with `function`. Only honored when `function` "
                 "is itself a read-only op. Use this to collapse multiple "
                 "independent reads into a single LLM turn — every entry "
                 "must be independent of the others (no entry's choice "
                 "depends on another's result). Never include "
-                "writes/deletes/moves/report_completion."
+                "writes/deletes/exec/report_completion."
             ),
         ),
     ]
@@ -180,15 +212,13 @@ REQ_MODELS: tuple[type[BaseModel], ...] = (
     Req_Read,
     Req_Write,
     Req_Delete,
-    Req_MkDir,
-    Req_Move,
     Req_List,
     Req_Tree,
     Req_Find,
     Req_Search,
+    Req_Stat,
+    Req_Exec,
     Req_Context,
-    Req_PreflightSchema,
-    Req_PreflightSemanticIndex,
 )
 
 
@@ -214,10 +244,10 @@ class UnknownRecommendedRoot(BaseModel):
 class Rsp_PreflightUnknown(BaseModel):
     """Structured scaffold the preflight emits for the agent."""
     likely_class: Literal[
-        "entity_attribute_lookup",
-        "inbox_processing",
+        "catalogue_lookup",
+        "sql_aggregation",
+        "data_correction",
         "security_refusal",
-        "cleanup_receipts",
         "ambiguous_referent",
         "other",
     ]

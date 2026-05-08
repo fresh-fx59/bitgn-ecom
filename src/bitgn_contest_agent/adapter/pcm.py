@@ -1,9 +1,35 @@
 """Single-class adapter between Pydantic Req_* models and the official
-bitgn PcmRuntimeClientSync. Every other layer is adapter-agnostic.
+bitgn EcomRuntimeClientSync. Every other layer is adapter-agnostic.
 
-The adapter is the ONLY place in the project that imports bitgn.vm.pcm_pb2
-or bitgn.vm.pcm_connect. Anywhere else that references bitgn is a smell
-to be fixed.
+The adapter is the ONLY place in the project that imports
+`bitgn.vm.ecom.ecom_pb2` or `bitgn.vm.ecom.ecom_connect`. Anywhere else
+that references the wire-level proto module is a smell to be fixed.
+
+Naming note — this file is still called `pcm.py` and the class is still
+`PcmAdapter` for git/import-history continuity with the PAC1 lineage
+(36+ call-sites import this path). The "P" is a fossil; the runtime is
+ECOM.
+
+Differences from the PAC1 (PCM) adapter this is forked from:
+
+  Added:    Req_Stat, Req_Exec dispatch
+  Removed:  Req_MkDir, Req_Move dispatch (no such RPCs on ECOM)
+  Removed:  preflight_schema / preflight_semantic_index dispatch
+            (workspace-schema/semantic-index were vault concepts;
+            the new run_prepass() is a flat tree+read+context bootstrap
+            modeled after sample-agents/ecom-py.main)
+  Adjusted: Find dispatch passes `kind` (NodeKind) instead of `type`
+            List dispatch passes `path` instead of `name`
+            Read dispatch passes through optional line-slicing
+            Tree dispatch passes through `level` cap
+
+Heuristics preserved verbatim from the PAC1 era:
+  - BITGN_OPT_A_CASE_INSENSITIVE: prepend `(?i)` to bare patterns
+  - BITGN_OPT_A_FIND_CI:           fan-out find() across name casings
+  - _strip_leading_slashes:        normalize answer ref paths
+  Both are domain-agnostic LLM-forgetfulness absorbers; they cost ~one
+  extra RPC at most and only fire when the original returned zero hits
+  or when explicitly enabled.
 """
 from __future__ import annotations
 
@@ -13,27 +39,25 @@ import os
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Sequence, Tuple
+from dataclasses import dataclass
+from typing import Any, Dict, Tuple
 
-from bitgn.vm import pcm_pb2
-from bitgn.vm.pcm_connect import PcmRuntimeClientSync
+from bitgn.vm.ecom import ecom_pb2
+from bitgn.vm.ecom.ecom_connect import EcomRuntimeClientSync
 
 from bitgn_contest_agent.schemas import (
-    NextStep,  # noqa: F401 — used by T10 type hints
+    NextStep,  # noqa: F401 — used by external type hints
     ReportTaskCompletion,
     Req_Context,
     Req_Delete,
+    Req_Exec,
     Req_Find,
     Req_List,
-    Req_MkDir,
-    Req_Move,
     Req_Read,
     Req_Search,
+    Req_Stat,
     Req_Tree,
     Req_Write,
-    Req_PreflightSchema,
-    Req_PreflightSemanticIndex,
 )
 
 from bitgn_contest_agent.arch_constants import ArchCategory
@@ -98,17 +122,17 @@ class PrepassResult:
     """Return shape of `PcmAdapter.run_prepass`.
 
     `bootstrap_content` is the list of strings the agent loop appends as
-    additional user messages (today: only the WORKSPACE SCHEMA payload).
-    `schema` is the typed parse of the `preflight_schema` JSON envelope —
-    consumed by the routed-preflight dispatcher to fill root args. On
-    any preflight_schema failure the schema is the empty WorkspaceSchema.
+    additional user messages (today: tree(/), AGENTS.MD, context()).
+    `schema` is preserved for call-site stability; the ECOM port no
+    longer discovers a workspace schema (vault concept), so this is
+    always an empty stub.
     """
     bootstrap_content: list[str]
     schema: "WorkspaceSchema"
 
 
 def _response_to_text(resp: Any) -> str:
-    """Extract a printable representation of any pcm_pb2 response.
+    """Extract a printable representation of any ecom_pb2 response.
 
     Generated proto messages are not JSON-serializable out of the box, so
     we use the protobuf MessageToJson helper + a plain string fallback.
@@ -120,7 +144,7 @@ def _response_to_text(resp: Any) -> str:
     first ~30 bytes and cannot be lost.
     """
     try:
-        if isinstance(resp, pcm_pb2.SearchResponse):
+        if isinstance(resp, ecom_pb2.SearchResponse):
             return _search_response_to_text(resp)
         from google.protobuf.json_format import MessageToJson
 
@@ -129,7 +153,7 @@ def _response_to_text(resp: Any) -> str:
         return str(resp)
 
 
-def _search_response_to_text(resp: "pcm_pb2.SearchResponse") -> str:
+def _search_response_to_text(resp: "ecom_pb2.SearchResponse") -> str:
     """Serialize a SearchResponse with a truncation-proof total_matches header.
 
     The canonical `MessageToJson` shape is `{"matches": [...]}` which
@@ -150,27 +174,42 @@ def _search_response_to_text(resp: "pcm_pb2.SearchResponse") -> str:
     return _json.dumps(payload, separators=(", ", ": "))
 
 
-_FIND_TYPE_MAP: Dict[str, int] = {
-    "TYPE_ALL": pcm_pb2.FindRequest.TYPE_ALL,
-    "TYPE_FILES": pcm_pb2.FindRequest.TYPE_FILES,
-    "TYPE_DIRS": pcm_pb2.FindRequest.TYPE_DIRS,
+_FIND_KIND_MAP: Dict[str, int] = {
+    "all": ecom_pb2.NodeKind.NODE_KIND_UNSPECIFIED,
+    "files": ecom_pb2.NodeKind.NODE_KIND_FILE,
+    "dirs": ecom_pb2.NodeKind.NODE_KIND_DIR,
 }
 
 
 _OUTCOME_MAP: Dict[str, int] = {
-    "OUTCOME_OK": pcm_pb2.OUTCOME_OK,
-    "OUTCOME_DENIED_SECURITY": pcm_pb2.OUTCOME_DENIED_SECURITY,
-    "OUTCOME_NONE_CLARIFICATION": pcm_pb2.OUTCOME_NONE_CLARIFICATION,
-    "OUTCOME_NONE_UNSUPPORTED": pcm_pb2.OUTCOME_NONE_UNSUPPORTED,
-    "OUTCOME_ERR_INTERNAL": pcm_pb2.OUTCOME_ERR_INTERNAL,
+    "OUTCOME_OK": ecom_pb2.Outcome.OUTCOME_OK,
+    "OUTCOME_DENIED_SECURITY": ecom_pb2.Outcome.OUTCOME_DENIED_SECURITY,
+    "OUTCOME_NONE_CLARIFICATION": ecom_pb2.Outcome.OUTCOME_NONE_CLARIFICATION,
+    "OUTCOME_NONE_UNSUPPORTED": ecom_pb2.Outcome.OUTCOME_NONE_UNSUPPORTED,
+    "OUTCOME_ERR_INTERNAL": ecom_pb2.Outcome.OUTCOME_ERR_INTERNAL,
 }
+
+
+def _build_write_request(req: Req_Write) -> "ecom_pb2.WriteRequest":
+    """Construct a WriteRequest, mirroring the sample's belt-and-suspenders
+    around field-2 naming drift.
+
+    Some published SDK pins briefly named WriteRequest's field 2
+    `content_type` before settling on `content`. The sample mirrors the
+    body to whichever name the loaded descriptor exposes. We replicate
+    that here so a stale wheel doesn't silently drop the body.
+    """
+    kwargs = {"path": req.path, "content": req.content}
+    if "content_type" in ecom_pb2.WriteRequest.DESCRIPTOR.fields_by_name:
+        kwargs["content_type"] = req.content
+    return ecom_pb2.WriteRequest(**kwargs)
 
 
 class PcmAdapter:
     def __init__(
         self,
         *,
-        runtime: PcmRuntimeClientSync,
+        runtime: EcomRuntimeClientSync,
         max_tool_result_bytes: int,
     ) -> None:
         self._runtime = runtime
@@ -182,14 +221,22 @@ class PcmAdapter:
         start = time.monotonic()
         try:
             if isinstance(req, Req_Read):
-                resp = self._runtime.read(pcm_pb2.ReadRequest(path=req.path))
+                resp = self._runtime.read(
+                    ecom_pb2.ReadRequest(
+                        path=req.path,
+                        number=req.number,
+                        start_line=req.start_line,
+                        end_line=req.end_line,
+                    )
+                )
                 return self._finish(start, resp, refs=(req.path,))
             if isinstance(req, Req_Write):
                 # Pre-write YAML guard — catches malformed frontmatter
                 # BEFORE persistence so the agent can fix-and-retry
                 # without accumulating a duplicate-write mutation that
-                # the grader flags. Post-write FORMAT_VALIDATOR remains
-                # as belt-and-suspenders for non-YAML format issues.
+                # the grader flags. Domain-agnostic: validate_yaml_frontmatter
+                # returns ok=True when no frontmatter is present, so
+                # ECOM writes that have no YAML are not affected.
                 val = validate_yaml_frontmatter(req.content)
                 if not val.ok:
                     emit_arch(
@@ -206,26 +253,18 @@ class PcmAdapter:
                         error_code="FORMAT_INVALID",
                         wall_ms=wall_ms,
                     )
-                resp = self._runtime.write(
-                    pcm_pb2.WriteRequest(path=req.path, content=req.content)
-                )
+                resp = self._runtime.write(_build_write_request(req))
                 return self._finish(start, resp, refs=())
             if isinstance(req, Req_Delete):
-                resp = self._runtime.delete(pcm_pb2.DeleteRequest(path=req.path))
-                return self._finish(start, resp, refs=())
-            if isinstance(req, Req_MkDir):
-                resp = self._runtime.mk_dir(pcm_pb2.MkDirRequest(path=req.path))
-                return self._finish(start, resp, refs=())
-            if isinstance(req, Req_Move):
-                resp = self._runtime.move(
-                    pcm_pb2.MoveRequest(from_name=req.from_name, to_name=req.to_name)
-                )
+                resp = self._runtime.delete(ecom_pb2.DeleteRequest(path=req.path))
                 return self._finish(start, resp, refs=())
             if isinstance(req, Req_List):
-                resp = self._runtime.list(pcm_pb2.ListRequest(name=req.name))
+                resp = self._runtime.list(ecom_pb2.ListRequest(path=req.path))
                 return self._finish(start, resp, refs=())
             if isinstance(req, Req_Tree):
-                resp = self._runtime.tree(pcm_pb2.TreeRequest(root=req.root))
+                resp = self._runtime.tree(
+                    ecom_pb2.TreeRequest(root=req.root, level=req.level)
+                )
                 return self._finish(start, resp, refs=())
             if isinstance(req, Req_Find):
                 name_in = req.name
@@ -237,10 +276,10 @@ class PcmAdapter:
                     for idx, variant in enumerate(variants):
                         try:
                             r = self._runtime.find(
-                                pcm_pb2.FindRequest(
+                                ecom_pb2.FindRequest(
                                     root=req.root,
                                     name=variant,
-                                    type=_FIND_TYPE_MAP[req.type],
+                                    kind=_FIND_KIND_MAP[req.kind],
                                     limit=req.limit,
                                 )
                             )
@@ -257,7 +296,7 @@ class PcmAdapter:
                                     break
                         if len(union) >= req.limit:
                             break
-                    resp = pcm_pb2.FindResponse(items=union)
+                    resp = ecom_pb2.FindResponse(items=union)
                     _LOG.info(
                         "[OPT_A] find rewrite root=%s name=%r variants=%s "
                         "hits_before=%d hits_after=%d",
@@ -265,10 +304,10 @@ class PcmAdapter:
                     )
                 else:
                     resp = self._runtime.find(
-                        pcm_pb2.FindRequest(
+                        ecom_pb2.FindRequest(
                             root=req.root,
                             name=name_in,
-                            type=_FIND_TYPE_MAP[req.type],
+                            kind=_FIND_KIND_MAP[req.kind],
                             limit=req.limit,
                         )
                     )
@@ -285,7 +324,7 @@ class PcmAdapter:
                 if _OPT_A_CASE_INSENSITIVE and pattern_out != pattern_in:
                     try:
                         resp_orig = self._runtime.search(
-                            pcm_pb2.SearchRequest(
+                            ecom_pb2.SearchRequest(
                                 root=req.root, pattern=pattern_in, limit=req.limit
                             )
                         )
@@ -293,7 +332,7 @@ class PcmAdapter:
                     except Exception:
                         hits_before = -1
                     resp = self._runtime.search(
-                        pcm_pb2.SearchRequest(
+                        ecom_pb2.SearchRequest(
                             root=req.root, pattern=pattern_out, limit=req.limit
                         )
                     )
@@ -304,7 +343,7 @@ class PcmAdapter:
                     )
                 else:
                     resp = self._runtime.search(
-                        pcm_pb2.SearchRequest(
+                        ecom_pb2.SearchRequest(
                             root=req.root, pattern=pattern_in, limit=req.limit
                         )
                     )
@@ -315,25 +354,19 @@ class PcmAdapter:
                             req.root, pattern_in, hits_after,
                         )
                 return self._finish(start, resp, refs=())
-            if isinstance(req, Req_Context):
-                resp = self._runtime.context(pcm_pb2.ContextRequest())
+            if isinstance(req, Req_Stat):
+                resp = self._runtime.stat(ecom_pb2.StatRequest(path=req.path))
                 return self._finish(start, resp, refs=())
-            if isinstance(req, Req_PreflightSchema):
-                from bitgn_contest_agent.preflight.schema import run_preflight_schema
-                return run_preflight_schema(self._runtime, None)
-            if isinstance(req, Req_PreflightSemanticIndex):
-                from bitgn_contest_agent.preflight.schema import (
-                    parse_schema_content, run_preflight_schema,
+            if isinstance(req, Req_Exec):
+                resp = self._runtime.exec(
+                    ecom_pb2.ExecRequest(
+                        path=req.path, args=list(req.args), stdin=req.stdin,
+                    )
                 )
-                from bitgn_contest_agent.preflight.semantic_index import (
-                    run_preflight_semantic_index,
-                )
-                # The adapter's `dispatch` is stateless — it may be called
-                # with no prior schema in hand (e.g. from a unit test). In
-                # that case, run schema first so we have the roots.
-                schema_result = run_preflight_schema(self._runtime, None)
-                schema = parse_schema_content(schema_result.content)
-                return run_preflight_semantic_index(self._runtime, schema)
+                return self._finish(start, resp, refs=())
+            if isinstance(req, Req_Context):
+                resp = self._runtime.context(ecom_pb2.ContextRequest())
+                return self._finish(start, resp, refs=())
             raise TypeError(f"unsupported request type: {type(req).__name__}")
         except Exception as exc:
             wall_ms = int((time.monotonic() - start) * 1000)
@@ -357,7 +390,7 @@ class PcmAdapter:
             message = self._strip_leading_slashes(completion.message)
             refs = [r.lstrip("/") for r in completion.grounding_refs]
             resp = self._runtime.answer(
-                pcm_pb2.AnswerRequest(
+                ecom_pb2.AnswerRequest(
                     message=message,
                     outcome=_OUTCOME_MAP[completion.outcome],
                     refs=refs,
@@ -378,38 +411,42 @@ class PcmAdapter:
     def run_prepass(self, *, session: Any, trace_writer: Any) -> PrepassResult:
         """Best-effort identity bootstrap.
 
-        Attempts tree(/), read(AGENTS.md), context(), preflight_schema().
-        Each failure is recorded and proceeds to the next call —
+        Attempts tree(/, level=2), read(/AGENTS.MD), context(). Each
+        failure is recorded and proceeds to the next call —
         identity_loaded flips true on ANY success. Per §1 the session
         is task-local, and the trace writer captures every attempt for
         the analyzer.
 
-        Returns a `PrepassResult` carrying:
-        - `bootstrap_content`: list of strings the caller injects as
-          additional user messages (today: WORKSPACE SCHEMA payload).
-        - `schema`: typed parse of the preflight_schema JSON envelope,
-          consumed by the routed-preflight dispatcher. Empty
-          `WorkspaceSchema` if preflight_schema failed or was empty.
+        ECOM port note: the PAC1 prepass also ran preflight_schema and
+        preflight_semantic_index to discover an Obsidian-vault layout
+        (inbox/finance/projects roots, entity index). ECOM has no such
+        structure; the runtime publishes its file inventory via
+        context() and its tool inventory via /AGENTS.MD, so the prepass
+        is now a flat fan-out of the three universal bootstrap calls.
         """
         from bitgn_contest_agent.adapter.pcm_tracing import pcm_origin
-        from bitgn_contest_agent.preflight.schema import parse_schema_content
+        from bitgn_contest_agent.preflight.schema import (
+            WorkspaceSchema,
+            parse_schema_content,
+        )
 
         bootstrap_content: list[str] = []
-        schema_content: str | None = None
+        # ECOM uses /AGENTS.MD (uppercase, leading slash) — see
+        # sample-agents/ecom-py/agent.py:run_agent.
         pre_cmds = [
-            ("tree", Req_Tree(tool="tree", root="/")),
-            ("read_agents_md", Req_Read(tool="read", path="AGENTS.md")),
+            ("tree", Req_Tree(tool="tree", root="/", level=2)),
+            ("read_agents_md", Req_Read(tool="read", path="/AGENTS.MD")),
             ("context", Req_Context(tool="context")),
-            ("preflight_schema", Req_PreflightSchema(tool="preflight_schema")),
         ]
-        # Phase 1 ops are mutually independent (each is its own RPC) so
-        # we dispatch them in parallel. ContextVars don't auto-propagate
-        # to ThreadPoolExecutor workers; copy_context() per-submit gives
-        # each worker the parent's pcm_origin label.
+
         def _dispatch_with_origin(req: Any) -> ToolResult:
             with pcm_origin("prepass"):
                 return self.dispatch(req)
 
+        # Phase 1 ops are mutually independent (each is its own RPC) so
+        # we dispatch them in parallel. ContextVars don't auto-propagate
+        # to ThreadPoolExecutor workers; copy_context() per-submit gives
+        # each worker the parent's pcm_origin label.
         with ThreadPoolExecutor(max_workers=len(pre_cmds)) as ex:
             futures = [
                 ex.submit(contextvars.copy_context().run, _dispatch_with_origin, req)
@@ -417,8 +454,6 @@ class PcmAdapter:
             ]
             phase1_results = [f.result() for f in futures]
 
-        # Apply side-effects + write trace in canonical order so log
-        # consumers see the same record sequence as the sequential path.
         with pcm_origin("prepass"):
             for (label, _), result in zip(pre_cmds, phase1_results):
                 if result.ok:
@@ -429,14 +464,14 @@ class PcmAdapter:
                         session.seen_refs.add(ref)
                     if label == "tree" and result.content:
                         bootstrap_content.append(
-                            "PRE-PASS tree(root=\"/\") — already executed, "
+                            "PRE-PASS tree(root=\"/\", level=2) — already executed, "
                             "do NOT re-run:\n"
                             f"{result.content}"
                         )
                     if label == "read_agents_md" and result.content:
                         bootstrap_content.append(
-                            "PRE-PASS read(path=\"AGENTS.md\") — already "
-                            "executed, do NOT re-run. AGENTS.md content "
+                            "PRE-PASS read(path=\"/AGENTS.MD\") — already "
+                            "executed, do NOT re-run. /AGENTS.MD content "
                             "below is the rulebook:\n"
                             f"{result.content}"
                         )
@@ -446,25 +481,6 @@ class PcmAdapter:
                             "re-run:\n"
                             f"{result.content}"
                         )
-                    if label == "preflight_schema" and result.content:
-                        bootstrap_content.append(
-                            "WORKSPACE SCHEMA (auto-discovered, use these roots "
-                            "when a preflight tool asks for inbox_root / "
-                            "entities_root / finance_roots / projects_root):\n"
-                            f"{result.content}"
-                        )
-                        schema_content = result.content
-                schema_roots = None
-                if label == "preflight_schema" and result.ok and result.content:
-                    from bitgn_contest_agent.preflight.schema import parse_schema_content
-                    parsed = parse_schema_content(result.content)
-                    schema_roots = {
-                        "projects_root": parsed.projects_root,
-                        "finance_roots": list(parsed.finance_roots),
-                        "entities_root": parsed.entities_root,
-                        "inbox_root": parsed.inbox_root,
-                        "outbox_root": parsed.outbox_root,
-                    }
                 trace_writer.append_prepass(
                     cmd=label,
                     ok=result.ok,
@@ -472,40 +488,11 @@ class PcmAdapter:
                     wall_ms=result.wall_ms,
                     error=result.error,
                     error_code=result.error_code,
-                    schema_roots=schema_roots,
-                )
-        # Phase 2: semantic index — depends on schema roots discovered above.
-        parsed_schema = parse_schema_content(schema_content)
-        if parsed_schema.entities_root or parsed_schema.projects_root:
-            with pcm_origin("prepass"):
-                from bitgn_contest_agent.preflight.semantic_index import (
-                    run_preflight_semantic_index,
-                )
-                t0 = time.perf_counter()
-                try:
-                    si_result = run_preflight_semantic_index(
-                        self._runtime, parsed_schema,
-                    )
-                except Exception as exc:
-                    si_result = ToolResult(
-                        ok=False, content="", refs=tuple(), error=str(exc),
-                        error_code="INTERNAL", wall_ms=0,
-                    )
-                wall_ms = int((time.perf_counter() - t0) * 1000)
-                if si_result.ok and si_result.content:
-                    bootstrap_content.append(si_result.content)
-                trace_writer.append_prepass(
-                    cmd="preflight_semantic_index",
-                    ok=si_result.ok,
-                    bytes=len(si_result.content or ""),
-                    wall_ms=wall_ms,
-                    error=si_result.error,
-                    error_code=si_result.error_code,
                     schema_roots=None,
                 )
         return PrepassResult(
             bootstrap_content=bootstrap_content,
-            schema=parse_schema_content(schema_content),
+            schema=parse_schema_content(""),  # ECOM: empty stub for shape compat
         )
 
     # -- helpers ----------------------------------------------------------
@@ -545,6 +532,6 @@ class PcmAdapter:
             return "RPC_UNAVAILABLE"
         if "InvalidArgument" in name or isinstance(exc, (TypeError, ValueError)):
             return "INVALID_ARG"
-        if "PcmError" in name:
-            return "PCM_ERROR"
+        if "EcomError" in name or "PcmError" in name:
+            return "RUNTIME_ERROR"
         return "UNKNOWN"
