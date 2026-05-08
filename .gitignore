@@ -1,0 +1,39 @@
+# Agent run artifacts — produced by bitgn contest agent, not source
+task-t01-t43-logs-produced-by-bitgn-contest-agent/
+
+# Git worktrees — isolated development workspaces
+.worktrees/
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+build/
+dist/
+uv.lock
+
+# Note: logs/ and artifacts/ are tracked — bench history, workspace snapshots,
+# and score detail are primary analysis inputs. Only ephemeral scratch files
+# from in-flight runs are excluded.
+artifacts/bench/*_scratch.json
+
+# Secrets — BITGN profile key, cliproxyapi token, etc.
+.env
+.env.*
+!.env.example
+management_secret.txt
+local_api_key.txt
+**/cliproxyapi/auths/
+**/cliproxyapi/config/config.yaml
+
+# Claude Code per-session runtime state
+.claude/scheduled_tasks.lock
+
+# scraper artifacts
+artifacts/harness_db/*.db
+artifacts/harness_db/*.db-journal
+artifacts/harness_db/*.db-wal
+artifacts/harness_db/scrape_runs/
+artifacts/harness_db/workspaces/

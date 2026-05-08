@@ -1,0 +1,5 @@
+2026-04-13T10:34:11Z [ INFO ] starting agent run for t030
+2026-04-13T10:34:13Z [ INFO ] agent reading 50_finance/spool/some_doc.md
+2026-04-13T10:35:04Z [ INFO ] agent submitted answer: "PLA spool from acme"
+2026-04-13T10:35:05Z [ ERR ] AI agent score 0.00 / answer is incorrect. Expected: '3D-Druck PLA-Filament 1.75mm'
+2026-04-13T10:35:06Z [ INFO ] trial complete
