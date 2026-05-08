@@ -56,7 +56,7 @@ TERMINATED_BY_VALUES: frozenset[str] = frozenset(
 )
 
 ERROR_CODE_VALUES: frozenset[Optional[str]] = frozenset(
-    {None, "RPC_DEADLINE", "RPC_UNAVAILABLE", "PCM_ERROR", "INVALID_ARG", "UNKNOWN"}
+    {None, "RPC_DEADLINE", "RPC_UNAVAILABLE", "RUNTIME_ERROR", "INVALID_ARG", "UNKNOWN"}
 )
 
 
@@ -165,9 +165,9 @@ class TraceVerify(_BaseRecord):
     changed: bool   # True if the post-verify completion differed
 
 
-class TracePcmOp(_BaseRecord):
+class TraceEcomOp(_BaseRecord):
     """One raw PCM runtime call — logged by the tracing wrapper around
-    PcmRuntimeClientSync. Captures the same ops the BitGN dashboard
+    EcomRuntimeClientSync. Captures the same ops the BitGN dashboard
     counts as "steps" (list/read/tree/find/search/context/write/...),
     so a local trace can be diffed against the dashboard without the
     pastebin dance. Order in the JSONL is chronological.
@@ -178,7 +178,7 @@ class TracePcmOp(_BaseRecord):
     wire size of the response (ByteSize). Failed calls set ok=False
     and populate error_code.
     """
-    kind: Literal["pcm_op"] = "pcm_op"
+    kind: Literal["ecom_op"] = "ecom_op"
     op: str
     path: Optional[str] = None
     bytes: int = 0
@@ -234,7 +234,7 @@ class TraceOutcome(_BaseRecord):
 
 TraceRecord = Union[
     TraceMeta, TraceTask, TracePrepass, TraceStep, TraceEvent,
-    TraceArch, TracePcmOp, TraceOutcome,
+    TraceArch, TraceEcomOp, TraceOutcome,
 ]
 
 
@@ -245,7 +245,7 @@ _KIND_TO_MODEL: dict[str, type[_BaseRecord]] = {
     "step": TraceStep,
     "event": TraceEvent,
     "arch": TraceArch,
-    "pcm_op": TracePcmOp,
+    "ecom_op": TraceEcomOp,
     "outcome": TraceOutcome,
 }
 

@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, List, Optional
 
-from bitgn_contest_agent.adapter.pcm import ToolResult
+from bitgn_contest_agent.adapter.ecom import ToolResult
 from bitgn_contest_agent.preflight.response import build_response
 
 
@@ -391,7 +391,7 @@ def _assign_roles(schema: WorkspaceSchema, per_role: dict[str, list[str]]) -> No
 
 def discover_schema_from_fs(root: Path) -> WorkspaceSchema:
     """Filesystem-based discovery — used for local tests and as the
-    core implementation that the PCM-backed version wraps.
+    core implementation that the ECOM-backed version wraps.
     """
     schema = WorkspaceSchema()
     root = Path(root)
@@ -424,7 +424,7 @@ def discover_schema_from_fs(root: Path) -> WorkspaceSchema:
 def run_preflight_schema(client: Any, workspace_ctx: Any) -> ToolResult:
     """ECOM no-op stub. Kept for shape compatibility with PAC1 callers
     that imported this name; the ECOM adapter's prepass no longer
-    invokes it (see adapter/pcm.py:run_prepass).
+    invokes it (see adapter/ecom.py:run_prepass).
 
     Returns an empty `WorkspaceSchema` envelope so any residual caller
     receives a well-formed ToolResult and parses to an empty schema

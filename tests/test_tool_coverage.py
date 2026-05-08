@@ -1,4 +1,4 @@
-"""Mechanical contract: the NextStep Union mirrors PcmRuntime RPCs exactly.
+"""Mechanical contract: the NextStep Union mirrors EcomRuntime RPCs exactly.
 
 If a future bitgn SDK release adds a new *Request type, this test fails
 until the Union is updated. Likewise if a Req_* model is added without a
@@ -93,11 +93,11 @@ def test_pcm_request_types_exactly_covered_by_union():
     extra = covered - rpc_requests
 
     assert not missing, (
-        f"PcmRuntime exposes {sorted(missing)} but no Req_* model covers them. "
+        f"EcomRuntime exposes {sorted(missing)} but no Req_* model covers them. "
         "Add a new Req_* model in schemas.py and extend REQ_MODELS."
     )
     assert not extra, (
-        f"Union covers {sorted(extra)} but PcmRuntime no longer exposes them. "
+        f"Union covers {sorted(extra)} but EcomRuntime no longer exposes them. "
         "Remove the Req_* model or update the coverage map."
     )
 

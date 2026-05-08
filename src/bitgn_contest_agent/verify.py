@@ -246,7 +246,7 @@ def _section_inbox_giveup(task_text: str) -> str:
         base += (
             "\n  - This inbox item names a collection (`all` / `every` "
             "/ `each`). Do not conclude no evidence exists from `search` "
-            "alone: PCM search is case-sensitive, so lowercase patterns "
+            "alone: ECOM search is case-sensitive, so lowercase patterns "
             "miss Title-cased entity names, and descriptor-based "
             "references are invisible to substring match. Instead "
             "`list` the lane most likely to hold these records (e.g. "

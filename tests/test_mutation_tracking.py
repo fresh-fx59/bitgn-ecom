@@ -7,7 +7,7 @@ from typing import Sequence
 from unittest.mock import MagicMock
 
 from bitgn_contest_agent.agent import AgentLoop, AgentLoopResult
-from bitgn_contest_agent.adapter.pcm import PcmAdapter, ToolResult
+from bitgn_contest_agent.adapter.ecom import EcomAdapter, ToolResult
 from bitgn_contest_agent.backend.base import Backend, Message, NextStepResult
 from bitgn_contest_agent.schemas import NextStep, ReportTaskCompletion
 from bitgn_contest_agent.session import Session
@@ -80,7 +80,7 @@ def test_write_and_delete_recorded_in_session_mutations(tmp_path: Path) -> None:
             observation="done", outcome_leaning="OUTCOME_OK",
         )),
     ])
-    adapter = MagicMock(spec=PcmAdapter)
+    adapter = MagicMock(spec=EcomAdapter)
     adapter.run_prepass = MagicMock(side_effect=lambda *, session, trace_writer: _fake_prepass(session))
     adapter.dispatch.return_value = ToolResult(
         ok=True, content="ok", refs=(), error=None, error_code=None, wall_ms=5,
@@ -126,7 +126,7 @@ def test_failed_dispatch_not_recorded_as_mutation(tmp_path: Path) -> None:
             observation="done", outcome_leaning="OUTCOME_OK",
         )),
     ])
-    adapter = MagicMock(spec=PcmAdapter)
+    adapter = MagicMock(spec=EcomAdapter)
     adapter.run_prepass = MagicMock(side_effect=lambda *, session, trace_writer: _fake_prepass(session))
     # First dispatch FAILS, terminal succeeds.
     adapter.dispatch.return_value = ToolResult(

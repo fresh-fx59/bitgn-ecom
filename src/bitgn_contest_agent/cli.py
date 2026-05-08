@@ -21,8 +21,8 @@ from typing import Any, Callable, List, Optional
 import threading as _threading
 
 from bitgn_contest_agent import __version__
-from bitgn_contest_agent.adapter.pcm import PcmAdapter
-from bitgn_contest_agent.adapter.pcm_tracing import TracingPcmClient
+from bitgn_contest_agent.adapter.ecom import EcomAdapter
+from bitgn_contest_agent.adapter.ecom_tracing import TracingEcomClient
 from bitgn_contest_agent.agent import AgentLoop, AgentLoopResult
 from bitgn_contest_agent.arch_constants import ArchCategory
 from bitgn_contest_agent.arch_log import (
@@ -291,13 +291,13 @@ def _run_single_task(
         effective_task_id = started.task_id
 
         # Wrap the runtime in a tracing proxy BEFORE constructing the
-        # adapter. Every PCM call (including those made by preflight_*
-        # tools that receive the runtime directly) then emits a pcm_op
+        # adapter. Every ECOM RPC (including those made by preflight_*
+        # tools that receive the runtime directly) then emits a ecom_op
         # trace record — the same ops counted as "steps" on the BitGN
         # dashboard. Writer is attached immediately after we know the
         # final task_id.
-        tracing_runtime = TracingPcmClient(started.runtime_client)
-        adapter = PcmAdapter(
+        tracing_runtime = TracingEcomClient(started.runtime_client)
+        adapter = EcomAdapter(
             runtime=tracing_runtime,
             max_tool_result_bytes=cfg.max_tool_result_bytes,
         )

@@ -19,7 +19,7 @@ from bitgn_contest_agent.trace_schema import (
     TraceEvent,
     TraceMeta,
     TraceOutcome,
-    TracePcmOp,
+    TraceEcomOp,
     TracePrepass,
     TraceStep,
     TraceTask,
@@ -137,7 +137,7 @@ class TraceWriter:
         )
         self._write(rec.model_dump(mode="json"))
 
-    def append_pcm_op(
+    def append_ecom_op(
         self,
         *,
         op: str,
@@ -148,7 +148,7 @@ class TraceWriter:
         error_code: Optional[str] = None,
         origin: Optional[str] = None,
     ) -> None:
-        rec = TracePcmOp(
+        rec = TraceEcomOp(
             op=op,
             path=path,
             bytes=bytes,

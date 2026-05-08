@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bitgn_contest_agent.agent import AgentLoop, AgentLoopResult
-from bitgn_contest_agent.adapter.pcm import PcmAdapter, ToolResult
+from bitgn_contest_agent.adapter.ecom import EcomAdapter, ToolResult
 from bitgn_contest_agent.backend.base import Backend, Message, NextStepResult, TransientBackendError
 from bitgn_contest_agent.schemas import NextStep, ReportTaskCompletion
 from bitgn_contest_agent.session import Session
@@ -68,7 +68,7 @@ def _mk_writer(tmp_path: Path) -> TraceWriter:
 
 
 def _mk_adapter_mock(tool_result_content: str = "AGENTS.md contents") -> MagicMock:
-    adapter = MagicMock(spec=PcmAdapter)
+    adapter = MagicMock(spec=EcomAdapter)
     adapter.run_prepass = MagicMock()
     adapter.dispatch.return_value = ToolResult(
         ok=True,
@@ -460,7 +460,7 @@ def test_agent_loop_dispatches_parallel_reads(tmp_path: Path) -> None:
     # Provide an extra copy in case the verify-hook fires.
     backend = _ScriptedBackend([_wrap(step1), _wrap(terminal_step), _wrap(terminal_step)])
 
-    adapter = MagicMock(spec=PcmAdapter)
+    adapter = MagicMock(spec=EcomAdapter)
     adapter.run_prepass = MagicMock(
         side_effect=lambda *, session, trace_writer: _fake_prepass(session)
     )

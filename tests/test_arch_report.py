@@ -128,17 +128,17 @@ def _make_trace_with_pcm_ops(path: Path, task_id: str) -> None:
         intent_head="q",
     ))
     emit_arch(writer, category=ArchCategory.TASK_START, details="q")
-    writer.append_pcm_op(
+    writer.append_ecom_op(
         op="tree", path="/", bytes=100, wall_ms=50, ok=True,
         error_code=None, origin="prepass",
     )
-    writer.append_pcm_op(
+    writer.append_ecom_op(
         op="read", path="AGENTS.md", bytes=1800, wall_ms=90, ok=True,
         error_code=None, origin="prepass",
     )
     emit_arch(writer, category=ArchCategory.SKILL_ROUTER,
               skill="finance-lookup", confidence=0.9)
-    writer.append_pcm_op(
+    writer.append_ecom_op(
         op="read", path="hanna.md", bytes=400, wall_ms=40, ok=True,
         error_code=None, origin="step:1",
     )

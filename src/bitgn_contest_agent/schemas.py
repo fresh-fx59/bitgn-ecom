@@ -4,7 +4,7 @@ Single source of truth: the `NextStep` Union mirrors the EcomRuntime RPC
 surface exactly. The coverage test in tests/test_tool_coverage.py keeps
 this correspondence mechanical.
 
-ECOM tool surface (vs the PAC1/PCM lineage this is forked from):
+ECOM tool surface (vs the PAC1 lineage this is forked from):
 
   Added:    stat, exec
   Removed:  mkdir, move (not part of the ECOM RPC surface)

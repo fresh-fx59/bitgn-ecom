@@ -28,8 +28,8 @@ from typing import Any, List, Optional, Sequence
 
 from pydantic import ValidationError
 
-from bitgn_contest_agent.adapter.pcm import PcmAdapter, ToolResult
-from bitgn_contest_agent.adapter.pcm_tracing import pcm_origin, set_pcm_origin
+from bitgn_contest_agent.adapter.ecom import EcomAdapter, ToolResult
+from bitgn_contest_agent.adapter.ecom_tracing import ecom_origin, set_ecom_origin
 from bitgn_contest_agent.arch_constants import (
     ArchCategory,
     ArchResult,
@@ -95,8 +95,8 @@ def _record_read_attempt(
     if tool_result.ok:
         return
     err = (tool_result.error or "").lower()
-    # The PCM server owns the error wording; the adapter passes it through
-    # verbatim (see adapter/pcm.py). We match known ENOENT substrings as a
+    # The ECOM runtime owns the error wording; the adapter passes it through
+    # verbatim (see adapter/ecom.py). We match known ENOENT substrings as a
     # heuristic. Follow-up: expose structured error_code=NOT_FOUND from the
     # adapter so this string match can become a fallback signal.
     if "file not found" in err or "no such file" in err:
@@ -207,12 +207,12 @@ def _describe_call(req: Any) -> str:
     return tool
 
 
-def _dispatch_parallel(adapter: PcmAdapter, ops: List[Any]) -> List[ToolResult]:
+def _dispatch_parallel(adapter: EcomAdapter, ops: List[Any]) -> List[ToolResult]:
     """Dispatch N independent ops concurrently; return results in submission order.
 
-    Uses `contextvars.copy_context().run` per worker so the `pcm_origin`
+    Uses `contextvars.copy_context().run` per worker so the `ecom_origin`
     ContextVar (set by the agent loop to e.g. `step:7`) propagates into
-    every worker's traced PCM call.
+    every worker's traced ECOM RPC.
     """
     if len(ops) == 1:
         return [adapter.dispatch(ops[0])]
@@ -298,7 +298,7 @@ class AgentLoop:
         self,
         *,
         backend: Backend,
-        adapter: PcmAdapter,
+        adapter: EcomAdapter,
         writer: TraceWriter,
         max_steps: int,
         llm_http_timeout_sec: float,
@@ -372,12 +372,12 @@ class AgentLoop:
         step_idx = 0  # visible in except block before first iteration
         try:
           for step_idx in range(1, self._max_steps + 1):
-            # Attribute all pcm_ops emitted below to this step number. The
-            # TracingPcmClient reads this var per-op so preflight tools
+            # Attribute all ecom_ops emitted below to this step number. The
+            # TracingEcomClient reads this var per-op so preflight tools
             # dispatched inside a step inherit the label too. Leakage to
             # post-loop code is harmless — nothing after the loop makes
-            # PCM calls.
-            set_pcm_origin(f"step:{step_idx}")
+            # ECOM RPCs.
+            set_ecom_origin(f"step:{step_idx}")
 
             if self._cancel_event is not None and self._cancel_event.is_set():
                 return self._finish_cancelled(totals, step_idx - 1)

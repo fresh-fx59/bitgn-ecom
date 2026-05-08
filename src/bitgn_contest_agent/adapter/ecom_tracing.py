@@ -1,7 +1,7 @@
-"""TracingPcmClient — a proxy around EcomRuntimeClientSync that writes
-one `pcm_op` trace record per runtime call.
+"""TracingEcomClient — a proxy around EcomRuntimeClientSync that writes
+one `ecom_op` trace record per runtime call.
 
-Naming note: kept as `TracingPcmClient` / `pcm_op` for log-format
+Naming note: kept as `TracingEcomClient` / `ecom_op` for log-format
 continuity with the PAC1 lineage (so existing dashboards and
 `jq` queries keep working). The wrapped runtime is ECOM.
 
@@ -11,13 +11,13 @@ iterations or high-level tool calls. Until we logged this layer,
 reconciling the dashboard against a local trace required shuttling
 screenshots or pastebins. With this wrapper, the local JSONL trace
 contains the same ops in the same order, so
-`jq 'select(.kind=="pcm_op")' trace.jsonl` gives you the dashboard
+`jq 'select(.kind=="ecom_op")' trace.jsonl` gives you the dashboard
 view verbatim.
 
 Wrapping the runtime (not the adapter) is load-bearing: anything that
 takes the runtime directly (e.g. helper modules, fan-out scripts)
 makes raw `client.list()` / `client.read()` calls that bypass
-PcmAdapter.dispatch. Tracing at the adapter would miss those.
+EcomAdapter.dispatch. Tracing at the adapter would miss those.
 """
 from __future__ import annotations
 
@@ -47,42 +47,42 @@ except ImportError:
 _LOWER_TOKEN_RE = re.compile(r"^[a-z][a-z0-9_-]*$")
 
 
-# Phase attribution for pcm_op records. The agent loop sets this around
+# Phase attribution for ecom_op records. The agent loop sets this around
 # each logical phase (prepass, step:N) so every op the underlying
-# PcmRuntimeClientSync sees inherits the label — including ops made by
+# EcomRuntimeClientSync sees inherits the label — including ops made by
 # preflight_* tools that call the runtime directly. "routed_preflight"
 # is a historical label present in older log files but no longer emitted.
-_pcm_op_origin: ContextVar[Optional[str]] = ContextVar(
-    "pcm_op_origin", default=None,
+_ecom_op_origin: ContextVar[Optional[str]] = ContextVar(
+    "ecom_op_origin", default=None,
 )
 
 
 @contextmanager
-def pcm_origin(label: str) -> Iterator[None]:
-    """Attribute all pcm_op records emitted in this block to `label`.
+def ecom_origin(label: str) -> Iterator[None]:
+    """Attribute all ecom_op records emitted in this block to `label`.
 
     Nests cleanly via contextvars — resetting on exit restores whatever
     the outer scope had set. Thread-safe because ContextVar is per-task
     in asyncio and copied into new threads at fork time (not relevant
     here since the agent is synchronous, but stated for the record).
     """
-    token = _pcm_op_origin.set(label)
+    token = _ecom_op_origin.set(label)
     try:
         yield
     finally:
-        _pcm_op_origin.reset(token)
+        _ecom_op_origin.reset(token)
 
 
-def set_pcm_origin(label: str) -> None:
-    """Set the origin label for subsequent pcm_op emissions until the
+def set_ecom_origin(label: str) -> None:
+    """Set the origin label for subsequent ecom_op emissions until the
     next call (or the end of the current Context). Use this when the
     code structure doesn't cleanly fit a `with` block — e.g. inside a
     big agent-loop iteration where re-indenting the body would churn
     300 lines. Each iteration overwrites before any op fires, so
     attribution is still precise per-step. The final value leaks to
-    whatever runs after, which is fine as long as no PCM ops fire
+    whatever runs after, which is fine as long as no ECOM ops fire
     post-loop."""
-    _pcm_op_origin.set(label)
+    _ecom_op_origin.set(label)
 
 
 def origin_bucket(origin: Optional[str]) -> str:
@@ -91,7 +91,7 @@ def origin_bucket(origin: Optional[str]) -> str:
     `step:1`, `step:2`, ..., `step:N` all map to "step" so cross-task
     aggregates compare apples to apples — otherwise a 15-step task has
     15 origin keys and a 3-step task has 3, making
-    `tasks[*].pcm_ops_by_origin` awkward to roll up.
+    `tasks[*].ecom_ops_by_origin` awkward to roll up.
 
     `None` maps to "other" so traces from before attribution landed
     (or off-path code that forgets to set origin) still account for
@@ -135,7 +135,7 @@ def _raw_dump_path() -> Optional[Path]:
         return _RAW_DUMP_PATH
     base = os.environ.get("BITGN_TRACE_RAW_DIR", "logs/raw_responses")
     Path(base).mkdir(parents=True, exist_ok=True)
-    _RAW_DUMP_PATH = Path(base) / f"pcm_responses.{os.getpid()}.jsonl"
+    _RAW_DUMP_PATH = Path(base) / f"ecom_responses.{os.getpid()}.jsonl"
     return _RAW_DUMP_PATH
 
 
@@ -160,7 +160,7 @@ def _dump_raw(op: str, req: Any, resp: Any, *, ok: bool, wall_ms: int,
               error_code: Optional[str]) -> None:
     """Append a single raw request/response record to the per-process
     dump file. Best-effort: any exception is swallowed so capture
-    failures never mask a real PCM error.
+    failures never mask a real runtime error.
     """
     path = _raw_dump_path()
     if path is None:
@@ -174,7 +174,7 @@ def _dump_raw(op: str, req: Any, resp: Any, *, ok: bool, wall_ms: int,
             "error_code": error_code,
             "request": _proto_to_dict(req) if req is not None else None,
             "response": _proto_to_dict(resp) if resp is not None else None,
-            "origin": _pcm_op_origin.get(),
+            "origin": _ecom_op_origin.get(),
         }
         line = json.dumps(record, default=str) + "\n"
         with _RAW_DUMP_LOCK:
@@ -185,7 +185,7 @@ def _dump_raw(op: str, req: Any, resp: Any, *, ok: bool, wall_ms: int,
 
 
 def _classify_exception(exc: BaseException) -> str:
-    """Same buckets as PcmAdapter._classify_exception — kept local so
+    """Same buckets as EcomAdapter._classify_exception — kept local so
     the wrapper has no circular import on the adapter."""
     name = type(exc).__name__
     if "Deadline" in name or "Timeout" in name:
@@ -194,7 +194,7 @@ def _classify_exception(exc: BaseException) -> str:
         return "RPC_UNAVAILABLE"
     if "InvalidArgument" in name or isinstance(exc, (TypeError, ValueError)):
         return "INVALID_ARG"
-    if "EcomError" in name or "PcmError" in name:
+    if "EcomError" in name:
         return "RUNTIME_ERROR"
     return "UNKNOWN"
 
@@ -215,7 +215,7 @@ _REQUEST_PATH_ATTR: dict[type, tuple[str, Optional[str]]] = {
 }
 
 
-class TracingPcmClient:
+class TracingEcomClient:
     """Drop-in replacement for `EcomRuntimeClientSync` that records
     every call to a `TraceWriter`. Methods mirror the underlying
     client; unknown attributes are delegated verbatim so future ECOM
@@ -396,16 +396,16 @@ class TracingPcmClient:
         if w is None:
             return
         try:
-            w.append_pcm_op(
+            w.append_ecom_op(
                 op=op,
                 path=path,
                 bytes=bytes_,
                 wall_ms=wall_ms,
                 ok=ok,
                 error_code=error_code,
-                origin=_pcm_op_origin.get(),
+                origin=_ecom_op_origin.get(),
             )
         except Exception:
-            # Tracing must never mask a real PCM error. Drop silently
+            # Tracing must never mask a real runtime error. Drop silently
             # if the writer is closed or raises.
             pass

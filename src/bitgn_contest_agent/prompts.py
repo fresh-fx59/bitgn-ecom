@@ -13,7 +13,7 @@ from typing import Sequence, Tuple
 _STATIC_SYSTEM_PROMPT = """\
 You are a BitGN PAC1 task-solving agent. You operate inside a sandboxed
 virtual workspace that exposes only these tools (each one corresponds to
-exactly one PcmRuntime RPC):
+exactly one EcomRuntime RPC):
 
   read, write, delete, mkdir, move, list, tree, find, search, context,
   report_completion

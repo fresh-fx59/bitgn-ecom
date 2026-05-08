@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Sequence
 from unittest.mock import MagicMock
 
-from bitgn_contest_agent.adapter.pcm import ToolResult
+from bitgn_contest_agent.adapter.ecom import ToolResult
 from bitgn_contest_agent.agent import AgentLoop
 import bitgn_contest_agent.agent as _agent_mod
 from bitgn_contest_agent.backend.base import Message, NextStepResult
@@ -28,7 +28,7 @@ class _Writer:
     def append_task(self, **kw): pass
     def append_step(self, **kw): pass
     def append_event(self, **kw): pass
-    def append_pcm_op(self, **kw): pass
+    def append_ecom_op(self, **kw): pass
     def append_prepass(self, **kw): pass
     def append_verify(self, **kw): self.records.append({"kind": "verify", **kw})
     def append_outcome(self, outcome): pass

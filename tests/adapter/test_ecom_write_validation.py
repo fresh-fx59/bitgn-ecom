@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from bitgn_contest_agent.adapter.pcm import PcmAdapter
+from bitgn_contest_agent.adapter.ecom import EcomAdapter
 from bitgn_contest_agent.schemas import Req_Write
 
 
 def _mk_adapter():
     runtime = MagicMock()
     runtime.write.return_value = MagicMock()
-    return runtime, PcmAdapter(runtime=runtime, max_tool_result_bytes=65536)
+    return runtime, EcomAdapter(runtime=runtime, max_tool_result_bytes=65536)
 
 
 def test_valid_yaml_frontmatter_dispatches_to_pcm():
@@ -57,7 +57,7 @@ def test_content_without_frontmatter_dispatches_without_validation():
 
 def test_format_pre_write_reject_arch_emitted(monkeypatch):
     """Verify a FORMAT_PRE_WRITE_REJECT arch event is emitted on reject."""
-    import bitgn_contest_agent.adapter.pcm as pcm_mod
+    import bitgn_contest_agent.adapter.ecom as pcm_mod
     captured = []
 
     def _capture(**kwargs):

@@ -1,1 +1,1 @@
-"""Adapter package — translates Req_* models to PcmRuntime calls."""
+"""Adapter package — translates Req_* models to EcomRuntime calls."""

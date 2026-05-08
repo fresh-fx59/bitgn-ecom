@@ -5,31 +5,13 @@ The adapter is the ONLY place in the project that imports
 `bitgn.vm.ecom.ecom_pb2` or `bitgn.vm.ecom.ecom_connect`. Anywhere else
 that references the wire-level proto module is a smell to be fixed.
 
-Naming note — this file is still called `pcm.py` and the class is still
-`PcmAdapter` for git/import-history continuity with the PAC1 lineage
-(36+ call-sites import this path). The "P" is a fossil; the runtime is
-ECOM.
-
-Differences from the PAC1 (PCM) adapter this is forked from:
-
-  Added:    Req_Stat, Req_Exec dispatch
-  Removed:  Req_MkDir, Req_Move dispatch (no such RPCs on ECOM)
-  Removed:  preflight_schema / preflight_semantic_index dispatch
-            (workspace-schema/semantic-index were vault concepts;
-            the new run_prepass() is a flat tree+read+context bootstrap
-            modeled after sample-agents/ecom-py.main)
-  Adjusted: Find dispatch passes `kind` (NodeKind) instead of `type`
-            List dispatch passes `path` instead of `name`
-            Read dispatch passes through optional line-slicing
-            Tree dispatch passes through `level` cap
-
-Heuristics preserved verbatim from the PAC1 era:
-  - BITGN_OPT_A_CASE_INSENSITIVE: prepend `(?i)` to bare patterns
+Heuristics carried over from the PAC1 lineage that are domain-agnostic
+and remain useful here:
+  - BITGN_OPT_A_CASE_INSENSITIVE: prepend `(?i)` to bare search patterns
   - BITGN_OPT_A_FIND_CI:           fan-out find() across name casings
   - _strip_leading_slashes:        normalize answer ref paths
-  Both are domain-agnostic LLM-forgetfulness absorbers; they cost ~one
-  extra RPC at most and only fire when the original returned zero hits
-  or when explicitly enabled.
+Each costs at most one extra RPC and only fires when the original
+returned zero hits or when explicitly enabled.
 """
 from __future__ import annotations
 
@@ -119,7 +101,7 @@ class ToolResult:
 
 @dataclass(frozen=True, slots=True)
 class PrepassResult:
-    """Return shape of `PcmAdapter.run_prepass`.
+    """Return shape of `EcomAdapter.run_prepass`.
 
     `bootstrap_content` is the list of strings the agent loop appends as
     additional user messages (today: tree(/), AGENTS.MD, context()).
@@ -205,7 +187,7 @@ def _build_write_request(req: Req_Write) -> "ecom_pb2.WriteRequest":
     return ecom_pb2.WriteRequest(**kwargs)
 
 
-class PcmAdapter:
+class EcomAdapter:
     def __init__(
         self,
         *,
@@ -424,7 +406,7 @@ class PcmAdapter:
         context() and its tool inventory via /AGENTS.MD, so the prepass
         is now a flat fan-out of the three universal bootstrap calls.
         """
-        from bitgn_contest_agent.adapter.pcm_tracing import pcm_origin
+        from bitgn_contest_agent.adapter.ecom_tracing import ecom_origin
         from bitgn_contest_agent.preflight.schema import (
             WorkspaceSchema,
             parse_schema_content,
@@ -440,13 +422,13 @@ class PcmAdapter:
         ]
 
         def _dispatch_with_origin(req: Any) -> ToolResult:
-            with pcm_origin("prepass"):
+            with ecom_origin("prepass"):
                 return self.dispatch(req)
 
         # Phase 1 ops are mutually independent (each is its own RPC) so
         # we dispatch them in parallel. ContextVars don't auto-propagate
         # to ThreadPoolExecutor workers; copy_context() per-submit gives
-        # each worker the parent's pcm_origin label.
+        # each worker the parent's ecom_origin label.
         with ThreadPoolExecutor(max_workers=len(pre_cmds)) as ex:
             futures = [
                 ex.submit(contextvars.copy_context().run, _dispatch_with_origin, req)
@@ -454,7 +436,7 @@ class PcmAdapter:
             ]
             phase1_results = [f.result() for f in futures]
 
-        with pcm_origin("prepass"):
+        with ecom_origin("prepass"):
             for (label, _), result in zip(pre_cmds, phase1_results):
                 if result.ok:
                     session.identity_loaded = True
@@ -532,6 +514,6 @@ class PcmAdapter:
             return "RPC_UNAVAILABLE"
         if "InvalidArgument" in name or isinstance(exc, (TypeError, ValueError)):
             return "INVALID_ARG"
-        if "EcomError" in name or "PcmError" in name:
+        if "EcomError" in name:
             return "RUNTIME_ERROR"
         return "UNKNOWN"
