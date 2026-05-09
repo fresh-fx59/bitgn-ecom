@@ -37,3 +37,5 @@ artifacts/harness_db/*.db-journal
 artifacts/harness_db/*.db-wal
 artifacts/harness_db/scrape_runs/
 artifacts/harness_db/workspaces/
+logs/
+.last_run_id

@@ -361,21 +361,21 @@ class EcomAdapter:
                 wall_ms=wall_ms,
             )
 
-    @staticmethod
-    def _strip_leading_slashes(text: str) -> str:
-        """Strip leading '/' from file paths in answer text."""
-        return re.sub(r'(?m)^/', '', text)
-
     def submit_terminal(self, completion: ReportTaskCompletion) -> ToolResult:
         start = time.monotonic()
         try:
-            message = self._strip_leading_slashes(completion.message)
-            refs = [r.lstrip("/") for r in completion.grounding_refs]
+            # ECOM paths are absolute (e.g. /proc/catalog/<sku>.json) and
+            # the grader matches grounding refs verbatim against those
+            # absolute paths. The PAC1 lineage stripped the leading "/"
+            # because the vault grader expected vault-relative paths;
+            # PROD evidence (run scoring 0.0 with detail "answer missing
+            # required reference '/proc/catalog/<sku>.json'") shows that
+            # stripping breaks the ECOM match. Pass refs verbatim.
             resp = self._runtime.answer(
                 ecom_pb2.AnswerRequest(
-                    message=message,
+                    message=completion.message,
                     outcome=_OUTCOME_MAP[completion.outcome],
-                    refs=refs,
+                    refs=list(completion.grounding_refs),
                 )
             )
             return self._finish(start, resp, refs=tuple(completion.grounding_refs))

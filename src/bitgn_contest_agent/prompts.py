@@ -83,12 +83,23 @@ Identity + rulebook discipline:
   2. /AGENTS.MD is the rulebook (see the "PRE-PASS read" user message).
      Anything it forbids is forbidden even if the task description
      asks for it.
-  3. Never fabricate file references. If you cite a path in
-     `grounding_refs`, you must have successfully read that exact path
-     earlier in the run, OR the path must be a row/column you derived
-     from a recorded `exec` result whose query is preserved in the
-     trace. /AGENTS.MD counts as read via the pre-pass and may be
-     cited in `grounding_refs` without an explicit re-read.
+  3. Never fabricate file references. `grounding_refs` is for FILE
+     PATHS only — paths you `read` (or `stat`) successfully in this
+     run. /AGENTS.MD counts as read via the pre-pass and may be cited
+     without an explicit re-read. SQL queries, exec stdin bodies, and
+     descriptive notes do NOT belong in `grounding_refs`; the BitGN
+     grader compares this list against the workspace files you
+     actually opened, and a query string will fail that check even
+     though it produced the correct numeric answer.
+
+  4. SQL is for DISCOVERY, not for citation. When `/bin/sql` reveals
+     a SKU / product id / record id that answers the task, you MUST
+     then `read` the canonical file for that record (e.g. the JSON
+     under /proc/catalog/<sku>.json or the markdown under the path
+     SQL returned in a `path` column) and put THAT file path in
+     `grounding_refs`. A SELECT result alone is not grounding — the
+     workspace's file inventory is. Build the query → take the row's
+     path/sku → read the file → cite the file.
 
 Catalogue / SQL discipline (ECOM-specific):
   - The runtime ships an `exec` interface to small executables in /bin.
@@ -239,7 +250,8 @@ Reliability rules:
     supports the outcome.
   - Every file path referenced in `message` or `outcome_justification`
     MUST appear in `grounding_refs` and MUST have been successfully
-    read in this run (or derived from a recorded exec result).
+    read (or stat'd) in this run. `grounding_refs` is FILE PATHS only
+    — never SQL bodies, never exec stdin, never descriptive notes.
   - When a task uses a relative time phrase (`in two weeks`,
     `4 days ago`, `next Friday`, `later today`), anchor the arithmetic
     to TODAY's date from `context` — NOT to a stored date in a file

@@ -560,15 +560,7 @@ def _run_tasks_and_summarize(
             all_results.extend(run_iteration(run_index))
 
     if output:
-        # scripts/ is a sibling of src/, not part of the installed package
-        # (pyproject.toml only packages src/). Pytest finds it via its
-        # implicit rootdir sys.path injection; at runtime we need to do
-        # the same here so the CLI works from both the editable install
-        # and a built wheel invoked from the repo checkout.
-        _repo_root = Path(__file__).resolve().parents[2]
-        if str(_repo_root) not in sys.path:
-            sys.path.insert(0, str(_repo_root))
-        from scripts.bench_summary import summarize  # type: ignore[attr-defined]
+        from bitgn_contest_agent.bench.summary import summarize
 
         summary = summarize(logs_dir=Path(cfg.log_dir) / run_id)
         Path(output).parent.mkdir(parents=True, exist_ok=True)
@@ -803,11 +795,7 @@ def _cmd_run_benchmark(args: argparse.Namespace) -> int:
 
 
 def _cmd_triage(args: argparse.Namespace) -> int:
-    # sys.path injection for scripts.bench_summary (same pattern as run-benchmark)
-    _repo_root = Path(__file__).resolve().parents[2]
-    if str(_repo_root) not in sys.path:
-        sys.path.insert(0, str(_repo_root))
-    from scripts.bench_summary import load_summary  # type: ignore[attr-defined]
+    from bitgn_contest_agent.bench.summary import load_summary
     from bitgn_contest_agent.bench.triage import classify_failure, TRIAGE_ORDER
 
     def cluster(path: Path) -> dict[str, list[str]]:
