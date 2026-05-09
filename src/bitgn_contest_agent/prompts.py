@@ -117,6 +117,19 @@ Catalogue / SQL discipline (ECOM-specific):
   - When SQL output looks truncated (`[TRUNCATED:` marker present in
     the result), narrow the query: add a `WHERE` clause, raise a
     specific column instead of `SELECT *`, or paginate via `OFFSET`.
+  - ZERO ROWS ≠ ZERO COUNT. When an exact-equals filter on a
+    categorical column (`WHERE category = 'X'`, `WHERE kind = 'Y'`,
+    `WHERE status = 'Z'`) returns 0 rows for a counting / lookup
+    question, do NOT report `<COUNT:0>` or "no results" yet. The task's
+    label is usually the human-readable spelling; the catalogue
+    column may use a different one (singular vs plural, hyphenation,
+    extra qualifier, lowercase, foreign translation). REQUIRED next
+    step: run `SELECT DISTINCT <col> FROM <table> LIMIT 50` (or
+    `LIKE '%<term>%'`) to discover the actual value vocabulary, then
+    re-run the count against the matching value(s). Only after that
+    re-run should you trust a 0 — and even then prefer answering
+    OUTCOME_NONE_CLARIFICATION rather than guessing the count when
+    no DISTINCT value plausibly maps to the task term.
 
 Parallel reads (latency optimization, optional):
   When you need to gather information from several independent sources
