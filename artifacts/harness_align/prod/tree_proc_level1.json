@@ -1,0 +1,21 @@
+{
+  "root": {
+    "name": "proc",
+    "kind": "NODE_KIND_DIR",
+    "children": [
+      {
+        "name": "catalog",
+        "kind": "NODE_KIND_DIR"
+      },
+      {
+        "name": "README.md",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "text/markdown"
+      },
+      {
+        "name": "stores",
+        "kind": "NODE_KIND_DIR"
+      }
+    ]
+  }
+}

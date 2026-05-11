@@ -1,0 +1,6 @@
+{
+  "path": "/AGENTS.MD",
+  "content_type": "text/markdown",
+  "content": "readme.md files take role of agents.md. Trust them, follow the chain of command.\n\nThis is Agentic E-Commerce OS system. All paths are / rooted (pass as such to tools and OS ops).\n\nKey locations:\n- Catalogue is in proc/catalog, stores are in proc/stores\n- Tools are in `/bin`. especially see sql tool that takes SQLite query as stdin. It operates with the state of the entire catalogue at the start of the session. Run `/bin/sql .schema` to see the schema.\n- inventory is only in SQL projections\n\nWhen responding with reference - provide full path in the repo to the object.\nWhen answering yes/no questions - include <YES> or <NO> tokens in the response. This is how the agent will know how to style the response.\nWhen answering availability questions - answer should reference products that are available, but should not reference unavailable products. Same with stores.\n\nWhen starting work, make sure to run tree -L 2 on docs folder\n",
+  "sha256": "6c554e98f3b94b4c48903579f6c31db35b64263bfaa15bc1bef82d063ef46f30"
+}

@@ -1,0 +1,58 @@
+{
+  "root": {
+    "name": "stores",
+    "kind": "NODE_KIND_DIR",
+    "children": [
+      {
+        "name": "store_bratislava_stare_mesto.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "store_brno_veveri.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "store_graz_jakomini.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "store_graz_lend.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "store_innsbruck_wilten.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "store_linz_hauptplatz.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "store_ljubljana_center.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "store_salzburg_elisabeth_vorstadt.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "store_vienna_meidling.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "store_vienna_praterstern.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      }
+    ]
+  }
+}

@@ -206,7 +206,8 @@ def test_exec_sql_count_orders(fixture_workspace: Path) -> None:
 
 def test_exec_sql_join_orders_customers(fixture_workspace: Path) -> None:
     """Cross-table join — proves the catalogue exposes both tables and
-    the result includes named columns in the header row."""
+    the result includes named columns in the header row. PROD /bin/sql
+    returns CSV (content_type=text/csv); the local mock matches."""
     client = LocalEcomClient(fixture_workspace)
     resp = client.exec(_req(
         path="/bin/sql", args=[],
@@ -218,7 +219,8 @@ def test_exec_sql_join_orders_customers(fixture_workspace: Path) -> None:
         ),
     ))
     assert resp.exit_code == 0
-    assert "name\ttotal_cents" in resp.stdout
+    assert resp.content_type == "text/csv"
+    assert "name,total_cents" in resp.stdout
     # Acme Co paid: 4500 + 1200 = 5700; Globex paid: 3300; Pimoroni paid: 200.
     assert "5700" in resp.stdout
     assert "Pimoroni Europe SARL" in resp.stdout

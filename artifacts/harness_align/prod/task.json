@@ -1,0 +1,7 @@
+{
+  "task_id": "t01",
+  "trial_id": "vm2-LwkwDbj2es1jsTAY6J7QXgXXQNL",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LwkwDbj2es1jsTAY6J7QXgXXQNL",
+  "instruction": "Do you have the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type drywall screw in catalogue?",
+  "benchmark_id": "bitgn/ecom1-dev"
+}

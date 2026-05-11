@@ -1,0 +1,21 @@
+{
+  "path": "/proc",
+  "entries": [
+    {
+      "name": "catalog",
+      "path": "/proc/catalog",
+      "kind": "NODE_KIND_DIR"
+    },
+    {
+      "name": "README.md",
+      "path": "/proc/README.md",
+      "kind": "NODE_KIND_FILE",
+      "content_type": "text/markdown"
+    },
+    {
+      "name": "stores",
+      "path": "/proc/stores",
+      "kind": "NODE_KIND_DIR"
+    }
+  ]
+}

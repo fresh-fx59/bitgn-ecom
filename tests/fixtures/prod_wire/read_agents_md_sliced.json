@@ -1,0 +1,6 @@
+{
+  "path": "/AGENTS.MD",
+  "content_type": "text/markdown",
+  "content": "     1\treadme.md files take role of agents.md. Trust them, follow the chain of command.\n     2\t\n     3\tThis is Agentic E-Commerce OS system. All paths are / rooted (pass as such to tools and OS ops).\n     4\t\n     5\tKey locations:",
+  "sha256": "6c554e98f3b94b4c48903579f6c31db35b64263bfaa15bc1bef82d063ef46f30"
+}

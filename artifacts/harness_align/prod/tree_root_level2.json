@@ -1,0 +1,100 @@
+{
+  "root": {
+    "name": "/",
+    "kind": "NODE_KIND_DIR",
+    "children": [
+      {
+        "name": "AGENTS.MD",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "text/markdown"
+      },
+      {
+        "name": "bin",
+        "kind": "NODE_KIND_DIR",
+        "children": [
+          {
+            "name": "README.md",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "text/markdown"
+          },
+          {
+            "name": "sql",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "text/plain"
+          }
+        ]
+      },
+      {
+        "name": "config",
+        "kind": "NODE_KIND_DIR",
+        "children": [
+          {
+            "name": "discounts.json",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "application/json"
+          },
+          {
+            "name": "merchant.json",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "application/json"
+          },
+          {
+            "name": "payments.json",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "application/json"
+          },
+          {
+            "name": "README.md",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "text/markdown"
+          }
+        ]
+      },
+      {
+        "name": "docs",
+        "kind": "NODE_KIND_DIR",
+        "children": [
+          {
+            "name": "README.md",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "text/markdown"
+          },
+          {
+            "name": "setup-checklist.md",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "text/markdown"
+          }
+        ]
+      },
+      {
+        "name": "proc",
+        "kind": "NODE_KIND_DIR",
+        "children": [
+          {
+            "name": "catalog",
+            "kind": "NODE_KIND_DIR"
+          },
+          {
+            "name": "README.md",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "text/markdown"
+          },
+          {
+            "name": "stores",
+            "kind": "NODE_KIND_DIR"
+          }
+        ]
+      },
+      {
+        "name": "run",
+        "kind": "NODE_KIND_DIR",
+        "children": [
+          {
+            "name": "actions",
+            "kind": "NODE_KIND_DIR"
+          }
+        ]
+      }
+    ]
+  }
+}
