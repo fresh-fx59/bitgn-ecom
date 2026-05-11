@@ -106,21 +106,43 @@ ECOM grounding_refs discipline (PROD-grader rules):
   rule reflects a specific score=0.0 failure mode caught in the
   2026-05-11 run.
 
-  A. USE `products.path` VERBATIM. The catalogue runtime serves SKU
-     files at multiple paths (flat, brand-nested, deeply category-
-     nested), and `read`/`stat` succeed on more than one form. The
-     GRADER's canonical form for each SKU is exactly what the
-     `products.path` column returns. Workflow:
-       1. SELECT p.sku, p.path FROM products WHERE … to discover the
-          row.
-       2. If `path` starts with `/`, use it verbatim. If it doesn't
-          (e.g. `Helios/PNT-169R7W8O.json`), prepend `/proc/catalog/`
-          to make it absolute (`/proc/catalog/Helios/PNT-169R7W8O.
-          json`). Never strip intermediate directories.
-       3. Read that exact path before citing.
-     Failure mode: PROD t14/t15/t16/t18/t20 (2026-05-12) scored 0.0
-     when the agent (or earlier adapter normalization) cited a flat
-     form for a SKU whose canonical path is nested.
+  A. DISCOVER THE CATALOG LAYOUT FIRST, DON'T TRUST `products.path`.
+     Each trial's catalogue may be laid out FLAT
+     (`/proc/catalog/<SKU>.json`) or NESTED (e.g.
+     `/proc/catalog/<Brand>/<SKU>.json` or
+     `/proc/catalog/<category>/<sub>/<SKU>.json`). The runtime serves
+     read/stat for both the canonical filesystem location AND its
+     shadow paths, so `read` succeeding does NOT confirm the path is
+     canonical. The grader accepts only the actual canonical path,
+     which is determined by THAT trial's catalogue layout.
+
+     REQUIRED workflow for product references:
+       1. Once, near the start of the task, run
+              {"tool":"find","root":"/proc/catalog",
+               "name":"<SKU>.json","kind":"files","limit":5}
+          to enumerate every path the SKU resolves to. The SHORTEST
+          (least slash-depth) result is canonical. Alternatively, run
+          `tree /proc/catalog -L 1` first: if `<SKU>.json` appears
+          directly as a child, the layout is FLAT for that trial; if
+          only category/brand subdirectories appear, the layout is
+          NESTED — then run find or `tree /proc/catalog -L 4` to
+          locate the SKU.
+       2. Read the canonical path you discovered (this registers it
+          in seen_refs for the R1 grounding-ref check).
+       3. Cite that exact canonical path in `grounding_refs`. NEVER
+          paste `products.path` verbatim without verifying — that
+          column is a logical/category path, not always the canonical
+          filesystem path.
+
+     Failure modes prevented:
+       - 2026-05-11 t02/t03 (cited nested form when canonical is flat)
+       - 2026-05-12 t02/t03/t04 (cited nested form when canonical
+         is flat) — same family, same root cause: `products.path`
+         is not the source of truth.
+
+     Store references (`/proc/stores/store_*.json`) are always flat;
+     no nesting under /proc/stores/. `list /proc/stores` shows every
+     available store.
 
   B. CITE ANSWER-PARTS ONLY, NOT THE INVESTIGATION TRAIL:
      `grounding_refs` is the list of paths the ANSWER is built on —
