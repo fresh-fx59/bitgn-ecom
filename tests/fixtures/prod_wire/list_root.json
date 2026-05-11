@@ -1,0 +1,36 @@
+{
+  "path": "/",
+  "entries": [
+    {
+      "name": "AGENTS.MD",
+      "path": "/AGENTS.MD",
+      "kind": "NODE_KIND_FILE",
+      "content_type": "text/markdown"
+    },
+    {
+      "name": "bin",
+      "path": "/bin",
+      "kind": "NODE_KIND_DIR"
+    },
+    {
+      "name": "config",
+      "path": "/config",
+      "kind": "NODE_KIND_DIR"
+    },
+    {
+      "name": "docs",
+      "path": "/docs",
+      "kind": "NODE_KIND_DIR"
+    },
+    {
+      "name": "proc",
+      "path": "/proc",
+      "kind": "NODE_KIND_DIR"
+    },
+    {
+      "name": "run",
+      "path": "/run",
+      "kind": "NODE_KIND_DIR"
+    }
+  ]
+}

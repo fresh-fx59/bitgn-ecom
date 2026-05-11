@@ -1,0 +1,14 @@
+{
+  "sku": "ELC-2INACNBE",
+  "brand": "Philips",
+  "series": "CorePro Ultra 1BQ-MPB",
+  "model": "1BQ-MPB",
+  "name": "Philips CorePro Ultra 1BQ-MPB LED Bulb E14 15W 4000K dimmable",
+  "properties": {
+    "wattage": "15 W",
+    "luminous_flux": "1055 lm",
+    "fitting": "E14",
+    "color_temperature": "4000 K",
+    "dimmable": true
+  }
+}

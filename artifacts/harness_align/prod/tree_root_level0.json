@@ -1,0 +1,211 @@
+{
+  "root": {
+    "name": "/",
+    "kind": "NODE_KIND_DIR",
+    "children": [
+      {
+        "name": "AGENTS.MD",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "text/markdown"
+      },
+      {
+        "name": "bin",
+        "kind": "NODE_KIND_DIR",
+        "children": [
+          {
+            "name": "README.md",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "text/markdown"
+          },
+          {
+            "name": "sql",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "text/plain"
+          }
+        ]
+      },
+      {
+        "name": "config",
+        "kind": "NODE_KIND_DIR",
+        "children": [
+          {
+            "name": "discounts.json",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "application/json"
+          },
+          {
+            "name": "merchant.json",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "application/json"
+          },
+          {
+            "name": "payments.json",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "application/json"
+          },
+          {
+            "name": "README.md",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "text/markdown"
+          }
+        ]
+      },
+      {
+        "name": "docs",
+        "kind": "NODE_KIND_DIR",
+        "children": [
+          {
+            "name": "README.md",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "text/markdown"
+          },
+          {
+            "name": "setup-checklist.md",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "text/markdown"
+          }
+        ]
+      },
+      {
+        "name": "proc",
+        "kind": "NODE_KIND_DIR",
+        "children": [
+          {
+            "name": "catalog",
+            "kind": "NODE_KIND_DIR",
+            "children": [
+              {
+                "name": "CLN-GEF2EYP9.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "CLN-NOLQX7ED.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "FST-1HE3ZSQ6.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "FST-1KPF96UD.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "FST-23VT61XO.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "FST-2JPIIG2S.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "FST-3SJKL8BF.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "FST-APSRIZJW.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "STO-12JLHT7D.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "STO-2R84BSHQ.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              }
+            ]
+          },
+          {
+            "name": "README.md",
+            "kind": "NODE_KIND_FILE",
+            "content_type": "text/markdown"
+          },
+          {
+            "name": "stores",
+            "kind": "NODE_KIND_DIR",
+            "children": [
+              {
+                "name": "store_bratislava_stare_mesto.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "store_brno_veveri.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "store_graz_jakomini.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "store_graz_lend.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "store_innsbruck_wilten.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "store_linz_hauptplatz.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "store_ljubljana_center.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "store_salzburg_elisabeth_vorstadt.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "store_vienna_meidling.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              },
+              {
+                "name": "store_vienna_praterstern.json",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "application/json"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "run",
+        "kind": "NODE_KIND_DIR",
+        "children": [
+          {
+            "name": "actions",
+            "kind": "NODE_KIND_DIR",
+            "children": [
+              {
+                "name": "README.md",
+                "kind": "NODE_KIND_FILE",
+                "content_type": "text/markdown"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

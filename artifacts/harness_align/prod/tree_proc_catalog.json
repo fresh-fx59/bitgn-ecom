@@ -1,0 +1,58 @@
+{
+  "root": {
+    "name": "catalog",
+    "kind": "NODE_KIND_DIR",
+    "children": [
+      {
+        "name": "CLN-GEF2EYP9.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "CLN-NOLQX7ED.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "FST-1HE3ZSQ6.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "FST-1KPF96UD.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "FST-23VT61XO.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "FST-2JPIIG2S.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "FST-3SJKL8BF.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "FST-APSRIZJW.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "STO-12JLHT7D.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      },
+      {
+        "name": "STO-2R84BSHQ.json",
+        "kind": "NODE_KIND_FILE",
+        "content_type": "application/json"
+      }
+    ]
+  }
+}

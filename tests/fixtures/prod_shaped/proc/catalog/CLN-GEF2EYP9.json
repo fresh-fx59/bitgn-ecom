@@ -1,0 +1,8 @@
+{
+  "sku": "CLN-GEF2EYP9",
+  "brand": "Acme",
+  "series": "Surface Cleaner X",
+  "model": "SCX-100",
+  "name": "Acme Surface Cleaner X SCX-100 500ml",
+  "properties": {"volume_ml": 500, "fragrance": "citrus"}
+}

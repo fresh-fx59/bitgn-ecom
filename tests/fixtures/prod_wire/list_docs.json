@@ -1,0 +1,17 @@
+{
+  "path": "/docs",
+  "entries": [
+    {
+      "name": "README.md",
+      "path": "/docs/README.md",
+      "kind": "NODE_KIND_FILE",
+      "content_type": "text/markdown"
+    },
+    {
+      "name": "setup-checklist.md",
+      "path": "/docs/setup-checklist.md",
+      "kind": "NODE_KIND_FILE",
+      "content_type": "text/markdown"
+    }
+  ]
+}

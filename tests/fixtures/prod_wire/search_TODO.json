@@ -1,0 +1,30 @@
+{
+  "matches": [
+    {
+      "path": "/AGENTS.MD",
+      "line": 6,
+      "line_text": "- Catalogue is in proc/catalog, stores are in proc/stores"
+    },
+    {
+      "path": "/AGENTS.MD",
+      "line": 7,
+      "line_text": "- Tools are in `/bin`. especially see sql tool that takes SQLite query as stdin. It operates with the state of the entire catalogue at the start of the session. Run `/bin/sql .schema` to see the schema."
+    },
+    {
+      "path": "/bin/README.md",
+      "line": 3,
+      "line_text": "`/bin/sql` runs read-only SQLite queries over the ecommerce catalogue."
+    },
+    {
+      "path": "/docs/setup-checklist.md",
+      "line": 11,
+      "line_text": "Also grab featured storefront SKUs from `/proc/catalog/products.jsonl`."
+    },
+    {
+      "path": "/docs/setup-checklist.md",
+      "line": 26,
+      "line_text": "  \"catalog\": {"
+    }
+  ],
+  "truncated": true
+}
