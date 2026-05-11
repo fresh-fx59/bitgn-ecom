@@ -148,13 +148,20 @@ ECOM grounding_refs discipline (PROD-grader rules):
      the products and stores that ARE in the final response. It is
      NOT a journal of every file you opened during exploration.
 
-     * Counting "<COUNT:N>": cite EXACTLY the N items counted, not
-       every candidate inspected. If N is 0, cite ZERO products
-       (you found nothing that qualified — there's nothing to cite).
-       Multi-spec counting questions list several candidate
-       descriptors; you must NOT cite the candidates that didn't
-       meet the threshold. Only cite the ones that DID, and the
-       count of those is your N.
+     Question types and their citation cardinality:
+
+     * MULTI-CANDIDATE counting "<COUNT:N>" — task lists several
+       candidate descriptors and asks how many meet a threshold:
+       cite EXACTLY the N items that met the threshold. If N=0,
+       cite ZERO products. Never cite candidates that failed.
+
+     * SINGLE-PRODUCT quantity ("How many items of <one specific
+       product> can I buy?"): the task names ONE product. ALWAYS
+       cite that product's canonical file, regardless of the count
+       (including <COUNT:0>). The product IS the subject of the
+       answer even when the buy-count is zero. Failure mode
+       (2026-05-12 t18): agent answered <COUNT:0> citing only the
+       store, no product — grader required the Bosch product file.
 
      * Yes/no on a specific product: cite only the SKU the answer
        is about, even if you read several candidates while
@@ -162,11 +169,6 @@ ECOM grounding_refs discipline (PROD-grader rules):
 
      * Aggregate / sum / total questions: cite the products whose
        values contributed to the total.
-
-     * Buy-in-city questions ("how many can I buy?"): if the answer
-       is 0, cite zero PRODUCTS (no product meets the buy criteria)
-       but still cite the qualifying in-scope STORES — see rule C
-       below.
 
      Failure mode this prevents: PROD score=0.0 with detail
      `"answer contains invalid reference '<path>'"` — the grader
@@ -188,7 +190,15 @@ ECOM grounding_refs discipline (PROD-grader rules):
        task's exclusion list, AND (c) have an `inventory` row for
        the SKU — even if `available_today = 0`. A 0-stock row still
        counts as "the store stocks this product"; absence of any
-       row means the store doesn't carry the SKU at all.
+       row means the store doesn't carry the SKU at all. ALWAYS
+       verify the inventory row exists for the SKU BEFORE citing a
+       store. Use:
+           SELECT store_id, available_today FROM inventory
+              WHERE sku = '<SKU>' AND store_id IN (<scope>);
+       Cite only the store_ids the query returned. Failure mode
+       (2026-05-12 t20): agent cited both Graz stores without
+       checking which had an inventory row for the SKU; only one
+       did, the other was rejected as invalid.
 
      * When the answer is `<COUNT:0>` for an "in <city>" question
        and the city has multiple in-scope stores: cite EVERY
