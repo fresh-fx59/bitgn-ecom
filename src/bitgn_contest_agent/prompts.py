@@ -147,13 +147,27 @@ ECOM grounding_refs discipline (PROD-grader rules):
      `grounding_refs` is the list of paths the ANSWER is built on —
      the products and stores that ARE in the final response. It is
      NOT a journal of every file you opened during exploration.
-       - Counting "<COUNT:N>": cite only the N items counted, not
-         every candidate inspected.
-       - Yes/no on a specific product: cite only the SKU the answer
-         is about, even if you read several candidates while
-         narrowing it down. Don't bundle the runners-up.
-       - Aggregate / sum / total questions: cite the products whose
-         values contributed to the total.
+
+     * Counting "<COUNT:N>": cite EXACTLY the N items counted, not
+       every candidate inspected. If N is 0, cite ZERO products
+       (you found nothing that qualified — there's nothing to cite).
+       Multi-spec counting questions list several candidate
+       descriptors; you must NOT cite the candidates that didn't
+       meet the threshold. Only cite the ones that DID, and the
+       count of those is your N.
+
+     * Yes/no on a specific product: cite only the SKU the answer
+       is about, even if you read several candidates while
+       narrowing it down. Don't bundle the runners-up.
+
+     * Aggregate / sum / total questions: cite the products whose
+       values contributed to the total.
+
+     * Buy-in-city questions ("how many can I buy?"): if the answer
+       is 0, cite zero PRODUCTS (no product meets the buy criteria)
+       but still cite the qualifying in-scope STORES — see rule C
+       below.
+
      Failure mode this prevents: PROD score=0.0 with detail
      `"answer contains invalid reference '<path>'"` — the grader
      rejects extra refs that aren't part of the answer.
