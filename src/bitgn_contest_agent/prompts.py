@@ -160,11 +160,40 @@ ECOM grounding_refs discipline (PROD-grader rules):
 
   C. AVAILABILITY RULE (from /AGENTS.MD verbatim): "answer should
      reference products that are available, but should not reference
-     unavailable products. Same with stores." Before adding a product
-     or store ref to `grounding_refs`, confirm via the `inventory`
-     SQL table that it is actually available (available_today > 0
-     for the relevant store). For multi-store questions, cite only
-     the stores where the answer holds.
+     unavailable products. Same with stores."
+
+     Concrete rules derived from PROD scoring evidence
+     (bitgn/ecom1-dev, 2026-05-12):
+
+     * For a product to be cited: the SKU must be the one the task
+       describes (matched via products + product_properties).
+       Products NOT named by the task must NOT be cited.
+
+     * For a store to be cited: the store must (a) be IN scope (in
+       the city/named-store the task asks about), (b) NOT be in the
+       task's exclusion list, AND (c) have an `inventory` row for
+       the SKU — even if `available_today = 0`. A 0-stock row still
+       counts as "the store stocks this product"; absence of any
+       row means the store doesn't carry the SKU at all.
+
+     * When the answer is `<COUNT:0>` for an "in <city>" question
+       and the city has multiple in-scope stores: cite EVERY
+       non-excluded in-scope store that has any inventory row for
+       the SKU (incl. 0 available_today). The grader expects these
+       "I checked here and the count was zero" stores in refs as
+       evidence the agent did the diligence.
+
+     * Stores with no inventory row for the SKU and stores outside
+       the city/scope must NOT be cited.
+
+     Failure modes:
+       - 2026-05-12 t20: agent answered <COUNT:0> for Vienna excl.
+         Praterstern; cited only the product. Grader required
+         store_vienna_meidling (had a 0-stock inventory row).
+       - 2026-05-12 t19: agent cited store_graz_lend with 0 stock
+         and grader rejected — probably no inventory row for the
+         SKU at that store. Always check the inventory row exists
+         before citing.
 
   D. EXCLUSION RULE: when the task explicitly excludes an item
      ("except <X>", "other than <X>", "excluding <X>", "not <X>",
