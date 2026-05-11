@@ -106,39 +106,38 @@ ECOM grounding_refs discipline (PROD-grader rules):
   rule reflects a specific score=0.0 failure mode caught in the
   2026-05-11 run.
 
-  A. DISCOVER THE CATALOG LAYOUT FIRST, DON'T TRUST `products.path`.
-     Each trial's catalogue may be laid out FLAT
-     (`/proc/catalog/<SKU>.json`) or NESTED (e.g.
-     `/proc/catalog/<Brand>/<SKU>.json` or
-     `/proc/catalog/<category>/<sub>/<SKU>.json`). The runtime serves
-     read/stat for both the canonical filesystem location AND its
-     shadow paths, so `read` succeeding does NOT confirm the path is
-     canonical. The grader accepts only the actual canonical path,
-     which is determined by THAT trial's catalogue layout.
+  A. CITE THE EXACT `products.path` VALUE FROM SQL, ABSOLUTIZED.
+     The `products.path` column is the grader's source of truth for
+     canonical catalog references. Mandatory workflow:
 
-     REQUIRED workflow for product references:
-       1. Once, near the start of the task, run
-              {"tool":"find","root":"/proc/catalog",
-               "name":"<SKU>.json","kind":"files","limit":5}
-          to enumerate every path the SKU resolves to. The SHORTEST
-          (least slash-depth) result is canonical. Alternatively, run
-          `tree /proc/catalog -L 1` first: if `<SKU>.json` appears
-          directly as a child, the layout is FLAT for that trial; if
-          only category/brand subdirectories appear, the layout is
-          NESTED — then run find or `tree /proc/catalog -L 4` to
-          locate the SKU.
-       2. Read the canonical path you discovered (this registers it
-          in seen_refs for the R1 grounding-ref check).
-       3. Cite that exact canonical path in `grounding_refs`. NEVER
-          paste `products.path` verbatim without verifying — that
-          column is a logical/category path, not always the canonical
-          filesystem path.
+       1. Always include `p.path` in the columns you SELECT:
+              SELECT p.sku, p.path, … FROM products p WHERE …
+          When narrowing down to a specific SKU, run
+              SELECT path FROM products WHERE sku='<SKU>';
+          first and treat its return string as the citation.
 
-     Failure modes prevented:
-       - 2026-05-11 t02/t03 (cited nested form when canonical is flat)
-       - 2026-05-12 t02/t03/t04 (cited nested form when canonical
-         is flat) — same family, same root cause: `products.path`
-         is not the source of truth.
+       2. ABSOLUTIZE that string by prefixing exactly `/proc/catalog/`
+          IF AND ONLY IF the returned value does NOT already start
+          with `/`. Examples:
+              "PWR-21134N3Q.json"              → "/proc/catalog/PWR-21134N3Q.json"
+              "Ryobi/PWR-293I8OUS.json"        → "/proc/catalog/Ryobi/PWR-293I8OUS.json"
+              "/proc/catalog/foo/X.json"       → "/proc/catalog/foo/X.json" (unchanged)
+          NEVER prepend a brand name, category, or any extra segment
+          beyond what `path` itself contains. The most common
+          mistake: SQL returns "PWR-XYZ.json" and the agent invents
+          "/proc/catalog/<Brand>/PWR-XYZ.json" because it knows the
+          brand from another column. That is a fabrication. The
+          grader rejects it.
+
+       3. Read that absolute path before citing (to satisfy R1
+          grounding-ref check), then cite it verbatim in
+          `grounding_refs`.
+
+     Failure mode this prevents: PROD t02/t03/t04 (2026-05-11 &
+     2026-05-12) cited `/proc/catalog/<Brand>/<SKU>.json` when the
+     SQL `path` was just `<SKU>.json` and the canonical form was
+     `/proc/catalog/<SKU>.json`. The agent had inferred a brand
+     subdirectory that didn't exist as canonical.
 
      Store references (`/proc/stores/store_*.json`) are always flat;
      no nesting under /proc/stores/. `list /proc/stores` shows every
