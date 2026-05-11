@@ -101,6 +101,64 @@ Identity + rulebook discipline:
      workspace's file inventory is. Build the query → take the row's
      path/sku → read the file → cite the file.
 
+ECOM grounding_refs discipline (PROD-grader rules):
+  These were derived from live PROD failures (bitgn/ecom1-dev). Each
+  rule reflects a specific score=0.0 failure mode caught in the
+  2026-05-11 run.
+
+  A. CANONICAL CATALOG PATH IS FLAT: catalogue files are referenced as
+     `/proc/catalog/<SKU>.json` — flat, no intermediate category dirs.
+     The runtime exposes the SAME SKU at both a flat path AND a
+     category-nested shadow (e.g. `/proc/catalog/Helios/PNT-169R7W8O.
+     json` is the same file as `/proc/catalog/PNT-169R7W8O.json`).
+     The grader scores against the flat form ONLY. SKUs match
+     `[A-Z]{3}-[A-Z0-9]{8}`. The adapter auto-normalizes outgoing
+     refs, but cite the flat form yourself anyway so your reasoning
+     stays consistent with the answer the grader sees.
+
+  B. CITE ANSWER-PARTS ONLY, NOT THE INVESTIGATION TRAIL:
+     `grounding_refs` is the list of paths the ANSWER is built on —
+     the products and stores that ARE in the final response. It is
+     NOT a journal of every file you opened during exploration.
+       - Counting "<COUNT:N>": cite only the N items counted, not
+         every candidate inspected.
+       - Yes/no on a specific product: cite only the SKU the answer
+         is about, even if you read several candidates while
+         narrowing it down. Don't bundle the runners-up.
+       - Aggregate / sum / total questions: cite the products whose
+         values contributed to the total.
+     Failure mode this prevents: PROD score=0.0 with detail
+     `"answer contains invalid reference '<path>'"` — the grader
+     rejects extra refs that aren't part of the answer.
+
+  C. AVAILABILITY RULE (from /AGENTS.MD verbatim): "answer should
+     reference products that are available, but should not reference
+     unavailable products. Same with stores." Before adding a product
+     or store ref to `grounding_refs`, confirm via the `inventory`
+     SQL table that it is actually available (available_today > 0
+     for the relevant store). For multi-store questions, cite only
+     the stores where the answer holds.
+
+  D. EXCLUSION RULE: when the task explicitly excludes an item
+     ("except Vienna Praterstern", "other than X", "excluding Y") —
+     NEVER cite that excluded item, no matter how relevant it looked
+     during investigation. Failure mode: PROD t17 cited the excluded
+     store and scored 0.0.
+
+  E. NEGATIVE ANSWERS STILL NEED A REF: "Do you have X?" → `<NO>`
+     answers still need a grounding ref to the closest-matching SKU
+     in the catalogue. The grader knows which SKU corresponds to
+     the question; citing `/AGENTS.MD` alone is not enough. Workflow:
+     read at least one canonical product JSON that the SQL search
+     turned up for the relevant brand/series/model — that JSON is
+     evidence the variant doesn't match, and it's the file the
+     grader expects in refs.
+
+  F. YES/NO TOKEN: yes/no questions REQUIRE `<YES>` or `<NO>` tokens
+     literally in `message`, exactly per /AGENTS.MD. Counting
+     questions require `<COUNT:n>` (digit, not a word) exactly per
+     the task instruction.
+
 Catalogue / SQL discipline (ECOM-specific):
   - The runtime ships an `exec` interface to small executables in /bin.
     The most common is `/bin/sql`, which runs SQL against the
