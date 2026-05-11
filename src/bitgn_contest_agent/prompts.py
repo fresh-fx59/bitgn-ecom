@@ -106,15 +106,21 @@ ECOM grounding_refs discipline (PROD-grader rules):
   rule reflects a specific score=0.0 failure mode caught in the
   2026-05-11 run.
 
-  A. CANONICAL CATALOG PATH IS FLAT: catalogue files are referenced as
-     `/proc/catalog/<SKU>.json` — flat, no intermediate category dirs.
-     The runtime exposes the SAME SKU at both a flat path AND a
-     category-nested shadow (e.g. `/proc/catalog/Helios/PNT-169R7W8O.
-     json` is the same file as `/proc/catalog/PNT-169R7W8O.json`).
-     The grader scores against the flat form ONLY. SKUs match
-     `[A-Z]{3}-[A-Z0-9]{8}`. The adapter auto-normalizes outgoing
-     refs, but cite the flat form yourself anyway so your reasoning
-     stays consistent with the answer the grader sees.
+  A. USE `products.path` VERBATIM. The catalogue runtime serves SKU
+     files at multiple paths (flat, brand-nested, deeply category-
+     nested), and `read`/`stat` succeed on more than one form. The
+     GRADER's canonical form for each SKU is exactly what the
+     `products.path` column returns. Workflow:
+       1. SELECT p.sku, p.path FROM products WHERE … to discover the
+          row.
+       2. If `path` starts with `/`, use it verbatim. If it doesn't
+          (e.g. `Helios/PNT-169R7W8O.json`), prepend `/proc/catalog/`
+          to make it absolute (`/proc/catalog/Helios/PNT-169R7W8O.
+          json`). Never strip intermediate directories.
+       3. Read that exact path before citing.
+     Failure mode: PROD t14/t15/t16/t18/t20 (2026-05-12) scored 0.0
+     when the agent (or earlier adapter normalization) cited a flat
+     form for a SKU whose canonical path is nested.
 
   B. CITE ANSWER-PARTS ONLY, NOT THE INVESTIGATION TRAIL:
      `grounding_refs` is the list of paths the ANSWER is built on —
@@ -140,10 +146,15 @@ ECOM grounding_refs discipline (PROD-grader rules):
      the stores where the answer holds.
 
   D. EXCLUSION RULE: when the task explicitly excludes an item
-     ("except Vienna Praterstern", "other than X", "excluding Y") —
-     NEVER cite that excluded item, no matter how relevant it looked
-     during investigation. Failure mode: PROD t17 cited the excluded
-     store and scored 0.0.
+     ("except <X>", "other than <X>", "excluding <X>", "not <X>",
+     "but not <X>") — NEVER cite that excluded item, no matter how
+     relevant it looked during investigation. Even when reporting
+     OUTCOME_NONE_CLARIFICATION, the excluded item must not appear
+     in `grounding_refs`. Scan the task text for these excluder
+     keywords BEFORE assembling your refs; if a candidate ref
+     references the excluded entity (by name, store_id, or path),
+     drop it. Failure mode: PROD t17/t19 cited the excluded store
+     "store_vienna_praterstern" and scored 0.0.
 
   E. NEGATIVE ANSWERS STILL NEED A REF: "Do you have X?" → `<NO>`
      answers still need a grounding ref to the closest-matching SKU

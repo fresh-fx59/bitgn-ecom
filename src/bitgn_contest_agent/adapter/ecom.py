@@ -156,28 +156,6 @@ def _search_response_to_text(resp: "ecom_pb2.SearchResponse") -> str:
     return _json.dumps(payload, separators=(", ", ": "))
 
 
-# ECOM catalogue files have a canonical flat location even when
-# `products.path` returns a category-nested form. The grader scores
-# refs against the flat form (`/proc/catalog/<SKU>.json`); SKUs are
-# 3-letter prefix + dash + 8 char id (e.g. PNT-169R7W8O).
-_CATALOG_NESTED_RE = re.compile(
-    r"^/proc/catalog/(?:[^/]+/)+([A-Z]{3}-[A-Z0-9]{8}\.json)$"
-)
-
-
-def _canonicalize_ref(ref: str) -> str:
-    """Normalize a grounding ref to the form the ECOM grader expects.
-
-    Today this strips category-nested catalogue paths back to the flat
-    /proc/catalog/<SKU>.json shape. If we discover other namespaces
-    that need normalization, add them here so the wire-level fix lives
-    in one place."""
-    m = _CATALOG_NESTED_RE.match(ref)
-    if m:
-        return f"/proc/catalog/{m.group(1)}"
-    return ref
-
-
 _FIND_KIND_MAP: Dict[str, int] = {
     "all": ecom_pb2.NodeKind.NODE_KIND_UNSPECIFIED,
     "files": ecom_pb2.NodeKind.NODE_KIND_FILE,
@@ -233,21 +211,14 @@ class EcomAdapter:
                         end_line=req.end_line,
                     )
                 )
-                # Register both the literal path read AND its
-                # canonical flat form so the validator's R1 grounding-
-                # ref check accepts either. The grader will see only
-                # the canonical form (submit_terminal canonicalizes
-                # outgoing refs); the agent may have read either.
-                canon = _canonicalize_ref(req.path)
-                read_refs = (req.path,) if canon == req.path else (req.path, canon)
-                return self._finish(start, resp, refs=read_refs)
+                return self._finish(start, resp, refs=(req.path,))
             if isinstance(req, Req_Stat):
+                # Stat counts as "saw the path exists" — register in
+                # seen_refs so the validator accepts citation without a
+                # full read. Cheap existence probe is the right move
+                # when the agent just needs to confirm a file is there.
                 resp = self._runtime.stat(ecom_pb2.StatRequest(path=req.path))
-                # Stat counts as evidence too — agent can use it to
-                # confirm a path exists before citing.
-                canon = _canonicalize_ref(req.path)
-                stat_refs = (req.path,) if canon == req.path else (req.path, canon)
-                return self._finish(start, resp, refs=stat_refs)
+                return self._finish(start, resp, refs=(req.path,))
             if isinstance(req, Req_Write):
                 # Pre-write YAML guard — catches malformed frontmatter
                 # BEFORE persistence so the agent can fix-and-retry
@@ -398,22 +369,15 @@ class EcomAdapter:
         start = time.monotonic()
         try:
             # ECOM paths are absolute (e.g. /proc/catalog/<sku>.json) and
-            # the grader matches grounding refs verbatim against those
-            # absolute paths. The PAC1 lineage stripped the leading "/"
-            # because the vault grader expected vault-relative paths;
-            # PROD evidence shows that breaks the ECOM match.
-            #
-            # ECOM canonicalization: the catalogue exposes the SAME SKU
-            # file at both a flat path (/proc/catalog/<sku>.json) and
-            # a category-nested shadow (/proc/catalog/<cat>/<sub>/<sku>.json
-            # — surfaced by the products.path SQL column on some
-            # benchmarks). The grader normalizes refs to the flat form;
-            # two t02/t03 failures on the 2026-05-11 run scored 0.0
-            # with "answer missing required reference '/proc/catalog/
-            # <sku>.json'" while the agent cited the nested form it had
-            # actually read. We strip intermediate dirs between
-            # /proc/catalog/ and the SKU file before sending.
-            refs = [_canonicalize_ref(r) for r in completion.grounding_refs]
+            # the grader matches grounding refs verbatim against the
+            # canonical path each SKU lives at. PROD evidence (2026-05-12
+            # run): the canonical form varies per SKU — some live at the
+            # flat path, some at brand-nested, some at deeply category-
+            # nested paths. The `products.path` SQL column returns the
+            # canonical form for each SKU. Pass refs through verbatim
+            # — earlier "canonicalize to flat" logic broke 5/20 tasks
+            # whose canonical form was nested.
+            refs = list(completion.grounding_refs)
             resp = self._runtime.answer(
                 ecom_pb2.AnswerRequest(
                     message=completion.message,
