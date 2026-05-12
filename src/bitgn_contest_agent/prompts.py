@@ -102,13 +102,13 @@ Identity + rulebook discipline:
      path/sku → read the file → cite the file.
 
 ECOM grounding_refs discipline (PROD-grader rules):
-  These were derived from live PROD failures (bitgn/ecom1-dev). Each
-  rule reflects a specific score=0.0 failure mode caught in the
-  2026-05-11 run.
+  Derived from live PROD failures on bitgn/ecom1-dev. These rules
+  are general — they describe HOW to construct a grounded answer,
+  not what to say for any specific task.
 
-  A. CITE THE EXACT `products.path` VALUE FROM SQL, ABSOLUTIZED.
-     The `products.path` column is the grader's source of truth for
-     canonical catalog references. Mandatory workflow:
+  A. CITE `products.path` VERBATIM, NEVER FABRICATE PATH SEGMENTS.
+     `products.path` is the source of truth for catalog citations.
+     Workflow:
 
        1. Always include `p.path` in the columns you SELECT:
               SELECT p.sku, p.path, … FROM products p WHERE …
@@ -117,132 +117,95 @@ ECOM grounding_refs discipline (PROD-grader rules):
           first and treat its return string as the citation.
 
        2. ABSOLUTIZE that string by prefixing exactly `/proc/catalog/`
-          IF AND ONLY IF the returned value does NOT already start
-          with `/`. Examples:
+          IFF the returned value does NOT already start with `/`:
               "PWR-21134N3Q.json"              → "/proc/catalog/PWR-21134N3Q.json"
               "Ryobi/PWR-293I8OUS.json"        → "/proc/catalog/Ryobi/PWR-293I8OUS.json"
               "/proc/catalog/foo/X.json"       → "/proc/catalog/foo/X.json" (unchanged)
-          NEVER prepend a brand name, category, or any extra segment
-          beyond what `path` itself contains. The most common
-          mistake: SQL returns "PWR-XYZ.json" and the agent invents
-          "/proc/catalog/<Brand>/PWR-XYZ.json" because it knows the
-          brand from another column. That is a fabrication. The
-          grader rejects it.
 
-       3. Read that absolute path before citing (to satisfy R1
+       3. NEVER add brand, category, or any extra segment from a
+          different column. If SQL returns "PWR-XYZ.json", do NOT
+          construct "/proc/catalog/<Brand>/PWR-XYZ.json" using a
+          brand value from `products.brand`. The grader does
+          exact-string match against the absolutized `path` value.
+
+       4. Read that absolute path before citing (satisfies the R1
           grounding-ref check), then cite it verbatim in
           `grounding_refs`.
-
-     Failure mode this prevents: PROD t02/t03/t04 (2026-05-11 &
-     2026-05-12) cited `/proc/catalog/<Brand>/<SKU>.json` when the
-     SQL `path` was just `<SKU>.json` and the canonical form was
-     `/proc/catalog/<SKU>.json`. The agent had inferred a brand
-     subdirectory that didn't exist as canonical.
 
      Store references (`/proc/stores/store_*.json`) are always flat;
      no nesting under /proc/stores/. `list /proc/stores` shows every
      available store.
 
-  B. CITE ANSWER-PARTS ONLY, NOT THE INVESTIGATION TRAIL:
-     `grounding_refs` is the list of paths the ANSWER is built on —
-     the products and stores that ARE in the final response. It is
-     NOT a journal of every file you opened during exploration.
+  B. CITE ANSWER-PARTS ONLY, NOT THE INVESTIGATION TRAIL.
+     `grounding_refs` is the list of paths the FINAL ANSWER is built
+     on, not a journal of every file you opened while exploring.
 
-     Question types and their citation cardinality:
+     The general principle is: cite exactly what your message is
+     about, including stores you used to determine the answer. In
+     practice:
 
-     * MULTI-CANDIDATE counting "<COUNT:N>" — task lists several
-       candidate descriptors and asks how many meet a threshold:
-       cite EXACTLY the N items that met the threshold. If N=0,
-       cite ZERO products. Never cite candidates that failed.
+       * Cite every product file whose data appears in or directly
+         supports the final answer (the product is named, counted,
+         compared, summed, or its absence is the answer).
+       * Cite every store file you used to compute the answer AND
+         that satisfies rule C below.
+       * Do NOT cite candidate products that you investigated but
+         that did not contribute to the final answer (e.g. ruled-out
+         matches in a yes/no, candidates below the threshold in a
+         counting question).
+       * Do NOT cite SQL strings, exec stdin bodies, or descriptive
+         notes — grounding_refs is file paths only.
 
-     * SINGLE-PRODUCT quantity ("How many items of <one specific
-       product> can I buy?"): the task names ONE product. ALWAYS
-       cite that product's canonical file, regardless of the count
-       (including <COUNT:0>). The product IS the subject of the
-       answer even when the buy-count is zero. Failure mode
-       (2026-05-12 t18): agent answered <COUNT:0> citing only the
-       store, no product — grader required the Bosch product file.
+     If the task names a specific product and the answer is zero/no,
+     the product is still the subject of the answer — cite it. If
+     the task lists several candidates and asks "how many qualify",
+     the qualifying set IS the answer — cite only those.
 
-     * Yes/no on a specific product: cite only the SKU the answer
-       is about, even if you read several candidates while
-       narrowing it down. Don't bundle the runners-up.
-
-     * Aggregate / sum / total questions: cite the products whose
-       values contributed to the total.
-
-     Failure mode this prevents: PROD score=0.0 with detail
-     `"answer contains invalid reference '<path>'"` — the grader
-     rejects extra refs that aren't part of the answer.
-
-  C. AVAILABILITY RULE (from /AGENTS.MD verbatim): "answer should
+  C. AVAILABILITY (from /AGENTS.MD verbatim): "answer should
      reference products that are available, but should not reference
      unavailable products. Same with stores."
 
-     Concrete rules derived from PROD scoring evidence
-     (bitgn/ecom1-dev, 2026-05-12):
+     Operationalized:
 
-     * For a product to be cited: the SKU must be the one the task
-       describes (matched via products + product_properties).
-       Products NOT named by the task must NOT be cited.
+       * A store is "available for a SKU" iff the `inventory` table
+         has a row keyed on (store_id, sku). The presence of the row
+         indicates the store stocks the product; `available_today`
+         is the today-availability quantity. Always verify the row
+         exists before citing any store for a given SKU:
+             SELECT store_id, available_today FROM inventory
+                WHERE sku = '<SKU>' AND store_id IN (<scope>);
+         Cite only store_ids the query returned. Never cite a store
+         that has no inventory row for the SKU.
 
-     * For a store to be cited: the store must (a) be IN scope (in
-       the city/named-store the task asks about), (b) NOT be in the
-       task's exclusion list, AND (c) have an `inventory` row for
-       the SKU — even if `available_today = 0`. A 0-stock row still
-       counts as "the store stocks this product"; absence of any
-       row means the store doesn't carry the SKU at all. ALWAYS
-       verify the inventory row exists for the SKU BEFORE citing a
-       store. Use:
-           SELECT store_id, available_today FROM inventory
-              WHERE sku = '<SKU>' AND store_id IN (<scope>);
-       Cite only the store_ids the query returned. Failure mode
-       (2026-05-12 t20): agent cited both Graz stores without
-       checking which had an inventory row for the SKU; only one
-       did, the other was rejected as invalid.
+       * If the question is about today's purchasable count and the
+         answer is zero, the in-scope stores you queried may still
+         be cited as the locations you established do not currently
+         have the product available today — they ARE part of the
+         answer. Only cite stores that (a) returned a row in the
+         inventory query above, (b) are in scope (the city or named
+         store), and (c) are not in the exclusion list (rule D).
 
-     * When the answer is `<COUNT:0>` for an "in <city>" question
-       and the city has multiple in-scope stores: cite EVERY
-       non-excluded in-scope store that has any inventory row for
-       the SKU (incl. 0 available_today). The grader expects these
-       "I checked here and the count was zero" stores in refs as
-       evidence the agent did the diligence.
+       * Products that are not named by the task must NOT be cited,
+         regardless of availability.
 
-     * Stores with no inventory row for the SKU and stores outside
-       the city/scope must NOT be cited.
+  D. EXCLUSION: when the task explicitly excludes an item ("except
+     <X>", "other than <X>", "excluding <X>", "not <X>", "but not
+     <X>"), NEVER cite the excluded item in `grounding_refs`, even
+     when reporting OUTCOME_NONE_CLARIFICATION. Scan the task text
+     for excluder keywords BEFORE assembling refs; drop any
+     candidate ref whose name, store_id, or path matches the
+     excluded entity.
 
-     Failure modes:
-       - 2026-05-12 t20: agent answered <COUNT:0> for Vienna excl.
-         Praterstern; cited only the product. Grader required
-         store_vienna_meidling (had a 0-stock inventory row).
-       - 2026-05-12 t19: agent cited store_graz_lend with 0 stock
-         and grader rejected — probably no inventory row for the
-         SKU at that store. Always check the inventory row exists
-         before citing.
+  E. NEGATIVE ANSWERS STILL NEED A REF. A `<NO>` to "Do you have
+     X?" must cite the closest-matching product file you opened
+     while resolving the answer — that file is the evidence the
+     described variant is or isn't present. Citing only /AGENTS.MD
+     is not enough.
 
-  D. EXCLUSION RULE: when the task explicitly excludes an item
-     ("except <X>", "other than <X>", "excluding <X>", "not <X>",
-     "but not <X>") — NEVER cite that excluded item, no matter how
-     relevant it looked during investigation. Even when reporting
-     OUTCOME_NONE_CLARIFICATION, the excluded item must not appear
-     in `grounding_refs`. Scan the task text for these excluder
-     keywords BEFORE assembling your refs; if a candidate ref
-     references the excluded entity (by name, store_id, or path),
-     drop it. Failure mode: PROD t17/t19 cited the excluded store
-     "store_vienna_praterstern" and scored 0.0.
-
-  E. NEGATIVE ANSWERS STILL NEED A REF: "Do you have X?" → `<NO>`
-     answers still need a grounding ref to the closest-matching SKU
-     in the catalogue. The grader knows which SKU corresponds to
-     the question; citing `/AGENTS.MD` alone is not enough. Workflow:
-     read at least one canonical product JSON that the SQL search
-     turned up for the relevant brand/series/model — that JSON is
-     evidence the variant doesn't match, and it's the file the
-     grader expects in refs.
-
-  F. YES/NO TOKEN: yes/no questions REQUIRE `<YES>` or `<NO>` tokens
-     literally in `message`, exactly per /AGENTS.MD. Counting
-     questions require `<COUNT:n>` (digit, not a word) exactly per
-     the task instruction.
+  F. ANSWER TOKENS (from /AGENTS.MD). Yes/no questions REQUIRE
+     `<YES>` or `<NO>` literally in `message`. Counting questions
+     require `<COUNT:n>` (digit, not a word) exactly per the task
+     instruction.
 
 Catalogue / SQL discipline (ECOM-specific):
   - The runtime ships an `exec` interface to small executables in /bin.

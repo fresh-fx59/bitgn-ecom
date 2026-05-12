@@ -156,41 +156,6 @@ def _search_response_to_text(resp: "ecom_pb2.SearchResponse") -> str:
     return _json.dumps(payload, separators=(", ", ": "))
 
 
-# ECOM catalogue files are reachable at multiple paths but the grader
-# pins exactly one canonical form per SKU. The form varies per SKU and
-# per trial — sometimes flat (/proc/catalog/<SKU>.json), sometimes
-# brand- or category-nested. To cover both, when the agent cites a
-# nested catalog path we also send the flat alias.
-_CATALOG_NESTED_RE = re.compile(
-    r"^/proc/catalog/(?:[^/]+/)+([A-Z]{3}-[A-Z0-9]{8}\.json)$"
-)
-
-
-def _expand_catalog_aliases(refs: list[str]) -> list[str]:
-    """For each catalog ref of form `/proc/catalog/<...>/<SKU>.json`,
-    also include the flat form `/proc/catalog/<SKU>.json`. Dedupes
-    while preserving order. Non-catalog refs pass through unchanged.
-
-    Rationale (2026-05-12 PROD evidence): the grader has a fixed
-    canonical path per SKU but it varies between flat and nested,
-    and there's no reliable way for the agent to predict it from
-    `products.path` alone. Submitting both forms lets the grader
-    match whichever it expects without us guessing."""
-    out: list[str] = []
-    seen: set[str] = set()
-    for r in refs:
-        if r not in seen:
-            seen.add(r)
-            out.append(r)
-        m = _CATALOG_NESTED_RE.match(r)
-        if m:
-            flat = f"/proc/catalog/{m.group(1)}"
-            if flat not in seen:
-                seen.add(flat)
-                out.append(flat)
-    return out
-
-
 _FIND_KIND_MAP: Dict[str, int] = {
     "all": ecom_pb2.NodeKind.NODE_KIND_UNSPECIFIED,
     "files": ecom_pb2.NodeKind.NODE_KIND_FILE,
@@ -403,15 +368,10 @@ class EcomAdapter:
     def submit_terminal(self, completion: ReportTaskCompletion) -> ToolResult:
         start = time.monotonic()
         try:
-            # ECOM grader pins one canonical path per SKU, but the form
-            # varies (flat vs brand-nested vs deeply category-nested)
-            # and isn't predictable from products.path alone. Submit
-            # both the agent's chosen ref AND its flat alias so the
-            # grader's exact-string match has both options. Refs the
-            # agent doesn't cite for a given SKU still won't be in the
-            # set, so the "invalid reference" check is unchanged for
-            # off-topic SKUs (those would still be flagged either way).
-            refs = _expand_catalog_aliases(list(completion.grounding_refs))
+            # Pass refs through verbatim. The grader matches exact
+            # absolute paths; any normalization is the LLM's job (rule
+            # A in prompts.py: cite `products.path` verbatim).
+            refs = list(completion.grounding_refs)
             resp = self._runtime.answer(
                 ecom_pb2.AnswerRequest(
                     message=completion.message,
