@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Stub /bin/checkout — local mock returns exit_code=2 (see LocalEcomClient).
+# The real PROD binary mutates basket state; we intentionally make this
+# unable to succeed locally so an agent that DOES try to checkout fails
+# loudly rather than silently "succeeding".
+echo "local /bin/checkout: cart side-effects are snapshot-specific and not emulated" >&2
+exit 2

@@ -1,0 +1,9 @@
+{
+  "basket_id": "basket_001",
+  "customer_id": "cust_001",
+  "status": "active",
+  "store_id": "store_vienna_meidling",
+  "lines": [
+    {"sku": "PWR-1LDO9DMM", "quantity": 8}
+  ]
+}

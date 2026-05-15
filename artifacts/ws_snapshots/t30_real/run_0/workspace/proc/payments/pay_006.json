@@ -1,0 +1,1 @@
+{"id":"pay_006","basket_id":"basket_206","customer_id":"cust_070","store_id":"store_vienna_meidling","amount_cents":93000,"currency":"EUR","status":"requires_3ds_action","created_at":"2021-07-27T14:54:43Z","three_ds":{"status":"3ds-status2","failure_reason":"customer_abandoned","attempts":2,"max_attempts":3}}
