@@ -1,0 +1,10 @@
+{
+  "instruction": "For the last checkoutable basket of marie.schneider+cust779@fastmail.com from my store, please add the largest allowed service_recovery discount.",
+  "context_date": "2026-05-15T17:28:59.369695+00:00",
+  "source": "rebuilt from full_20260515T171653Z on 2026-05-15",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 11 files / 0 dirs from 21 dump records. Window: started_at=2026-05-15T17:28:59.369695+00:00. Trial outcome was unknown with score 0.0; score_detail=['expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED'].",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}
