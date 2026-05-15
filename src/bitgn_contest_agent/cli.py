@@ -669,12 +669,15 @@ def _cmd_run_benchmark(args: argparse.Namespace) -> int:
         # Full benchmark uses the leaderboard flow: each --runs iteration
         # calls StartRun, executes every trial the server hands back,
         # then SubmitRun's the leaderboard entry so it appears in the
-        # dashboard. The run name is the canonical owner/agent handle
-        # fixed by the user (2026-04-11) — the server disambiguates
-        # iterations by run_id, not by name.
+        # dashboard. Format pinned by the user (2026-05-15):
+        #   "@ai_engineer_helper DEV-ECOM1 <commit> <model>"
+        # — owner handle + benchmark identifier + commit short SHA +
+        # model slug, so the dashboard row uniquely identifies the
+        # code revision that produced the run. Iterations are still
+        # disambiguated server-side by run_id, not by name.
         _model_slug = cfg.model.rsplit("/", 1)[-1].replace(":", "-")
         LEADERBOARD_RUN_NAME = (
-            f"aleksei_aksenov-ai_engineer_helper-bitgn-agent-{_model_slug}"
+            f"@ai_engineer_helper DEV-ECOM1 {_git_commit_short()} {_model_slug}"
         )
 
         def tasks_for_iteration(run_index: int) -> List[TaskSpec]:
