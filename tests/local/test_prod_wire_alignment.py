@@ -19,6 +19,9 @@ What we assert (and what we deliberately don't):
   pinned ``text/markdown`` for .MD and ``application/json`` for
   ``.json`` based on the probe; if /AGENTS.MD's content_type drifts,
   the heuristic in ``_content_type_for`` is out of sync.
+  Post-freeze note: ``ExecResponse`` no longer carries a content_type
+  field (reserved in the proto), so exec-shape tests check stdout
+  contents only and assert the field is absent in the serialized JSON.
 - Truncation flag: present iff the response was truncated.
 
 We do NOT assert byte-equal content or sha256 — the fixture files are
@@ -79,21 +82,36 @@ def _expected_keys(d: dict) -> set[str]:
     return set(d.keys())
 
 
-# ---- context -----------------------------------------------------------
+# ---- /bin/id and /bin/date replace the retired context() RPC --------
 
 
-def test_context_matches_prod_shape(prod_shaped_client: LocalEcomClient) -> None:
-    prod = _prod("context.json")
-    local = _to_json(prod_shaped_client.context())
-    assert _expected_keys(prod) <= _expected_keys(local), (
-        f"prod has {_expected_keys(prod) - _expected_keys(local)} that local lacks"
+def test_exec_bin_id_returns_actor_on_stdout(
+    prod_shaped_client: LocalEcomClient,
+) -> None:
+    """Post-freeze prepass uses `exec(/bin/id)` for actor identity. The
+    runtime returns a one-line descriptor on stdout — no `content_type`
+    (reserved in the proto), no extra metadata."""
+    local = _to_json(prod_shaped_client.exec(
+        _req(path="/bin/id", args=[], stdin=""),
+    ))
+    # ExecResponse on success: stdout populated, exit_code default-omitted.
+    assert local.get("stdout"), "local /bin/id should emit a descriptor"
+    assert "content_type" not in local, (
+        "post-freeze ExecResponse no longer carries content_type "
+        "(reserved field) — local must match"
     )
-    # unix_time is int64 → string in JSON; both must follow that rule.
-    assert isinstance(local["unix_time"], str), local
-    assert isinstance(prod["unix_time"], str), prod
-    # Both should be ISO8601 UTC with the trailing Z.
-    assert local["time"].endswith("Z")
-    assert prod["time"].endswith("Z")
+    assert "truncated" not in local
+
+
+def test_exec_bin_date_returns_iso_timestamp(
+    prod_shaped_client: LocalEcomClient,
+) -> None:
+    """Post-freeze prepass anchors temporal arithmetic on
+    `exec(/bin/date)` stdout. The ISO8601 stamp must end with `Z`."""
+    local = _to_json(prod_shaped_client.exec(
+        _req(path="/bin/date", args=[], stdin=""),
+    ))
+    assert local.get("stdout", "").strip().endswith("Z")
 
 
 # ---- tree --------------------------------------------------------------
@@ -306,34 +324,32 @@ def _seed_catalogue(workspace: Path) -> None:
         conn.close()
 
 
-def test_exec_sql_select_returns_csv_content_type(tmp_path: Path) -> None:
-    """PROD `/bin/sql` on a SELECT emits ``content_type: text/csv`` and
-    a comma-separated body with header row (`n\\n10\\n` for a single-
-    column COUNT). The local mock must use the same content_type so the
-    agent's prompt heuristics keyed on it remain consistent."""
+def test_exec_sql_select_returns_csv_stdout(tmp_path: Path) -> None:
+    """Post-freeze `/bin/sql` SELECT: CSV body on stdout (`n\\n10\\n`
+    for a single-column COUNT). `content_type` is reserved on
+    ExecResponse, so the local mock must NOT emit it — wire-shape match
+    is now stdout-only."""
     _seed_catalogue(tmp_path)
     client = LocalEcomClient(tmp_path)
-    prod = _prod("exec_sql_count_products.json")
     local = _to_json(client.exec(_req(
         path="/bin/sql", args=[],
         stdin="SELECT count(*) AS n FROM products;",
     )))
-    assert prod["content_type"] == "text/csv"
-    assert local["content_type"] == "text/csv"
-    # PROD body shape: header + value lines, newline terminated.
-    assert prod["stdout"] == "n\n10\n"
+    assert "content_type" not in local, (
+        "post-freeze ExecResponse must omit the reserved content_type field"
+    )
     assert local["stdout"] == "n\n10\n"
 
 
-def test_exec_sql_schema_returns_plain_text(tmp_path: Path) -> None:
+def test_exec_sql_schema_returns_ddl_stdout(tmp_path: Path) -> None:
+    """`.schema` returns raw DDL on stdout. content_type stays absent
+    (reserved field)."""
     _seed_catalogue(tmp_path)
     client = LocalEcomClient(tmp_path)
-    prod = _prod("exec_sql_schema.json")
     local = _to_json(client.exec(_req(
         path="/bin/sql", args=[], stdin=".schema",
     )))
-    assert prod["content_type"] == "text/plain"
-    assert local["content_type"] == "text/plain"
+    assert "content_type" not in local
     assert "CREATE TABLE" in local["stdout"]
 
 

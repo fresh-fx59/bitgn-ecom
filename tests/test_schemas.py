@@ -10,7 +10,6 @@ from bitgn_contest_agent import schemas
 from bitgn_contest_agent.schemas import (
     NextStep,
     REQ_MODELS,
-    Req_Context,
     Req_Delete,
     Req_Exec,
     Req_Find,
@@ -57,7 +56,6 @@ def _sample_function_payloads() -> list[dict[str, Any]]:
             "args": [],
             "stdin": "SELECT count(*) FROM orders;",
         },
-        {"tool": "context"},
         {
             "tool": "report_completion",
             "message": "done",

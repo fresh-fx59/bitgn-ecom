@@ -10,12 +10,14 @@ What this script does (one trial, ~30s, costs 1 leaderboard slot):
 
   1. start_run + start_trial against bitgn/ecom1-dev
   2. Issue every ECOM RPC at least once:
-       context, tree (level 1, level 2, level 0),
+       tree (level 1, level 2, level 0),
        list (root and a known sub),
        read (/AGENTS.MD with and without line slicing),
        find (kind=all / files / dirs),
        search (regex with limit), stat (file + dir),
-       exec /bin/sql (".schema" and a SELECT against products)
+       exec /bin/sql (".schema" and a SELECT against products),
+       exec /bin/id, exec /bin/date, exec /bin/checkout
+       (post-freeze replacements for the retired context() RPC)
   3. Serialize each response with MessageToDict and save under
        artifacts/harness_align/prod/<op>__<descr>.json
   4. submit a deliberate OUTCOME_NONE_CLARIFICATION answer with a
@@ -110,12 +112,7 @@ def main() -> int:
 
     manifest: list[dict] = []
 
-    # 2a. context
-    manifest.append(_try("context", lambda: _save(
-        "context", vm.context(ecom_pb2.ContextRequest()),
-    )))
-
-    # 2b. tree at root with several level caps
+    # 2a. tree at root with several level caps
     for level in (0, 1, 2):
         manifest.append(_try(f"tree_root_level{level}", lambda l=level: _save(
             f"tree_root_level{l}",
@@ -192,6 +189,22 @@ def main() -> int:
         vm.exec(ecom_pb2.ExecRequest(
             path="/bin/does-not-exist", args=[], stdin="",
         )),
+    )))
+
+    # 2h-bis. exec /bin/id, /bin/date, /bin/checkout — post-freeze
+    # replacements for the retired context() RPC. /bin/checkout is
+    # probed with no args to capture its `--help`-shaped exit.
+    manifest.append(_try("exec_id", lambda: _save(
+        "exec_id",
+        vm.exec(ecom_pb2.ExecRequest(path="/bin/id", args=[], stdin="")),
+    )))
+    manifest.append(_try("exec_date", lambda: _save(
+        "exec_date",
+        vm.exec(ecom_pb2.ExecRequest(path="/bin/date", args=[], stdin="")),
+    )))
+    manifest.append(_try("exec_checkout", lambda: _save(
+        "exec_checkout",
+        vm.exec(ecom_pb2.ExecRequest(path="/bin/checkout", args=[], stdin="")),
     )))
 
     # 2i. capture proc layout (we hit this namespace in failures)

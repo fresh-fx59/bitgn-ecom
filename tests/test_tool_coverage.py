@@ -55,7 +55,6 @@ def _req_model_rpc_names() -> set[str]:
         "Req_Search": "SearchRequest",
         "Req_Stat": "StatRequest",
         "Req_Exec": "ExecRequest",
-        "Req_Context": "ContextRequest",
     }
     names: set[str] = set()
     for model in REQ_MODELS:

@@ -16,8 +16,8 @@ dependencies = [
   # (the same pins used by sample-agents/ecom-py). 0.10.x is the first
   # SDK release that ships the bitgn.vm.ecom module; the 0.9.x pin used
   # by the PAC1 agent only carries bitgn.vm.pcm.
-  "bitgn-api-connectrpc-python==0.10.0.1.20260508124000+434a5d933432",
-  "bitgn-api-protocolbuffers-python==34.1.0.1.20260508124000+434a5d933432",
+  "bitgn-api-connectrpc-python==0.10.0.1.20260515140309+1f9ca1046f73",
+  "bitgn-api-protocolbuffers-python==34.1.0.1.20260515140309+1f9ca1046f73",
   "connectrpc",
 ]
 

@@ -123,7 +123,7 @@ def _envelope_schema_fragment() -> Dict[str, Any]:
         },
         "identity_verified": {
             "type": "boolean",
-            "description": "True only after AGENTS.md and context() have been read.",
+            "description": "True only after AGENTS.md, /bin/id, and /bin/date have been read.",
         },
         "observation": {
             "type": "string",

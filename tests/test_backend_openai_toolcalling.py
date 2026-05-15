@@ -73,7 +73,7 @@ def test_tool_catalog_includes_ecom_tool_surface() -> None:
     names = {t["function"]["name"] for t in cat}
     expected = {
         "read", "write", "delete",
-        "list", "tree", "find", "search", "stat", "exec", "context",
+        "list", "tree", "find", "search", "stat", "exec",
         "report_completion",
     }
     assert names == expected

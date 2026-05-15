@@ -6,7 +6,7 @@ continuity with the PAC1 lineage (so existing dashboards and
 `jq` queries keep working). The wrapped runtime is ECOM.
 
 Motivation: the BitGN dashboard's "steps" metric counts runtime
-ops (list/read/tree/find/search/stat/exec/context/write/...), not LLM
+ops (list/read/tree/find/search/stat/exec/write/...), not LLM
 iterations or high-level tool calls. Until we logged this layer,
 reconciling the dashboard against a local trace required shuttling
 screenshots or pastebins. With this wrapper, the local JSONL trace
@@ -210,7 +210,6 @@ _REQUEST_PATH_ATTR: dict[type, tuple[str, Optional[str]]] = {
     ecom_pb2.SearchRequest: ("search", "root"),
     ecom_pb2.StatRequest: ("stat", "path"),
     ecom_pb2.ExecRequest: ("exec", "path"),
-    ecom_pb2.ContextRequest: ("context", None),
     ecom_pb2.AnswerRequest: ("answer", None),
 }
 
@@ -290,32 +289,6 @@ class TracingEcomClient:
             retry_req.pattern = titled
         retry_resp = self._traced(retry_req, self._runtime.search)
         return retry_resp if list(getattr(retry_resp, "matches", []) or []) else resp
-
-    def context(self, req: "ecom_pb2.ContextRequest | None" = None) -> Any:
-        # Local emulation may call client.context() with no args. Prod
-        # adapter passes ecom_pb2.ContextRequest(). Pass req as-is when
-        # set, otherwise invoke the no-arg form so both backends work.
-        if req is None:
-            start = time.monotonic()
-            try:
-                resp = self._runtime.context()
-            except BaseException as exc:
-                wall_ms = int((time.monotonic() - start) * 1000)
-                self._emit(op="context", path=None, bytes_=0,
-                           wall_ms=wall_ms, ok=False,
-                           error_code=_classify_exception(exc))
-                _dump_raw("context", None, None, ok=False,
-                          wall_ms=wall_ms,
-                          error_code=_classify_exception(exc))
-                raise
-            wall_ms = int((time.monotonic() - start) * 1000)
-            self._emit(op="context", path=None,
-                       bytes_=_response_bytes(resp), wall_ms=wall_ms,
-                       ok=True, error_code=None)
-            _dump_raw("context", None, resp, ok=True,
-                      wall_ms=wall_ms, error_code=None)
-            return resp
-        return self._traced(req, self._runtime.context)
 
     def answer(self, req: "ecom_pb2.AnswerRequest") -> Any:
         return self._traced(req, self._runtime.answer)

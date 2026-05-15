@@ -8,9 +8,11 @@ ECOM tool surface (vs the PAC1 lineage this is forked from):
 
   Added:    stat, exec
   Removed:  mkdir, move (not part of the ECOM RPC surface)
+  Removed:  context (retired at the 2026-05-15 API freeze — actor
+            identity moved to exec(/bin/id), trial date to exec(/bin/date))
   Removed:  preflight_schema, preflight_semantic_index
             (workspace-schema/semantic-index discovery was a vault-only
-            concept; ECOM tasks ground via tree+context+/AGENTS.MD)
+            concept; ECOM tasks ground via tree+/AGENTS.MD+/bin/id+/bin/date)
   Adjusted: read gains start_line / end_line / number (line slicing)
             list keys on `path` (was `name`)
             tree gains `level` cap
@@ -98,8 +100,8 @@ class Req_Exec(BaseModel):
     path: NonEmptyStr = Field(
         description=(
             "Absolute path of the executable (e.g. `/bin/sql` for catalogue "
-            "queries). Provided by the ECOM runtime — see context() / "
-            "/AGENTS.MD for the live inventory."
+            "queries, `/bin/id` for actor identity, `/bin/date` for the "
+            "current trial date). See /AGENTS.MD for the live inventory."
         ),
     )
     args: List[str] = Field(default_factory=list)
@@ -110,10 +112,6 @@ class Req_Exec(BaseModel):
             "SQL query body."
         ),
     )
-
-
-class Req_Context(BaseModel):
-    tool: Literal["context"]
 
 
 class ReportTaskCompletion(BaseModel):
@@ -143,7 +141,6 @@ FunctionUnion = Annotated[
         Req_Search,
         Req_Stat,
         Req_Exec,
-        Req_Context,
         ReportTaskCompletion,
     ],
     Field(discriminator="tool"),
@@ -158,7 +155,6 @@ ReadOnlyFunctionUnion = Annotated[
         Req_Find,
         Req_Search,
         Req_Stat,
-        Req_Context,
     ],
     Field(discriminator="tool"),
 ]
@@ -171,7 +167,6 @@ READ_ONLY_REQ_TYPES: tuple[type[BaseModel], ...] = (
     Req_Find,
     Req_Search,
     Req_Stat,
-    Req_Context,
 )
 
 
@@ -195,7 +190,7 @@ class NextStep(BaseModel):
             max_length=8,
             description=(
                 "Optional batch of additional read-only ops "
-                "(read/list/tree/find/search/stat/context) dispatched in "
+                "(read/list/tree/find/search/stat) dispatched in "
                 "parallel with `function`. Only honored when `function` "
                 "is itself a read-only op. Use this to collapse multiple "
                 "independent reads into a single LLM turn — every entry "
@@ -218,7 +213,6 @@ REQ_MODELS: tuple[type[BaseModel], ...] = (
     Req_Search,
     Req_Stat,
     Req_Exec,
-    Req_Context,
 )
 
 

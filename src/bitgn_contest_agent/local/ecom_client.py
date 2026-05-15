@@ -1,8 +1,12 @@
 """Filesystem-backed ECOM mock — serves workspace snapshots as if they
-were a live BitGN ECOM sandbox. Mirrors the public ECOM RPC surface:
+were a live BitGN ECOM sandbox. Mirrors the public ECOM RPC surface
+as of the 2026-05-15 API freeze:
 
-    tree, list, read, search, find, stat, exec, context,
+    tree, list, read, search, find, stat, exec,
     write, delete, answer
+
+The `context()` RPC was retired at the freeze; actor identity is now
+exposed via `exec(/bin/id)` and the trial clock via `exec(/bin/date)`.
 
 This enables offline replay of tasks against local workspace snapshots
 without connecting to the BitGN server, and is the fixture for unit
@@ -41,7 +45,6 @@ Heuristic toggles (for offline replay flexibility):
 """
 from __future__ import annotations
 
-import calendar
 import csv
 import hashlib
 import io
@@ -86,6 +89,9 @@ _CONTENT_TYPE_BY_EXT = {
 _SQLITE_EXTS = {".db", ".sqlite", ".sqlite3"}
 
 _SQL_BIN_PATHS = frozenset({"/bin/sql", "bin/sql"})
+_ID_BIN_PATHS = frozenset({"/bin/id", "bin/id"})
+_DATE_BIN_PATHS = frozenset({"/bin/date", "bin/date"})
+_CHECKOUT_BIN_PATHS = frozenset({"/bin/checkout", "bin/checkout"})
 
 
 def _content_type_for(path: Path) -> str:
@@ -185,11 +191,14 @@ class LocalEcomClient:
         Filesystem root that emulates the ECOM workspace. The runtime's
         view of "/" maps to this directory.
     context_date:
-        Optional ISO8601 string used as the value ``context()`` returns.
-        Defaults to ``datetime.now(UTC)``. PROD ContextResponse encodes
-        ``unix_time`` as int64 — MessageToJson renders int64 as a JSON
-        string, so callers reading via ``_response_to_text`` see
-        ``"unix_time": "<seconds>"`` exactly like PROD.
+        Optional ISO8601 string surfaced by ``exec(/bin/date)`` so the
+        agent can anchor relative-date arithmetic to a deterministic
+        trial clock. Defaults to ``datetime.now(UTC)``. Replaces the
+        retired ``context()`` RPC.
+    actor_id:
+        Optional descriptor surfaced by ``exec(/bin/id)`` (one line of
+        text). Defaults to ``agent`` so prepass output is non-empty;
+        override per snapshot to emulate role-scoped trials.
     sql_db_paths:
         Optional iterable of catalogue SQLite databases (relative to
         workspace_root) that ``/bin/sql`` should attach. If None,
@@ -206,6 +215,7 @@ class LocalEcomClient:
         workspace_root: str | Path,
         context_date: str | None = None,
         sql_db_paths: Optional[Iterable[str | Path]] = None,
+        actor_id: str = "agent",
     ) -> None:
         self._root = Path(workspace_root).resolve()
         if not self._root.exists():
@@ -213,6 +223,7 @@ class LocalEcomClient:
         self._context_date = context_date or datetime.now(timezone.utc).strftime(
             "%Y-%m-%dT%H:%M:%SZ"
         )
+        self._actor_id = actor_id
         sql_dbs = self._resolve_sql_dbs(sql_db_paths)
         self._sql_dbs = _CatalogueAccess(
             primary=sql_dbs[0] if sql_dbs else None,
@@ -441,37 +452,95 @@ class LocalEcomClient:
         return resp
 
     def exec(self, req: Any) -> "ecom_pb2.ExecResponse":
-        """Local exec — supports /bin/sql against attached SQLite DBs.
+        """Local exec — supports the post-freeze /bin inventory:
 
-        For any other path returns exit_code=127 with a stderr
-        explaining the local limitation. PROD ECOM exposes a richer
-        /bin inventory (workspace-specific scripts); reproducing those
+          /bin/sql       — query attached SQLite catalogues (CSV stdout)
+          /bin/id        — print the actor descriptor
+          /bin/date      — print the trial-anchored ISO datetime
+          /bin/checkout  — sketch of the shopping-cart utility; the
+                           real PROD binary handles cart workflows.
+                           Local replay returns exit_code=2 with a
+                           stderr hint, since cart side-effects are
+                           snapshot-specific.
+
+        Any other path returns exit_code=127 with a stderr explaining
+        the local limitation. PROD ECOM exposes a richer /bin
+        inventory (workspace-specific scripts); reproducing those
         locally is out of scope."""
         path = getattr(req, "path", "")
         args = list(getattr(req, "args", []) or [])
         stdin = getattr(req, "stdin", "") or ""
         if path in _SQL_BIN_PATHS:
             return self._exec_sql(args=args, stdin=stdin)
+        if path in _ID_BIN_PATHS:
+            return self._exec_id()
+        if path in _DATE_BIN_PATHS:
+            return self._exec_date()
+        if path in _CHECKOUT_BIN_PATHS:
+            return self._exec_checkout(args=args, stdin=stdin)
 
         self.ops_log.append({
             "op": "exec", "path": path, "args": args, "exit_code": 127,
         })
         return ecom_pb2.ExecResponse(
             exit_code=127,
-            content_type="text/plain",
             stderr=(
                 f"local mock: exec {path!r} not supported. "
-                "Only /bin/sql is implemented. Provide a SQLite "
-                "catalogue in the workspace to query via SQL, or run "
-                "this task against a real ECOM VM."
+                "Implemented bins: /bin/sql, /bin/id, /bin/date, "
+                "/bin/checkout. Provide a SQLite catalogue in the "
+                "workspace to query via SQL, or run this task against "
+                "a real ECOM VM."
+            ),
+        )
+
+    def _exec_id(self) -> "ecom_pb2.ExecResponse":
+        """Mirror PROD `/bin/id`: a single newline-terminated descriptor
+        line on stdout (`uid=...(name) ...` shape). Local replay keeps
+        the line minimal — overridden snapshots set ``actor_id`` at
+        construction to emulate role-scoped trials."""
+        stdout = f"{self._actor_id}\n"
+        self.ops_log.append({"op": "exec", "path": "/bin/id", "exit_code": 0})
+        return ecom_pb2.ExecResponse(exit_code=0, stdout=stdout)
+
+    def _exec_date(self) -> "ecom_pb2.ExecResponse":
+        """Mirror PROD `/bin/date`: ISO8601 UTC stamp on stdout. The
+        value comes from the constructor-supplied ``context_date`` so
+        replay is deterministic — same role as the retired
+        ``context()`` RPC."""
+        stdout = f"{self._context_date}\n"
+        self.ops_log.append({"op": "exec", "path": "/bin/date", "exit_code": 0})
+        return ecom_pb2.ExecResponse(exit_code=0, stdout=stdout)
+
+    def _exec_checkout(
+        self, *, args: list[str], stdin: str,
+    ) -> "ecom_pb2.ExecResponse":
+        """Local stub for `/bin/checkout`. The real PROD binary handles
+        cart workflows (3DS reverification, cart inspection, etc.);
+        reproducing every flow locally is out of scope. We return
+        exit_code=2 with a stderr telling the agent to inspect the
+        cart files directly under the workspace tree instead."""
+        self.ops_log.append({
+            "op": "exec", "path": "/bin/checkout", "args": args,
+            "exit_code": 2,
+        })
+        return ecom_pb2.ExecResponse(
+            exit_code=2,
+            stderr=(
+                "local mock: /bin/checkout side-effects are snapshot-"
+                "specific and not emulated. Inspect cart entities "
+                "directly via list/read against the workspace."
             ),
         )
 
     def _exec_sql(self, *, args: list[str], stdin: str) -> "ecom_pb2.ExecResponse":
         """Run the stdin SQL body against the workspace's SQLite
-        catalogues. Supports ``.schema`` for DDL inspection (matches
-        PROD content_type=text/plain) and arbitrary SELECT/UPDATE/
-        INSERT via sqlite3 (content_type=text/csv).
+        catalogues. Supports ``.schema`` for DDL inspection and
+        arbitrary SELECT/UPDATE/INSERT via sqlite3.
+
+        Post-freeze ``ExecResponse`` no longer carries a content_type
+        field (reserved in the proto). The CSV-vs-plain-text
+        distinction now lives only in stdout shape — CSV bodies start
+        with a column-header row, ``.schema`` returns raw DDL.
 
         Multiple catalogue files are attached as ``db1``/``db2``/...
         so a query can join across them without the agent needing to
@@ -479,7 +548,6 @@ class LocalEcomClient:
         if not self._sql_dbs.primary:
             return ecom_pb2.ExecResponse(
                 exit_code=2,
-                content_type="text/plain",
                 stderr=(
                     "local /bin/sql: no SQLite catalogues found in this "
                     "workspace. Drop a *.db or *.sqlite file under the "
@@ -491,7 +559,6 @@ class LocalEcomClient:
         if not body:
             return ecom_pb2.ExecResponse(
                 exit_code=2,
-                content_type="text/plain",
                 stderr="local /bin/sql: empty SQL body on stdin",
             )
 
@@ -515,9 +582,7 @@ class LocalEcomClient:
                     "op": "exec", "path": "/bin/sql", "args": args,
                     "exit_code": 0, "schema": True,
                 })
-                return ecom_pb2.ExecResponse(
-                    exit_code=0, content_type="text/plain", stdout=stdout,
-                )
+                return ecom_pb2.ExecResponse(exit_code=0, stdout=stdout)
 
             cursor = conn.execute(body)
             rows = cursor.fetchall()
@@ -530,11 +595,7 @@ class LocalEcomClient:
                 "op": "exec", "path": "/bin/sql", "args": args,
                 "rows": len(rows), "exit_code": 0,
             })
-            return ecom_pb2.ExecResponse(
-                exit_code=0,
-                content_type="text/csv",
-                stdout=stdout,
-            )
+            return ecom_pb2.ExecResponse(exit_code=0, stdout=stdout)
         except sqlite3.Error as exc:
             self.ops_log.append({
                 "op": "exec", "path": "/bin/sql", "args": args,
@@ -542,7 +603,6 @@ class LocalEcomClient:
             })
             return ecom_pb2.ExecResponse(
                 exit_code=1,
-                content_type="text/plain",
                 stderr=f"sqlite3 error: {exc}",
             )
         finally:
@@ -551,16 +611,6 @@ class LocalEcomClient:
                     conn.close()
                 except Exception:
                     pass
-
-    def context(self, req: Any = None) -> "ecom_pb2.ContextResponse":
-        time_str = self._context_date
-        try:
-            dt = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
-            unix_time = int(calendar.timegm(dt.timetuple()))
-        except (ValueError, TypeError):
-            unix_time = 0
-        self.ops_log.append({"op": "context"})
-        return ecom_pb2.ContextResponse(unix_time=unix_time, time=time_str)
 
     def write(self, req: Any) -> "ecom_pb2.WriteResponse":
         path = getattr(req, "path", "")

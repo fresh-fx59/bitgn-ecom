@@ -206,8 +206,9 @@ def test_exec_sql_count_orders(fixture_workspace: Path) -> None:
 
 def test_exec_sql_join_orders_customers(fixture_workspace: Path) -> None:
     """Cross-table join — proves the catalogue exposes both tables and
-    the result includes named columns in the header row. PROD /bin/sql
-    returns CSV (content_type=text/csv); the local mock matches."""
+    the result includes named columns in the header row. Post-freeze
+    ExecResponse no longer carries content_type (reserved); CSV-vs-DDL
+    distinction now lives in stdout shape only."""
     client = LocalEcomClient(fixture_workspace)
     resp = client.exec(_req(
         path="/bin/sql", args=[],
@@ -219,7 +220,6 @@ def test_exec_sql_join_orders_customers(fixture_workspace: Path) -> None:
         ),
     ))
     assert resp.exit_code == 0
-    assert resp.content_type == "text/csv"
     assert "name,total_cents" in resp.stdout
     # Acme Co paid: 4500 + 1200 = 5700; Globex paid: 3300; Pimoroni paid: 200.
     assert "5700" in resp.stdout
@@ -249,13 +249,29 @@ def test_exec_unknown_path_returns_127(fixture_workspace: Path) -> None:
 # ---- context, write, delete -------------------------------------------
 
 
-def test_context_uses_supplied_date(fixture_workspace: Path) -> None:
+def test_exec_date_uses_supplied_date(fixture_workspace: Path) -> None:
+    """Post-freeze: trial clock surfaces via exec(/bin/date), not the
+    retired context() RPC. The supplied ISO timestamp must round-trip
+    on stdout so the prepass can anchor relative-date arithmetic."""
+    from types import SimpleNamespace
+
     client = LocalEcomClient(
         fixture_workspace, context_date="2026-05-08T12:00:00Z",
     )
-    resp = client.context()
-    assert resp.time == "2026-05-08T12:00:00Z"
-    assert resp.unix_time > 0
+    resp = client.exec(SimpleNamespace(path="/bin/date", args=[], stdin=""))
+    assert resp.exit_code == 0
+    assert "2026-05-08T12:00:00Z" in resp.stdout
+
+
+def test_exec_id_uses_supplied_actor(fixture_workspace: Path) -> None:
+    """`/bin/id` replaces the actor portion of the retired context()
+    payload — one-line descriptor on stdout."""
+    from types import SimpleNamespace
+
+    client = LocalEcomClient(fixture_workspace, actor_id="manager")
+    resp = client.exec(SimpleNamespace(path="/bin/id", args=[], stdin=""))
+    assert resp.exit_code == 0
+    assert "manager" in resp.stdout
 
 
 def test_write_then_read_round_trip(fixture_workspace: Path) -> None:

@@ -30,7 +30,6 @@ from bitgn.vm.ecom.ecom_connect import EcomRuntimeClientSync
 from bitgn_contest_agent.schemas import (
     NextStep,  # noqa: F401 — used by external type hints
     ReportTaskCompletion,
-    Req_Context,
     Req_Delete,
     Req_Exec,
     Req_Find,
@@ -173,18 +172,7 @@ _OUTCOME_MAP: Dict[str, int] = {
 
 
 def _build_write_request(req: Req_Write) -> "ecom_pb2.WriteRequest":
-    """Construct a WriteRequest, mirroring the sample's belt-and-suspenders
-    around field-2 naming drift.
-
-    Some published SDK pins briefly named WriteRequest's field 2
-    `content_type` before settling on `content`. The sample mirrors the
-    body to whichever name the loaded descriptor exposes. We replicate
-    that here so a stale wheel doesn't silently drop the body.
-    """
-    kwargs = {"path": req.path, "content": req.content}
-    if "content_type" in ecom_pb2.WriteRequest.DESCRIPTOR.fields_by_name:
-        kwargs["content_type"] = req.content
-    return ecom_pb2.WriteRequest(**kwargs)
+    return ecom_pb2.WriteRequest(path=req.path, content=req.content)
 
 
 class EcomAdapter:
@@ -350,9 +338,6 @@ class EcomAdapter:
                     )
                 )
                 return self._finish(start, resp, refs=())
-            if isinstance(req, Req_Context):
-                resp = self._runtime.context(ecom_pb2.ContextRequest())
-                return self._finish(start, resp, refs=())
             raise TypeError(f"unsupported request type: {type(req).__name__}")
         except Exception as exc:
             wall_ms = int((time.monotonic() - start) * 1000)
@@ -394,18 +379,19 @@ class EcomAdapter:
     def run_prepass(self, *, session: Any, trace_writer: Any) -> PrepassResult:
         """Best-effort identity bootstrap.
 
-        Attempts tree(/, level=2), read(/AGENTS.MD), context(). Each
-        failure is recorded and proceeds to the next call —
-        identity_loaded flips true on ANY success. Per §1 the session
-        is task-local, and the trace writer captures every attempt for
-        the analyzer.
+        Attempts tree(/, level=2), read(/AGENTS.MD), exec(/bin/id), and
+        exec(/bin/date). Each failure is recorded and proceeds to the
+        next call — identity_loaded flips true on ANY success. Per §1
+        the session is task-local, and the trace writer captures every
+        attempt for the analyzer.
 
-        ECOM port note: the PAC1 prepass also ran preflight_schema and
-        preflight_semantic_index to discover an Obsidian-vault layout
-        (inbox/finance/projects roots, entity index). ECOM has no such
-        structure; the runtime publishes its file inventory via
-        context() and its tool inventory via /AGENTS.MD, so the prepass
-        is now a flat fan-out of the three universal bootstrap calls.
+        ECOM port note: prior to the 2026-05-15 API freeze the runtime
+        exposed a `context()` RPC that returned actor identity + the
+        current unix time. The freeze retired `context()` and moved
+        those signals into ordinary executables: `/bin/id` for the
+        actor descriptor and `/bin/date` for the trial-anchored clock.
+        Both are fanned-out in parallel alongside the workspace tree
+        and the rulebook read.
         """
         from bitgn_contest_agent.adapter.ecom_tracing import ecom_origin
         from bitgn_contest_agent.preflight.schema import (
@@ -419,7 +405,8 @@ class EcomAdapter:
         pre_cmds = [
             ("tree", Req_Tree(tool="tree", root="/", level=2)),
             ("read_agents_md", Req_Read(tool="read", path="/AGENTS.MD")),
-            ("context", Req_Context(tool="context")),
+            ("exec_id", Req_Exec(tool="exec", path="/bin/id")),
+            ("exec_date", Req_Exec(tool="exec", path="/bin/date")),
         ]
 
         def _dispatch_with_origin(req: Any) -> ToolResult:
@@ -458,10 +445,19 @@ class EcomAdapter:
                             "below is the rulebook:\n"
                             f"{result.content}"
                         )
-                    if label == "context" and result.content:
+                    if label == "exec_id" and result.content:
                         bootstrap_content.append(
-                            "PRE-PASS context() — already executed, do NOT "
-                            "re-run:\n"
+                            "PRE-PASS exec(path=\"/bin/id\") — already "
+                            "executed, do NOT re-run. Actor identity:\n"
+                            f"{result.content}"
+                        )
+                    if label == "exec_date" and result.content:
+                        bootstrap_content.append(
+                            "PRE-PASS exec(path=\"/bin/date\") — already "
+                            "executed, do NOT re-run. Trial date (use this "
+                            "as the temporal anchor for any relative-date "
+                            "arithmetic — `today + delta`, `N days ago`, "
+                            "etc. — NOT a stored timestamp from a file):\n"
                             f"{result.content}"
                         )
                 trace_writer.append_prepass(
