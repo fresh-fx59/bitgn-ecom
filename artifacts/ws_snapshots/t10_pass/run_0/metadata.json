@@ -1,0 +1,10 @@
+{
+  "instruction": "How many catalogue products are Work Jacket? Answer with '<COUNT:n>' exactly.",
+  "context_date": "2026-05-15T17:19:30.702623+00:00",
+  "source": "rebuilt from full_20260515T171653Z on 2026-05-15",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 4 files / 0 dirs from 11 dump records. Window: started_at=2026-05-15T17:19:30.702623+00:00. Trial outcome was unknown with score 1.0; score_detail=[].",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

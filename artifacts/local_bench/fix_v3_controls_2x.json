@@ -1,0 +1,122 @@
+{
+  "ts": "20260515T190034Z",
+  "model": "gpt-5.4",
+  "results": [
+    {
+      "snapshot": "t01_pass",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/FST-1KPF96UD.json"
+      ],
+      "message": "<YES> The catalogue contains a matching product: Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw, and its screw type is listed as \"drywall screw.\"",
+      "steps": 4,
+      "wall_sec": 96.7851227382198
+    },
+    {
+      "snapshot": "t01_pass",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/FST-1KPF96UD.json"
+      ],
+      "message": "<YES> The catalogue includes this item: Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw, and its screw type is listed as \"drywall screw.\"",
+      "steps": 4,
+      "wall_sec": 29.155092207714915
+    },
+    {
+      "snapshot": "t10_pass",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Mascot/WRK-1A7JZ7P3.json",
+        "/proc/catalog/Mascot/WRK-3JV3G2YY.json",
+        "/proc/catalog/Mascot/WRK-3QX06WWQ.json"
+      ],
+      "message": "<COUNT:3>",
+      "steps": 6,
+      "wall_sec": 37.55992359854281
+    },
+    {
+      "snapshot": "t10_pass",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Mascot/WRK-1A7JZ7P3.json",
+        "/proc/catalog/Mascot/WRK-3JV3G2YY.json",
+        "/proc/catalog/Mascot/WRK-3QX06WWQ.json"
+      ],
+      "message": "<COUNT:3>",
+      "steps": 5,
+      "wall_sec": 32.116709319874644
+    },
+    {
+      "snapshot": "t17_pass",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog/FST-1KPF96UD.json",
+        "/proc/stores/store_vienna_praterstern.json"
+      ],
+      "message": "I can identify the requested product, but I can\u2019t determine how many you can buy in Vienna today without guessing. The matching product is the Heco drywall screw in /proc/catalog/FST-1KPF96UD.json, and after excluding Meidling the remaining in-scope Vienna store is PowerTool Vienna Praterstern. However, this workspace exposes no readable inventory quantities for that SKU/store combination, and the SQL inventory projection is unavailable here, so a numeric total can\u2019t be established from evidence.",
+      "steps": 7,
+      "wall_sec": 131.76330626942217
+    },
+    {
+      "snapshot": "t17_pass",
+      "run_index": 1,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog/FST-1KPF96UD.json",
+        "/proc/stores/store_vienna_praterstern.json"
+      ],
+      "message": "I can identify the requested product and the only in-scope Vienna store, but I can\u2019t determine how many you can buy today because this workspace has no inventory/availability data for that SKU at PowerTool Vienna Praterstern. The matching product is in /proc/catalog/FST-1KPF96UD.json, and the remaining Vienna store after your exclusion is /proc/stores/store_vienna_praterstern.json.",
+      "steps": 6,
+      "wall_sec": 60.35309350118041
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t01_pass": {
+        "passed": 2,
+        "runs": 2,
+        "rate": 1.0,
+        "fail_details": []
+      },
+      "t10_pass": {
+        "passed": 2,
+        "runs": 2,
+        "rate": 1.0,
+        "fail_details": []
+      },
+      "t17_pass": {
+        "passed": 0,
+        "runs": 2,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 4,
+      "runs": 6,
+      "rate": 0.6666666666666666
+    }
+  }
+}

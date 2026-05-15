@@ -1,0 +1,48 @@
+{
+  "ts": "20260515T190738Z",
+  "model": "gpt-5.4",
+  "results": [
+    {
+      "snapshot": "t01_pass",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog/FST-1KPF96UD.json"
+      ],
+      "message": "<YES> The catalogue includes a Heco product in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line with screw type \"drywall screw\": SKU FST-1KPF96UD, named \"Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw drywall screw 6mm 120mm pozidriv 100pc.\"",
+      "steps": 4,
+      "wall_sec": 38.006505995988846
+    },
+    {
+      "snapshot": "t01_pass",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/FST-1KPF96UD.json"
+      ],
+      "message": "<YES> The catalogue has a matching product: Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw, and its screw type is listed as \"drywall screw.\"",
+      "steps": 4,
+      "wall_sec": 58.58211439754814
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t01_pass": {
+        "passed": 2,
+        "runs": 2,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 2,
+      "runs": 2,
+      "rate": 1.0
+    }
+  }
+}

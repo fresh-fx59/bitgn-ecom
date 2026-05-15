@@ -1,0 +1,51 @@
+{
+  "ts": "20260515T190740Z",
+  "model": "gpt-5.4",
+  "results": [
+    {
+      "snapshot": "t10_pass",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Mascot/WRK-1A7JZ7P3.json",
+        "/proc/catalog/Mascot/WRK-3JV3G2YY.json",
+        "/proc/catalog/Mascot/WRK-3QX06WWQ.json"
+      ],
+      "message": "<COUNT:3>",
+      "steps": 5,
+      "wall_sec": 33.85234935954213
+    },
+    {
+      "snapshot": "t10_pass",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Mascot/WRK-1A7JZ7P3.json",
+        "/proc/catalog/Mascot/WRK-3JV3G2YY.json",
+        "/proc/catalog/Mascot/WRK-3QX06WWQ.json"
+      ],
+      "message": "<COUNT:3>",
+      "steps": 4,
+      "wall_sec": 66.45466858427972
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t10_pass": {
+        "passed": 2,
+        "runs": 2,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 2,
+      "runs": 2,
+      "rate": 1.0
+    }
+  }
+}

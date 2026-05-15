@@ -1,0 +1,66 @@
+{
+  "ts": "20260515T185117Z",
+  "model": "gpt-5.4",
+  "results": [
+    {
+      "snapshot": "t10_pass",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Mascot/WRK-1A7JZ7P3.json",
+        "/proc/catalog/Mascot/WRK-3JV3G2YY.json",
+        "/proc/catalog/Mascot/WRK-3QX06WWQ.json"
+      ],
+      "message": "<COUNT:3>",
+      "steps": 4,
+      "wall_sec": 35.19313401449472
+    },
+    {
+      "snapshot": "t10_pass",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Mascot/WRK-1A7JZ7P3.json",
+        "/proc/catalog/Mascot/WRK-3JV3G2YY.json",
+        "/proc/catalog/Mascot/WRK-3QX06WWQ.json"
+      ],
+      "message": "<COUNT:3>",
+      "steps": 5,
+      "wall_sec": 37.3467472512275
+    },
+    {
+      "snapshot": "t10_pass",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Mascot/WRK-1A7JZ7P3.json",
+        "/proc/catalog/Mascot/WRK-3JV3G2YY.json",
+        "/proc/catalog/Mascot/WRK-3QX06WWQ.json"
+      ],
+      "message": "<COUNT:3>",
+      "steps": 5,
+      "wall_sec": 34.93279607407749
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t10_pass": {
+        "passed": 3,
+        "runs": 3,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 3,
+      "runs": 3,
+      "rate": 1.0
+    }
+  }
+}
