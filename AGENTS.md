@@ -86,7 +86,7 @@ Suggested template:
   - Bump the repository version on every completed change before committing it.
   - For code changes, run a BitGN PAC1 regression validation before moving to the next step; documentation-only or guidance-only changes may skip the benchmark run when no runtime behavior changed.
   - Unless the user explicitly overrides it, use `gpt-5.3-codex` with medium reasoning for BitGN regression validation runs.
-  - **Default benchmark is DEV, not PROD.** `run-benchmark` without `--benchmark` uses `bitgn/pac1-dev` (43 tasks, `BITGN_BENCHMARK` env default in `config.py`). PROD requires `--benchmark bitgn/pac1-prod` (104 tasks) explicitly. Always confirm which benchmark a run targets before reporting results as PROD.
+  - **Default benchmark is DEV, not PROD.** `run-benchmark` without `--benchmark` uses `bitgn/ecom1-dev` in this repo (`BITGN_BENCHMARK` env default in `config.py`); the legacy PAC1 PROD slug is `bitgn/pac1-prod` (104 tasks). Always confirm which benchmark a run targets before reporting results as PROD.
   - Standard benchmark launch line (PROD, full 104 tasks):
     ```
     set -a && source .worktrees/plan-b/.env && set +a
@@ -98,6 +98,24 @@ Suggested template:
       --log-dir logs
     ```
     `p3i6` in the filename encodes `--max-parallel 3 --max-inflight-llm 6`. Do not raise parallelism without explicit user approval — higher settings (e.g. p16i24) can cause rate-limit timeouts and must be launched deliberately.
+  - **BitGN ECOM bench launch line** (`bitgn/ecom1-dev`, current contest as of the 2026-05-15 API freeze):
+    ```
+    # .env lives at repo root or in the active worktree; it must export
+    # BITGN_API_KEY, CLIPROXY_BASE_URL, CLIPROXY_API_KEY. NEVER commit
+    # .env — the repo is public and the file is in .gitignore. If the
+    # box has no .env, copy one from a private sibling agent repo
+    # (e.g. ../bitgn-contest-with-claude/.worktrees/plan-b/.env) so
+    # secrets stay outside this checkout.
+    set -a && source .env && set +a
+    AGENT_MODEL=gpt-5.4 AGENT_REASONING_EFFORT=medium \
+    .venv/bin/python -m bitgn_contest_agent.cli run-benchmark \
+      --benchmark bitgn/ecom1-dev \
+      --max-parallel 3 --max-inflight-llm 6 \
+      --runs 1 \
+      --output artifacts/bench/<commit>_ecom_p3i6_gpt54_runs1.json \
+      --log-dir logs
+    ```
+    Pre-launch checklist: probe the proxy with `curl -sS -H "Authorization: Bearer $CLIPROXY_API_KEY" "$CLIPROXY_BASE_URL/models"` to confirm the selected `AGENT_MODEL` (e.g. `gpt-5.4`) is listed; run `scripts/local_runner.py --workspace tests/fixtures/local_ecom --prepass-only` and `pytest` to validate adapter/local-mock alignment before burning real trials (memory: `feedback_local_first`).
   - PROD smoke test (first 5 trials from PROD leaderboard, cheap validation):
     ```
     set -a && source .worktrees/plan-b/.env && set +a
