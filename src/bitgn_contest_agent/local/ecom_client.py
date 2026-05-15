@@ -92,6 +92,23 @@ _SQL_BIN_PATHS = frozenset({"/bin/sql", "bin/sql"})
 _ID_BIN_PATHS = frozenset({"/bin/id", "bin/id"})
 _DATE_BIN_PATHS = frozenset({"/bin/date", "bin/date"})
 _CHECKOUT_BIN_PATHS = frozenset({"/bin/checkout", "bin/checkout"})
+_DISCOUNT_BIN_PATHS = frozenset({"/bin/discount", "bin/discount"})
+_PAYMENTS_BIN_PATHS = frozenset({"/bin/payments", "bin/payments"})
+
+# /bin/* entries are zero-byte stubs in the real ECOM runtime —
+# `read /bin/checkout` returns {path, content_type, sha256} with
+# NO `content` field. The agent uses `--help` arg via exec, not read.
+# Local mock mirrors this so `_response_to_text` produces the same
+# JSON shape the LLM sees on PROD. Confirmed across 62 trials
+# (scans run1 + run2, 2026-05-15): every /bin/* file has sha256=
+# e3b0c442... (empty string) and content_type=text/plain.
+_BIN_STUB_PATHS = frozenset({
+    "/bin/checkout", "/bin/date", "/bin/discount", "/bin/id",
+    "/bin/payments", "/bin/sql",
+})
+_EMPTY_FILE_SHA256 = (
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+)
 
 
 def _content_type_for(path: Path) -> str:
@@ -196,9 +213,16 @@ class LocalEcomClient:
         trial clock. Defaults to ``datetime.now(UTC)``. Replaces the
         retired ``context()`` RPC.
     actor_id:
-        Optional descriptor surfaced by ``exec(/bin/id)`` (one line of
-        text). Defaults to ``agent`` so prepass output is non-empty;
-        override per snapshot to emulate role-scoped trials.
+        Identity descriptor surfaced by ``exec(/bin/id)`` on the
+        ``user:`` line. PROD default across 42/62 scanned trials is
+        ``"anonymous"``; remaining trials use ``cust_NNN`` / ``emp_NNN``
+        ids per trial seed.
+    roles:
+        Comma-separated roles surfaced by ``exec(/bin/id)`` on the
+        ``roles:`` line. PROD default is ``"GUEST"`` for anonymous;
+        customers get ``"customer"``; employees get the long form
+        ``"employee, store_manager, discount_manager, inventory_viewer,
+        fulfillment_viewer, customer_service"``.
     sql_db_paths:
         Optional iterable of catalogue SQLite databases (relative to
         workspace_root) that ``/bin/sql`` should attach. If None,
@@ -215,7 +239,8 @@ class LocalEcomClient:
         workspace_root: str | Path,
         context_date: str | None = None,
         sql_db_paths: Optional[Iterable[str | Path]] = None,
-        actor_id: str = "agent",
+        actor_id: str = "anonymous",
+        roles: str = "GUEST",
     ) -> None:
         self._root = Path(workspace_root).resolve()
         if not self._root.exists():
@@ -224,6 +249,7 @@ class LocalEcomClient:
             "%Y-%m-%dT%H:%M:%SZ"
         )
         self._actor_id = actor_id
+        self._roles = roles
         sql_dbs = self._resolve_sql_dbs(sql_db_paths)
         self._sql_dbs = _CatalogueAccess(
             primary=sql_dbs[0] if sql_dbs else None,
@@ -289,7 +315,11 @@ class LocalEcomClient:
         resolved = self._resolve(path)
         if not resolved.exists() or not resolved.is_dir():
             raise FileNotFoundError(f"Directory not found: {path}")
-        resp = ecom_pb2.ListResponse(path=path)
+        # PROD quirk (confirmed across all 31 trials of the 2026-05-15
+        # scan): `list` echoes the request path *lowercased*. Other
+        # RPCs (read, stat) preserve case; only `list` normalises.
+        # Mirror this so the LLM sees the same `path` string locally.
+        resp = ecom_pb2.ListResponse(path=path.lower())
         for child in sorted(resolved.iterdir()):
             if child.is_dir():
                 resp.entries.append(ecom_pb2.ListResponse.Entry(
@@ -317,6 +347,24 @@ class LocalEcomClient:
         resolved = self._resolve(path)
         if not resolved.exists() or resolved.is_dir():
             raise FileNotFoundError(f"File not found: {path}")
+
+        # /bin/* are zero-byte executable stubs on PROD. `read` returns
+        # {path, content_type, sha256} with NO `content` field and
+        # sha256 = e3b0c442… (empty string SHA). Mirror that regardless
+        # of what the local filesystem holds, so snapshot rebuilds that
+        # copy non-empty stub scripts still produce PROD-shaped reads.
+        if path in _BIN_STUB_PATHS:
+            self.reads.add(path.lstrip("/"))
+            self.ops_log.append({
+                "op": "read", "path": path, "bytes": 0,
+                "truncated": False, "bin_stub": True,
+            })
+            return ecom_pb2.ReadResponse(
+                path=path,
+                content_type="text/plain",
+                sha256=_EMPTY_FILE_SHA256,
+            )
+
         raw = resolved.read_text(encoding="utf-8", errors="replace")
         sliced, truncated = _slice_lines(raw, start_line, end_line)
         if number:
@@ -452,21 +500,43 @@ class LocalEcomClient:
         return resp
 
     def exec(self, req: Any) -> "ecom_pb2.ExecResponse":
-        """Local exec — supports the post-freeze /bin inventory:
+        """Local exec — mirrors the post-freeze ECOM /bin inventory.
 
-          /bin/sql       — query attached SQLite catalogues (CSV stdout)
-          /bin/id        — print the actor descriptor
-          /bin/date      — print the trial-anchored ISO datetime
-          /bin/checkout  — sketch of the shopping-cart utility; the
-                           real PROD binary handles cart workflows.
-                           Local replay returns exit_code=2 with a
-                           stderr hint, since cart side-effects are
-                           snapshot-specific.
+        Stdout shapes / exit codes confirmed across 62 scanner trials
+        (2026-05-15, scans run1+run2):
 
-        Any other path returns exit_code=127 with a stderr explaining
-        the local limitation. PROD ECOM exposes a richer /bin
-        inventory (workspace-specific scripts); reproducing those
-        locally is out of scope."""
+          /bin/sql                — SELECT returns CSV on stdout
+                                    (header row + data rows). Errors
+                                    return {exit_code=1, stderr}.
+                                    Dot-commands (.schema/.tables) are
+                                    NOT supported on PROD — they
+                                    surface as SQL syntax errors. Use
+                                    `SELECT … FROM sqlite_schema …`
+                                    instead.
+          /bin/id                 — `"user: <id>\\nroles: <role>\\n"`
+                                    (two newline-terminated lines).
+          /bin/date               — ISO8601 UTC stamp, newline-term.
+          /bin/checkout (no args) — exit 1, stderr =
+                                    "checkout: expected exactly one
+                                    basket id\\n".
+          /bin/checkout <basket>  — locally: no-op success (empty
+                                    response) since cart mutation is
+                                    snapshot-specific. PROD performs
+                                    the real checkout.
+          /bin/discount (no args) — exit 1, stderr =
+                                    "discount: expected basket id,
+                                    percent, reason code, and issuer
+                                    id\\n".
+          /bin/payments (no args) — exit 1, stderr =
+                                    "payments: expected subcommand\\n".
+          /bin/payments recover-3ds <id>
+                                  — stdout =
+                                    "3ds_recovery_started <id>\\n"
+                                    (confirmed in baseline dump).
+
+        Any unknown /bin/* path returns exit_code=127 with stderr
+        explaining the local limitation.
+        """
         path = getattr(req, "path", "")
         args = list(getattr(req, "args", []) or [])
         stdin = getattr(req, "stdin", "") or ""
@@ -478,6 +548,10 @@ class LocalEcomClient:
             return self._exec_date()
         if path in _CHECKOUT_BIN_PATHS:
             return self._exec_checkout(args=args, stdin=stdin)
+        if path in _DISCOUNT_BIN_PATHS:
+            return self._exec_discount(args=args, stdin=stdin)
+        if path in _PAYMENTS_BIN_PATHS:
+            return self._exec_payments(args=args, stdin=stdin)
 
         self.ops_log.append({
             "op": "exec", "path": path, "args": args, "exit_code": 127,
@@ -487,50 +561,110 @@ class LocalEcomClient:
             stderr=(
                 f"local mock: exec {path!r} not supported. "
                 "Implemented bins: /bin/sql, /bin/id, /bin/date, "
-                "/bin/checkout. Provide a SQLite catalogue in the "
-                "workspace to query via SQL, or run this task against "
-                "a real ECOM VM."
+                "/bin/checkout, /bin/discount, /bin/payments. Run this "
+                "task against a real ECOM VM for unmodelled binaries."
             ),
         )
 
     def _exec_id(self) -> "ecom_pb2.ExecResponse":
-        """Mirror PROD `/bin/id`: a single newline-terminated descriptor
-        line on stdout (`uid=...(name) ...` shape). Local replay keeps
-        the line minimal — overridden snapshots set ``actor_id`` at
-        construction to emulate role-scoped trials."""
-        stdout = f"{self._actor_id}\n"
+        """Mirror PROD `/bin/id`: two newline-terminated lines —
+        `user: <actor>\\nroles: <roles>\\n`. PROD default across the
+        2026-05-15 scan (42/62 trials) was actor=anonymous, role=GUEST;
+        the remaining trials surfaced customer/employee identities
+        derived from the trial seed."""
+        stdout = f"user: {self._actor_id}\nroles: {self._roles}\n"
         self.ops_log.append({"op": "exec", "path": "/bin/id", "exit_code": 0})
-        return ecom_pb2.ExecResponse(exit_code=0, stdout=stdout)
+        return ecom_pb2.ExecResponse(stdout=stdout)
 
     def _exec_date(self) -> "ecom_pb2.ExecResponse":
-        """Mirror PROD `/bin/date`: ISO8601 UTC stamp on stdout. The
-        value comes from the constructor-supplied ``context_date`` so
-        replay is deterministic — same role as the retired
-        ``context()`` RPC."""
+        """Mirror PROD `/bin/date`: ISO8601 UTC stamp on stdout with a
+        trailing newline. Trial clock is deterministic per snapshot via
+        the constructor's ``context_date``."""
         stdout = f"{self._context_date}\n"
         self.ops_log.append({"op": "exec", "path": "/bin/date", "exit_code": 0})
-        return ecom_pb2.ExecResponse(exit_code=0, stdout=stdout)
+        return ecom_pb2.ExecResponse(stdout=stdout)
 
     def _exec_checkout(
         self, *, args: list[str], stdin: str,
     ) -> "ecom_pb2.ExecResponse":
-        """Local stub for `/bin/checkout`. The real PROD binary handles
-        cart workflows (3DS reverification, cart inspection, etc.);
-        reproducing every flow locally is out of scope. We return
-        exit_code=2 with a stderr telling the agent to inspect the
-        cart files directly under the workspace tree instead."""
+        """`/bin/checkout` — PROD-aligned argument parsing.
+
+        - No args            → exit 1, PROD's verbatim stderr.
+        - One arg (basket id) → empty success ({} on the wire). PROD
+                               actually mutates basket state; the local
+                               mock can't faithfully model that without
+                               per-snapshot cart logic, so we return
+                               success-shaped empty response and let
+                               the snapshot's grading rules (e.g.
+                               forbidden_refs / mutation_count probes)
+                               catch wrong behaviour.
+        """
         self.ops_log.append({
             "op": "exec", "path": "/bin/checkout", "args": args,
-            "exit_code": 2,
+            "exit_code": 1 if not args else 0,
         })
-        return ecom_pb2.ExecResponse(
-            exit_code=2,
-            stderr=(
-                "local mock: /bin/checkout side-effects are snapshot-"
-                "specific and not emulated. Inspect cart entities "
-                "directly via list/read against the workspace."
-            ),
-        )
+        if not args:
+            return ecom_pb2.ExecResponse(
+                exit_code=1,
+                stderr="checkout: expected exactly one basket id\n",
+            )
+        # PROD on success: empty response (no stdout/stderr/exit_code).
+        # `ExecResponse()` serialises to `{}` exactly like PROD.
+        return ecom_pb2.ExecResponse()
+
+    def _exec_discount(
+        self, *, args: list[str], stdin: str,
+    ) -> "ecom_pb2.ExecResponse":
+        """`/bin/discount` — PROD-aligned. Requires basket id +
+        percent + reason code + issuer id. With fewer than 4 args
+        PROD emits the verbatim stderr below; with a full arg set
+        PROD mutates discount state which we cannot model locally —
+        return empty success so the agent's *decision* (whether to
+        run discount under /docs/discounts.md) is what the local A/B
+        measures, not the binary's side-effect."""
+        self.ops_log.append({
+            "op": "exec", "path": "/bin/discount", "args": args,
+            "exit_code": 1 if len(args) < 4 else 0,
+        })
+        if len(args) < 4:
+            return ecom_pb2.ExecResponse(
+                exit_code=1,
+                stderr=(
+                    "discount: expected basket id, percent, reason "
+                    "code, and issuer id\n"
+                ),
+            )
+        return ecom_pb2.ExecResponse()
+
+    def _exec_payments(
+        self, *, args: list[str], stdin: str,
+    ) -> "ecom_pb2.ExecResponse":
+        """`/bin/payments` — PROD-aligned subcommand router.
+
+        - No args                       → exit 1, PROD's stderr.
+        - recover-3ds <payment_id>     → stdout =
+                                          "3ds_recovery_started <id>\\n"
+                                          (verbatim PROD shape, baseline
+                                          dump 2026-05-15 captured this
+                                          exactly for two calls).
+        - other subcommands             → empty success (no PROD data
+                                          captured for those yet; expand
+                                          when scanner exercises them).
+        """
+        self.ops_log.append({
+            "op": "exec", "path": "/bin/payments", "args": args,
+        })
+        if not args:
+            return ecom_pb2.ExecResponse(
+                exit_code=1,
+                stderr="payments: expected subcommand\n",
+            )
+        if args[0] == "recover-3ds" and len(args) >= 2:
+            payment_id = args[1]
+            return ecom_pb2.ExecResponse(
+                stdout=f"3ds_recovery_started {payment_id}\n",
+            )
+        return ecom_pb2.ExecResponse()
 
     def _exec_sql(self, *, args: list[str], stdin: str) -> "ecom_pb2.ExecResponse":
         """Run the stdin SQL body against the workspace's SQLite
@@ -538,13 +672,41 @@ class LocalEcomClient:
         arbitrary SELECT/UPDATE/INSERT via sqlite3.
 
         Post-freeze ``ExecResponse`` no longer carries a content_type
-        field (reserved in the proto). The CSV-vs-plain-text
-        distinction now lives only in stdout shape — CSV bodies start
-        with a column-header row, ``.schema`` returns raw DDL.
+        field (reserved in the proto). The CSV-vs-error distinction
+        now lives only in shape:
+
+          success  → {stdout: "col1,col2\\nval,val\\n..."}
+          failure  → {exit_code: 1, stderr: "<sqlite error>\\n"}
 
         Multiple catalogue files are attached as ``db1``/``db2``/...
         so a query can join across them without the agent needing to
-        know which file holds which table."""
+        know which file holds which table.
+
+        Dot-commands (``.schema``, ``.tables``, etc.) are NOT
+        supported by PROD — they surface as SQL syntax errors,
+        matching real sqlite CLI behaviour when dot-commands are
+        fed via stdin. Agents are expected to use SQL queries
+        against the ``sqlite_schema`` virtual table instead:
+            SELECT name, sql FROM sqlite_schema WHERE type='table';
+        """
+        body = stdin.strip()
+        # PROD /bin/sql rejects sqlite dot-commands the same way the
+        # raw sqlite engine does when fed `.schema` as if it were SQL.
+        # Confirmed across 62 scanner trials (2026-05-15) — both
+        # `.schema` and `.tables` returned exit_code=1, stderr =
+        # "SQL logic error: near \".\": syntax error (1)\n".
+        # This rejection fires BEFORE the catalogue presence check so
+        # the wire shape matches PROD even on snapshots with no DB.
+        if body.startswith("."):
+            self.ops_log.append({
+                "op": "exec", "path": "/bin/sql", "args": args,
+                "exit_code": 1, "rejected": "dot_command",
+            })
+            return ecom_pb2.ExecResponse(
+                exit_code=1,
+                stderr='SQL logic error: near ".": syntax error (1)\n',
+            )
+
         if not self._sql_dbs.primary:
             return ecom_pb2.ExecResponse(
                 exit_code=2,
@@ -555,7 +717,6 @@ class LocalEcomClient:
                 ),
             )
 
-        body = stdin.strip()
         if not body:
             return ecom_pb2.ExecResponse(
                 exit_code=2,
@@ -571,19 +732,6 @@ class LocalEcomClient:
                 )
             conn.row_factory = sqlite3.Row
 
-            # .schema is a sqlite shell dot-command; emulate it.
-            if body.startswith(".schema"):
-                rows = conn.execute(
-                    "SELECT sql FROM sqlite_master "
-                    "WHERE sql IS NOT NULL ORDER BY type, name"
-                ).fetchall()
-                stdout = "\n\n".join(r[0] for r in rows) + "\n"
-                self.ops_log.append({
-                    "op": "exec", "path": "/bin/sql", "args": args,
-                    "exit_code": 0, "schema": True,
-                })
-                return ecom_pb2.ExecResponse(exit_code=0, stdout=stdout)
-
             cursor = conn.execute(body)
             rows = cursor.fetchall()
             cols = (
@@ -595,16 +743,23 @@ class LocalEcomClient:
                 "op": "exec", "path": "/bin/sql", "args": args,
                 "rows": len(rows), "exit_code": 0,
             })
-            return ecom_pb2.ExecResponse(exit_code=0, stdout=stdout)
+            return ecom_pb2.ExecResponse(stdout=stdout)
         except sqlite3.Error as exc:
             self.ops_log.append({
                 "op": "exec", "path": "/bin/sql", "args": args,
                 "exit_code": 1, "error": str(exc),
             })
-            return ecom_pb2.ExecResponse(
-                exit_code=1,
-                stderr=f"sqlite3 error: {exc}",
-            )
+            # PROD's stderr format for sqlite errors is
+            # "SQL logic error: <message> (<code>)\n" — matching the
+            # raw sqlite shell output. Python's sqlite3.Error message
+            # uses "<message>" without the framing; we wrap it so the
+            # local stderr text matches PROD's shape closely.
+            msg = str(exc)
+            if not msg.startswith("SQL logic error"):
+                msg = f"SQL logic error: {msg} (1)"
+            if not msg.endswith("\n"):
+                msg += "\n"
+            return ecom_pb2.ExecResponse(exit_code=1, stderr=msg)
         finally:
             if conn is not None:
                 try:

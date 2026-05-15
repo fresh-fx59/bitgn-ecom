@@ -39,3 +39,11 @@ artifacts/harness_db/scrape_runs/
 artifacts/harness_db/workspaces/
 logs/
 .last_run_id
+
+# Harness scan probe payloads are large (~135 MB per 31-trial run) and
+# reproducible from the manifest + a fresh `scripts/scan_ecom1.py` call.
+# Track only the manifest so the run-id and trial set survive in git.
+artifacts/scans/*/trials/
+artifacts/scans/*/manifest.json.bak
+# Mirror-workspace temp dirs produced by scripts/verify_local_mirror.py
+artifacts/scans/**/_mirror_workspace/

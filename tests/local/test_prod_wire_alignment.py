@@ -85,33 +85,160 @@ def _expected_keys(d: dict) -> set[str]:
 # ---- /bin/id and /bin/date replace the retired context() RPC --------
 
 
-def test_exec_bin_id_returns_actor_on_stdout(
+def test_exec_bin_id_two_line_user_roles_shape(
     prod_shaped_client: LocalEcomClient,
 ) -> None:
-    """Post-freeze prepass uses `exec(/bin/id)` for actor identity. The
-    runtime returns a one-line descriptor on stdout — no `content_type`
-    (reserved in the proto), no extra metadata."""
+    """PROD `/bin/id` returns TWO newline-terminated lines:
+        user: <actor>\\nroles: <role>\\n
+    Confirmed across all 62 scanned trials (2026-05-15): every
+    successful exec produced this exact template. Default actor on
+    most trials was 'anonymous' with role 'GUEST'."""
     local = _to_json(prod_shaped_client.exec(
         _req(path="/bin/id", args=[], stdin=""),
     ))
-    # ExecResponse on success: stdout populated, exit_code default-omitted.
-    assert local.get("stdout"), "local /bin/id should emit a descriptor"
-    assert "content_type" not in local, (
-        "post-freeze ExecResponse no longer carries content_type "
-        "(reserved field) — local must match"
-    )
+    stdout = local.get("stdout", "")
+    assert "content_type" not in local
     assert "truncated" not in local
+    assert stdout.startswith("user: "), stdout
+    assert "\nroles: " in stdout, stdout
+    assert stdout.endswith("\n"), stdout
+
+
+def test_exec_bin_id_role_override(tmp_path: Path) -> None:
+    """Per-snapshot override of actor/roles via the constructor —
+    required to reproduce trials whose seed picked a customer or
+    employee identity."""
+    from types import SimpleNamespace
+    client = LocalEcomClient(
+        tmp_path, actor_id="cust_032", roles="customer",
+    )
+    local = _to_json(client.exec(
+        SimpleNamespace(path="/bin/id", args=[], stdin=""),
+    ))
+    assert local["stdout"] == "user: cust_032\nroles: customer\n"
 
 
 def test_exec_bin_date_returns_iso_timestamp(
     prod_shaped_client: LocalEcomClient,
 ) -> None:
     """Post-freeze prepass anchors temporal arithmetic on
-    `exec(/bin/date)` stdout. The ISO8601 stamp must end with `Z`."""
+    `exec(/bin/date)` stdout. The ISO8601 stamp must end with `Z`
+    (and a trailing newline, matching PROD)."""
     local = _to_json(prod_shaped_client.exec(
         _req(path="/bin/date", args=[], stdin=""),
     ))
-    assert local.get("stdout", "").strip().endswith("Z")
+    stdout = local.get("stdout", "")
+    assert stdout.strip().endswith("Z"), stdout
+    assert stdout.endswith("\n"), stdout
+
+
+def test_exec_bin_checkout_no_args_matches_prod_stderr(tmp_path: Path) -> None:
+    """PROD's `/bin/checkout` with no args emits a fixed usage stderr:
+        "checkout: expected exactly one basket id\\n"
+    Confirmed across all 31 scanned trials of run1 (2026-05-15)."""
+    from types import SimpleNamespace
+    client = LocalEcomClient(tmp_path)
+    local = _to_json(client.exec(
+        SimpleNamespace(path="/bin/checkout", args=[], stdin=""),
+    ))
+    assert local["exit_code"] == 1
+    assert local["stderr"] == "checkout: expected exactly one basket id\n"
+
+
+def test_exec_bin_checkout_with_basket_arg_is_empty_success(tmp_path: Path) -> None:
+    """With a basket arg PROD performs the real checkout and returns
+    an empty response (no stdout / stderr / exit_code, serialises to
+    `{}`). Local mock returns the same shape since cart mutation
+    can't be modelled snapshot-agnostically — snapshot grading
+    catches wrong refusals via expected_outcome."""
+    from types import SimpleNamespace
+    client = LocalEcomClient(tmp_path)
+    local = _to_json(client.exec(
+        SimpleNamespace(path="/bin/checkout", args=["basket_001"], stdin=""),
+    ))
+    assert local == {}
+
+
+def test_exec_bin_discount_no_args_matches_prod_stderr(tmp_path: Path) -> None:
+    """PROD `/bin/discount` with no args:
+        exit 1, stderr =
+        "discount: expected basket id, percent, reason code, and issuer id\\n"
+    Confirmed across all 31 scanned trials."""
+    from types import SimpleNamespace
+    client = LocalEcomClient(tmp_path)
+    local = _to_json(client.exec(
+        SimpleNamespace(path="/bin/discount", args=[], stdin=""),
+    ))
+    assert local["exit_code"] == 1
+    assert local["stderr"] == (
+        "discount: expected basket id, percent, reason code, and issuer id\n"
+    )
+
+
+def test_exec_bin_payments_no_args_matches_prod_stderr(tmp_path: Path) -> None:
+    """PROD `/bin/payments` with no args:
+        exit 1, stderr = "payments: expected subcommand\\n"."""
+    from types import SimpleNamespace
+    client = LocalEcomClient(tmp_path)
+    local = _to_json(client.exec(
+        SimpleNamespace(path="/bin/payments", args=[], stdin=""),
+    ))
+    assert local["exit_code"] == 1
+    assert local["stderr"] == "payments: expected subcommand\n"
+
+
+def test_exec_bin_payments_recover_3ds_shape(tmp_path: Path) -> None:
+    """PROD `/bin/payments recover-3ds <pay_id>` returns:
+        {stdout: "3ds_recovery_started <pay_id>\\n"}
+    Confirmed exactly twice in the baseline dump (pay_002, pay_074)."""
+    from types import SimpleNamespace
+    client = LocalEcomClient(tmp_path)
+    local = _to_json(client.exec(
+        SimpleNamespace(
+            path="/bin/payments", args=["recover-3ds", "pay_002"], stdin="",
+        ),
+    ))
+    assert local == {"stdout": "3ds_recovery_started pay_002\n"}
+
+
+def test_read_bin_stub_returns_empty_content_with_sha256_of_empty_string(
+    tmp_path: Path,
+) -> None:
+    """All /bin/* binaries are zero-byte stubs on PROD. `read` returns
+    {path, content_type=text/plain, sha256=e3b0c442…} with NO `content`
+    field. Mirror this regardless of what the local filesystem holds
+    so snapshots that copy stub scripts still produce PROD-shaped
+    reads."""
+    from types import SimpleNamespace
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    # Local file has non-trivial content; the mock must IGNORE it.
+    (bin_dir / "checkout").write_text(
+        "#!/bin/sh\necho 'this would never reach the wire'\n"
+    )
+    client = LocalEcomClient(tmp_path)
+    local = _to_json(client.read(
+        SimpleNamespace(path="/bin/checkout", number=False,
+                        start_line=0, end_line=0),
+    ))
+    assert "content" not in local, "PROD omits content for zero-byte /bin/*"
+    assert local["content_type"] == "text/plain"
+    assert local["sha256"] == (
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    )
+
+
+def test_list_lowercases_echoed_path(tmp_path: Path) -> None:
+    """PROD quirk (confirmed across 31 scanned trials): `list`
+    lowercases the echoed `path` field, even though tree returns
+    mixed-case dir names and `read` preserves case. Mock must do
+    the same so the LLM sees identical wire shape."""
+    from types import SimpleNamespace
+    (tmp_path / "proc" / "catalog" / "3M").mkdir(parents=True)
+    (tmp_path / "proc" / "catalog" / "3M" / "SFE-X.json").write_text("{}")
+    client = LocalEcomClient(tmp_path)
+    local = _to_json(client.list(SimpleNamespace(path="/proc/catalog/3M")))
+    assert local["path"] == "/proc/catalog/3m", local["path"]
 
 
 # ---- tree --------------------------------------------------------------
@@ -341,16 +468,37 @@ def test_exec_sql_select_returns_csv_stdout(tmp_path: Path) -> None:
     assert local["stdout"] == "n\n10\n"
 
 
-def test_exec_sql_schema_returns_ddl_stdout(tmp_path: Path) -> None:
-    """`.schema` returns raw DDL on stdout. content_type stays absent
-    (reserved field)."""
+def test_exec_sql_dot_commands_rejected_with_syntax_error(tmp_path: Path) -> None:
+    """PROD-aligned: `/bin/sql` does NOT implement sqlite dot-commands
+    (.schema / .tables). They surface as the raw sqlite syntax error.
+    Confirmed across all 62 scanned trials (2026-05-15). Agents must
+    query `sqlite_schema` instead. content_type is absent (reserved)."""
+    _seed_catalogue(tmp_path)
+    client = LocalEcomClient(tmp_path)
+    for body in (".schema", ".tables"):
+        local = _to_json(client.exec(_req(
+            path="/bin/sql", args=[], stdin=body,
+        )))
+        assert "content_type" not in local
+        assert local["exit_code"] == 1, body
+        assert local["stderr"] == (
+            'SQL logic error: near ".": syntax error (1)\n'
+        ), body
+
+
+def test_exec_sql_sqlite_schema_query_works(tmp_path: Path) -> None:
+    """The PROD-supported replacement for dot-commands: query
+    sqlite_schema directly. Confirmed in the baseline dump: PROD
+    agents use `SELECT name, sql FROM sqlite_schema …` for DDL."""
     _seed_catalogue(tmp_path)
     client = LocalEcomClient(tmp_path)
     local = _to_json(client.exec(_req(
-        path="/bin/sql", args=[], stdin=".schema",
+        path="/bin/sql", args=[],
+        stdin="SELECT name FROM sqlite_schema WHERE type='table';",
     )))
     assert "content_type" not in local
-    assert "CREATE TABLE" in local["stdout"]
+    assert local["stdout"].startswith("name\n")
+    assert "products" in local["stdout"]
 
 
 # ---- response stringification matches MessageToJson --------------------

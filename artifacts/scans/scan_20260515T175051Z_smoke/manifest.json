@@ -1,0 +1,55 @@
+{
+  "scanner_version": "0.1",
+  "benchmark": "bitgn/ecom1-dev",
+  "run_id": "run-22PWYsUScgVAW3yQa1iHUXTzD",
+  "started_at": "2026-05-15T17:50:52.018303+00:00",
+  "trials": [
+    {
+      "task_id": "t01",
+      "trial_id": "vm2-LwyT9tAAAPpzALukJYbH88efgrC",
+      "path_count": 589,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 81,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 71,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t02",
+      "trial_id": "vm2-LwyT9tAAAPpzALukJYbH88efgrD",
+      "path_count": 709,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 100,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 81,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 101,
+      "n_failed_probes": 0
+    }
+  ],
+  "config": {
+    "read_every": false,
+    "sample_per_dir": 3,
+    "max_trials": 2,
+    "label": "smoke"
+  },
+  "ended_at": "2026-05-15T17:50:57.774255+00:00"
+}
