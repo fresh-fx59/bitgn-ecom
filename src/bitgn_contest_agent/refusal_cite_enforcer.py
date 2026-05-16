@@ -55,14 +55,15 @@ from typing import Iterable
 # Entity-id regex — matches the ECOM workspace's convention:
 #   basket_<token>, cust_<token>, emp_<token>, pay_<token>,
 #   ret_<token>, store_<token>
-# Anchored on word boundaries so "basket_019" in a sentence matches
-# but "store_associate-exception-handbook" (in /docs/ paths) does not
-# because the `_` after the namespace must be followed by an alnum/_
-# token that does NOT contain a hyphen (the latter would be a doc
-# slug, not an entity id).
+# Anchored on word boundaries on the left and a *non-hyphen* lookahead
+# on the right so doc-slug-style tokens like
+# "store_associate-exception-handbook" never produce a false-positive
+# `store_associate` match (the trailing `-` is a doc-slug delimiter).
+# Entity ids never contain hyphens in PROD — they're alphanumeric +
+# underscores only.
 ENTITY_ID_RE = re.compile(
     r"\b(basket|cust|customer|emp|employee|pay|payment|ret|return|store)"
-    r"_([A-Za-z0-9]+(?:_[A-Za-z0-9]+)*)\b"
+    r"_([A-Za-z0-9]+(?:_[A-Za-z0-9]+)*)(?![A-Za-z0-9_-])"
 )
 
 # /proc namespace plural → singular id prefix mapping for matching:
@@ -126,16 +127,24 @@ _VERIFICATION_VERBS: tuple[str, ...] = (
     "is a manager",
     "are a manager",
     "the manager of",
-    "manages",
     "approved discount",
     "subtotal is",
     "the subtotal",
+    # Note: bare "manages" intentionally NOT in this list — too
+    # generic, triggers re-add on incidental sentences like
+    # "the warehouse team manages incoming stock". Use the more
+    # specific "is/are the manager of" patterns above.
 )
 
 # Currency / amount assertion — when the agent's message echoes a
-# specific monetary value, that's a verification claim about the
-# basket's content.
-_CURRENCY_RE = re.compile(r"\b(EUR|USD|GBP|CHF)\s*\d+(?:[.,]\d+)?\b", re.IGNORECASE)
+# specific monetary VALUE (not a generic "EUR 0 deposit policy"
+# reference), that's a verification claim about the entity's
+# content. Require a fractional component or a 2+ digit integer
+# part to filter out boilerplate mentions like "EUR 0".
+_CURRENCY_RE = re.compile(
+    r"\b(EUR|USD|GBP|CHF)\s*(?:\d{2,}|\d+[.,]\d+)\b",
+    re.IGNORECASE,
+)
 
 
 # Task-level verification cues: the task text itself asks for a
@@ -435,16 +444,20 @@ def clean_refusal_refs(
     # Bidirectional companion: re-add verification refs the agent
     # dropped. Only enabled when seen_refs is supplied and message
     # demonstrates verification.
+    #
+    # NEVER re-add person records (employees/customers) regardless of
+    # is_pii. Their citation is regulated by the strip path only —
+    # the strip path has full context (PII vs role refusal, sole-vs-
+    # multiple person refs); the re-add path would lack that nuance
+    # and could undo a correct strip. Re-add only applies to baskets,
+    # payments, returns, and stores (entity records the strip rules
+    # would have kept anyway if a verification claim was present).
     if seen_refs:
         for required in _required_verification_refs(
             task_text=task_text, message=message, seen_refs=seen_refs,
         ):
+            if "/proc/employees/" in required or "/proc/customers/" in required:
+                continue
             if required not in kept:
-                # Don't re-add PII person records on PII refusals —
-                # those were stripped for a reason.
-                if is_pii and "/proc/employees/" in required:
-                    continue
-                if is_pii and "/proc/customers/" in required:
-                    continue
                 kept.append(required)
     return CleanResult(refs=kept, stripped=stripped, reasons=reasons)

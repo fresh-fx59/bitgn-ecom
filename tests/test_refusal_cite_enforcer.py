@@ -396,6 +396,70 @@ def test_re_add_skips_pii_persons_on_pii_refusal() -> None:
     assert "/proc/stores/store_lj.json" in result.refs
 
 
+def test_entity_regex_does_not_match_doc_slug() -> None:
+    """Regression guard: `/docs/store-associate-exception-handbook.md`
+    contains `store_associate-...` which the bare `\\b...\\b` regex
+    would falsely match. The tightened lookahead must reject any
+    token followed by a hyphen (doc-slug delimiter)."""
+    from bitgn_contest_agent.refusal_cite_enforcer import ENTITY_ID_RE
+    text = "Read the store-associate-exception-handbook.md for the rule."
+    matches = ENTITY_ID_RE.findall(text)
+    assert matches == [], (
+        f"doc-slug-style token must NOT match entity regex; got {matches}"
+    )
+    # Sanity: legitimate id still matches
+    assert ENTITY_ID_RE.findall("apply discount on basket_019 now") == [
+        ("basket", "019"),
+    ]
+
+
+def test_currency_regex_rejects_boilerplate_zero() -> None:
+    """Regression guard: bare `EUR 0` or `EUR 1` in policy boilerplate
+    ("deposit policy is EUR 0") must NOT count as a verification
+    assertion. Require a decimal or 2+ digit integer value."""
+    from bitgn_contest_agent.refusal_cite_enforcer import _CURRENCY_RE
+    # Boilerplate — must not match
+    assert _CURRENCY_RE.search("EUR 0 deposit policy") is None
+    assert _CURRENCY_RE.search("USD 1 fee") is None
+    # Real subtotal — must match
+    assert _CURRENCY_RE.search("EUR 154.00") is not None
+    assert _CURRENCY_RE.search("EUR 996") is not None
+    assert _CURRENCY_RE.search("USD 12.50") is not None
+
+
+def test_re_add_never_resurrects_person_record() -> None:
+    """Hardening guard (reviewer-flagged latent risk): the re-add
+    path must NEVER add /proc/employees or /proc/customers refs
+    back, regardless of is_pii. Person citation is governed by the
+    strip path only — strip + re-add must not disagree on persons."""
+    seen = {
+        "/AGENTS.MD",
+        "/proc/employees/emp_006.json",
+        "/proc/baskets/basket_019.json",
+    }
+    # Non-PII role-policy refusal that DOES echo a verification
+    # claim. The verification re-add would otherwise resurrect
+    # emp_006 if it had been stripped.
+    refs_input = ["/AGENTS.MD"]  # both entity refs absent
+    result = clean_refusal_refs(
+        task_text=(
+            "verify that Fabian (emp_006) is the manager and "
+            "apply discount on basket_019 with subtotal EUR 996.00"
+        ),
+        message=(
+            "I verified Fabian is the manager and the basket "
+            "subtotal checks out at EUR 996.00."
+        ),
+        outcome="OUTCOME_DENIED_SECURITY",
+        refs=refs_input,
+        seen_refs=seen,
+    )
+    # Basket re-added (non-person verification target)
+    assert "/proc/baskets/basket_019.json" in result.refs
+    # Employee NEVER re-added by the bidirectional path
+    assert "/proc/employees/emp_006.json" not in result.refs
+
+
 def test_re_add_no_op_when_message_has_no_verification() -> None:
     """If the agent's message contains no verification claim, the
     re-add path must NOT add entity records — pure action refusal
