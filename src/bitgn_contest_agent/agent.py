@@ -1016,6 +1016,7 @@ class AgentLoop:
                 message=fn.message,
                 outcome=fn.outcome,
                 refs=fn.grounding_refs,
+                seen_refs=session.seen_refs,
             )
             if cleaned.stripped:
                 emit_arch(

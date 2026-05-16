@@ -55,14 +55,15 @@ from typing import Iterable
 # Entity-id regex — matches the ECOM workspace's convention:
 #   basket_<token>, cust_<token>, emp_<token>, pay_<token>,
 #   ret_<token>, store_<token>
-# Anchored on word boundaries so "basket_019" in a sentence matches
-# but "store_associate-exception-handbook" (in /docs/ paths) does not
-# because the `_` after the namespace must be followed by an alnum/_
-# token that does NOT contain a hyphen (the latter would be a doc
-# slug, not an entity id).
+# Anchored on word boundaries on the left and a *non-hyphen* lookahead
+# on the right so doc-slug-style tokens like
+# "store_associate-exception-handbook" never produce a false-positive
+# `store_associate` match (the trailing `-` is a doc-slug delimiter).
+# Entity ids never contain hyphens in PROD — they're alphanumeric +
+# underscores only.
 ENTITY_ID_RE = re.compile(
     r"\b(basket|cust|customer|emp|employee|pay|payment|ret|return|store)"
-    r"_([A-Za-z0-9]+(?:_[A-Za-z0-9]+)*)\b"
+    r"_([A-Za-z0-9]+(?:_[A-Za-z0-9]+)*)(?![A-Za-z0-9_-])"
 )
 
 # /proc namespace plural → singular id prefix mapping for matching:
@@ -126,16 +127,24 @@ _VERIFICATION_VERBS: tuple[str, ...] = (
     "is a manager",
     "are a manager",
     "the manager of",
-    "manages",
     "approved discount",
     "subtotal is",
     "the subtotal",
+    # Note: bare "manages" intentionally NOT in this list — too
+    # generic, triggers re-add on incidental sentences like
+    # "the warehouse team manages incoming stock". Use the more
+    # specific "is/are the manager of" patterns above.
 )
 
 # Currency / amount assertion — when the agent's message echoes a
-# specific monetary value, that's a verification claim about the
-# basket's content.
-_CURRENCY_RE = re.compile(r"\b(EUR|USD|GBP|CHF)\s*\d+(?:[.,]\d+)?\b", re.IGNORECASE)
+# specific monetary VALUE (not a generic "EUR 0 deposit policy"
+# reference), that's a verification claim about the entity's
+# content. Require a fractional component or a 2+ digit integer
+# part to filter out boilerplate mentions like "EUR 0".
+_CURRENCY_RE = re.compile(
+    r"\b(EUR|USD|GBP|CHF)\s*(?:\d{2,}|\d+[.,]\d+)\b",
+    re.IGNORECASE,
+)
 
 
 # Task-level verification cues: the task text itself asks for a
@@ -309,12 +318,76 @@ def _classify_ref(
     return False, "contested action target, no verification claim → strip"
 
 
+def _required_verification_refs(
+    *, task_text: str, message: str, seen_refs: set[str],
+) -> list[str]:
+    """Discover entity refs the AGENT verified but failed to cite.
+
+    Bidirectional companion to the strip rule: when the agent's
+    message contains a verification claim about a task-named entity
+    AND the agent actually READ that entity's record during
+    investigation (``seen_refs`` contains the path), the entity's
+    /proc/<ns>/<id>.json is REQUIRED in grounding_refs per the
+    grader's t28-shape ("answer missing required reference") rule.
+
+    Without this, the model's β-strip interpretation (applied at
+    answer-composition time) can drop the basket BEFORE the
+    enforcer runs, leaving the cite irrecoverable. This function
+    re-adds it from `seen_refs` when the message proves
+    verification happened.
+
+    Returns a list of /proc paths to ensure are present in refs.
+    """
+    if not _message_proves_verification(message):
+        return []
+    required: list[str] = []
+    for m in ENTITY_ID_RE.finditer(task_text):
+        prefix, token = m.group(1), m.group(2)
+        # Normalize plural forms used in task text (customer → cust, etc.)
+        canon = {
+            "basket": "basket", "cust": "cust", "customer": "cust",
+            "emp": "emp", "employee": "emp", "pay": "pay",
+            "payment": "pay", "ret": "ret", "return": "ret",
+            "store": "store",
+        }.get(prefix, prefix)
+        # Find matching namespace plural for the proc path
+        ns_plural = {
+            "basket": "baskets", "cust": "customers",
+            "emp": "employees", "pay": "payments",
+            "ret": "returns", "store": "stores",
+        }.get(canon)
+        if not ns_plural:
+            continue
+        path = f"/proc/{ns_plural}/{canon}_{token}.json"
+        if path in seen_refs and path not in required:
+            required.append(path)
+    return required
+
+
+def _message_proves_verification(message: str) -> bool:
+    """True when the agent's message contains explicit verification
+    evidence (currency assertion echoed, "checks out", "I verified",
+    "is the manager", etc.). Used to gate ref re-addition — we only
+    add back records the agent demonstrably read for verification."""
+    if not message:
+        return False
+    if _CURRENCY_RE.search(message):
+        return True
+    msg_lower = message.lower()
+    return any(v in msg_lower for v in _VERIFICATION_VERBS) or any(
+        phrase in msg_lower for phrase in (
+            "checks out", "matches", "verified the", "confirmed the",
+        )
+    )
+
+
 def clean_refusal_refs(
     *,
     task_text: str,
     message: str,
     outcome: str,
     refs: Iterable[str],
+    seen_refs: set[str] | None = None,
 ) -> CleanResult:
     """Apply the cite-iff-checkable-claim rule to a refusal's
     grounding_refs.
@@ -332,6 +405,14 @@ def clean_refusal_refs(
         The outcome the agent emitted, e.g. ``"OUTCOME_DENIED_SECURITY"``.
     refs:
         Current grounding_refs list.
+    seen_refs:
+        Optional set of paths the agent successfully `read` during
+        the task. When supplied, the enforcer ALSO ADDS missing
+        verification-target refs: if the message proves the agent
+        verified an entity but failed to cite the entity's record
+        (β-strip applied at model level), the path is re-added from
+        seen_refs. Without this, t28-shape "answer missing required
+        reference" rejections persist even with a clean strip.
     """
     refs_list = list(refs)
     if outcome != "OUTCOME_DENIED_SECURITY":
@@ -359,4 +440,24 @@ def clean_refusal_refs(
         else:
             stripped.append(ref)
             reasons.append(why)
+
+    # Bidirectional companion: re-add verification refs the agent
+    # dropped. Only enabled when seen_refs is supplied and message
+    # demonstrates verification.
+    #
+    # NEVER re-add person records (employees/customers) regardless of
+    # is_pii. Their citation is regulated by the strip path only —
+    # the strip path has full context (PII vs role refusal, sole-vs-
+    # multiple person refs); the re-add path would lack that nuance
+    # and could undo a correct strip. Re-add only applies to baskets,
+    # payments, returns, and stores (entity records the strip rules
+    # would have kept anyway if a verification claim was present).
+    if seen_refs:
+        for required in _required_verification_refs(
+            task_text=task_text, message=message, seen_refs=seen_refs,
+        ):
+            if "/proc/employees/" in required or "/proc/customers/" in required:
+                continue
+            if required not in kept:
+                kept.append(required)
     return CleanResult(refs=kept, stripped=stripped, reasons=reasons)
