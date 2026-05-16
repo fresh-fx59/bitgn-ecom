@@ -23,6 +23,7 @@ class ArchCategory(StrEnum):
     BODY_PRESERVATION = "BODY_PRESERVATION"
     TASK_START = "TASK_START"
     FORMAT_PRE_WRITE_REJECT = "FORMAT_PRE_WRITE_REJECT"
+    REFS_DROP = "REFS_DROP"
 
 
 class ValidatorT1Rule(StrEnum):
