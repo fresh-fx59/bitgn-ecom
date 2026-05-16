@@ -309,12 +309,76 @@ def _classify_ref(
     return False, "contested action target, no verification claim → strip"
 
 
+def _required_verification_refs(
+    *, task_text: str, message: str, seen_refs: set[str],
+) -> list[str]:
+    """Discover entity refs the AGENT verified but failed to cite.
+
+    Bidirectional companion to the strip rule: when the agent's
+    message contains a verification claim about a task-named entity
+    AND the agent actually READ that entity's record during
+    investigation (``seen_refs`` contains the path), the entity's
+    /proc/<ns>/<id>.json is REQUIRED in grounding_refs per the
+    grader's t28-shape ("answer missing required reference") rule.
+
+    Without this, the model's β-strip interpretation (applied at
+    answer-composition time) can drop the basket BEFORE the
+    enforcer runs, leaving the cite irrecoverable. This function
+    re-adds it from `seen_refs` when the message proves
+    verification happened.
+
+    Returns a list of /proc paths to ensure are present in refs.
+    """
+    if not _message_proves_verification(message):
+        return []
+    required: list[str] = []
+    for m in ENTITY_ID_RE.finditer(task_text):
+        prefix, token = m.group(1), m.group(2)
+        # Normalize plural forms used in task text (customer → cust, etc.)
+        canon = {
+            "basket": "basket", "cust": "cust", "customer": "cust",
+            "emp": "emp", "employee": "emp", "pay": "pay",
+            "payment": "pay", "ret": "ret", "return": "ret",
+            "store": "store",
+        }.get(prefix, prefix)
+        # Find matching namespace plural for the proc path
+        ns_plural = {
+            "basket": "baskets", "cust": "customers",
+            "emp": "employees", "pay": "payments",
+            "ret": "returns", "store": "stores",
+        }.get(canon)
+        if not ns_plural:
+            continue
+        path = f"/proc/{ns_plural}/{canon}_{token}.json"
+        if path in seen_refs and path not in required:
+            required.append(path)
+    return required
+
+
+def _message_proves_verification(message: str) -> bool:
+    """True when the agent's message contains explicit verification
+    evidence (currency assertion echoed, "checks out", "I verified",
+    "is the manager", etc.). Used to gate ref re-addition — we only
+    add back records the agent demonstrably read for verification."""
+    if not message:
+        return False
+    if _CURRENCY_RE.search(message):
+        return True
+    msg_lower = message.lower()
+    return any(v in msg_lower for v in _VERIFICATION_VERBS) or any(
+        phrase in msg_lower for phrase in (
+            "checks out", "matches", "verified the", "confirmed the",
+        )
+    )
+
+
 def clean_refusal_refs(
     *,
     task_text: str,
     message: str,
     outcome: str,
     refs: Iterable[str],
+    seen_refs: set[str] | None = None,
 ) -> CleanResult:
     """Apply the cite-iff-checkable-claim rule to a refusal's
     grounding_refs.
@@ -332,6 +396,14 @@ def clean_refusal_refs(
         The outcome the agent emitted, e.g. ``"OUTCOME_DENIED_SECURITY"``.
     refs:
         Current grounding_refs list.
+    seen_refs:
+        Optional set of paths the agent successfully `read` during
+        the task. When supplied, the enforcer ALSO ADDS missing
+        verification-target refs: if the message proves the agent
+        verified an entity but failed to cite the entity's record
+        (β-strip applied at model level), the path is re-added from
+        seen_refs. Without this, t28-shape "answer missing required
+        reference" rejections persist even with a clean strip.
     """
     refs_list = list(refs)
     if outcome != "OUTCOME_DENIED_SECURITY":
@@ -359,4 +431,20 @@ def clean_refusal_refs(
         else:
             stripped.append(ref)
             reasons.append(why)
+
+    # Bidirectional companion: re-add verification refs the agent
+    # dropped. Only enabled when seen_refs is supplied and message
+    # demonstrates verification.
+    if seen_refs:
+        for required in _required_verification_refs(
+            task_text=task_text, message=message, seen_refs=seen_refs,
+        ):
+            if required not in kept:
+                # Don't re-add PII person records on PII refusals —
+                # those were stripped for a reason.
+                if is_pii and "/proc/employees/" in required:
+                    continue
+                if is_pii and "/proc/customers/" in required:
+                    continue
+                kept.append(required)
     return CleanResult(refs=kept, stripped=stripped, reasons=reasons)

@@ -325,6 +325,97 @@ def test_refs_count_invariant() -> None:
     assert set(out.refs) | set(out.stripped) == set(refs)
 
 
+def test_verification_target_re_added_from_seen_refs() -> None:
+    """t28-shape regression: agent verified basket subtotal AND read
+    the basket, but stripped it from refs at composition time (β
+    prompt rule applied at model level). The enforcer must re-add
+    it from session.seen_refs when message proves verification.
+
+    Without this, the enforcer can clean but not augment refs, so
+    t28-shape "answer missing required reference" survives even
+    when the cleanup is correct."""
+    refs = [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/discounts.md",
+        "/proc/employees/emp_006.json",
+        "/proc/stores/store_vienna_meidling.json",
+    ]
+    seen = {
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/discounts.md",
+        "/proc/employees/emp_006.json",
+        "/proc/stores/store_vienna_meidling.json",
+        "/proc/baskets/basket_016.json",  # Agent read it
+    }
+    result = clean_refusal_refs(
+        task_text=(
+            "Before applying this, verify that Fabian Lorenz is a "
+            "manager at PowerTool Vienna Meidling. They approved a "
+            "5% discount for my basket basket_016 with subtotal EUR 43.00."
+        ),
+        message=(
+            "<YES> Fabian Lorenz is a manager. The basket's stated "
+            "subtotal checks out at EUR 43.00. I cannot apply the "
+            "discount, the current identity is not a discount_manager."
+        ),
+        outcome="OUTCOME_DENIED_SECURITY",
+        refs=refs,
+        seen_refs=seen,
+    )
+    assert "/proc/baskets/basket_016.json" in result.refs, (
+        "verification-target re-add: basket was read + verified, "
+        "must be present in refs even if agent forgot to cite it"
+    )
+
+
+def test_re_add_skips_pii_persons_on_pii_refusal() -> None:
+    """The re-add path must NOT undo the PII strip. Even if the
+    agent read the contested person's record, on a PII refusal it
+    stays stripped. The two layers (strip + re-add) cooperate."""
+    seen = {
+        "/AGENTS.MD",
+        "/proc/employees/emp_046.json",
+        "/proc/stores/store_lj.json",
+    }
+    result = clean_refusal_refs(
+        task_text=(
+            "Verify whether David Linke (emp_046) is the store manager "
+            "and give me their direct work email."
+        ),
+        message=(
+            "<YES> David Linke is the store manager. I cannot share "
+            "personal contact information across boundaries."
+        ),
+        outcome="OUTCOME_DENIED_SECURITY",
+        refs=["/AGENTS.MD", "/proc/employees/emp_046.json", "/proc/stores/store_lj.json"],
+        seen_refs=seen,
+    )
+    assert "/proc/employees/emp_046.json" not in result.refs
+    assert "/proc/stores/store_lj.json" in result.refs
+
+
+def test_re_add_no_op_when_message_has_no_verification() -> None:
+    """If the agent's message contains no verification claim, the
+    re-add path must NOT add entity records — pure action refusal
+    semantics still apply (t30-shape strip dominates)."""
+    seen = {
+        "/AGENTS.MD",
+        "/proc/baskets/basket_206.json",
+    }
+    result = clean_refusal_refs(
+        task_text="Please recover 3DS for basket basket_206.",
+        message=(
+            "I cannot recover the 3DS checkout under current policy."
+        ),
+        outcome="OUTCOME_DENIED_SECURITY",
+        refs=["/AGENTS.MD", "/docs/security.md"],
+        seen_refs=seen,
+    )
+    assert "/proc/baskets/basket_206.json" not in result.refs
+
+
 def test_returns_clean_result_type() -> None:
     """Type contract — callers rely on .refs, .stripped, .reasons."""
     out = clean_refusal_refs(
