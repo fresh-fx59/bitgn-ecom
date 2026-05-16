@@ -72,6 +72,11 @@ _TRANSIENT_MESSAGE_SUBSTRINGS: tuple[str, ...] = (
     "broken pipe",          # EPIPE error
     "epipe",                # EPIPE variant
     "stream error",         # HTTP/2 RST_STREAM / GOAWAY — PROD t093 2026-04-20
+    "unexpected eof",       # Upstream closed connection mid-stream —
+                            # PROD t020 / t024 on 2026-05-15 with gpt-5.4
+                            # surfaced as bare "APIError: unexpected EOF",
+                            # crashing both trials and dropping pass rate
+                            # from 29/31 to 27/31 on commit 6271d84.
 )
 
 

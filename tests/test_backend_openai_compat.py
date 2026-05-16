@@ -227,6 +227,32 @@ def test_plain_api_error_without_transient_marker_propagates() -> None:
         backend.next_step([Message(role="user", content="t")], NextStep, 30.0)
 
 
+def test_unexpected_eof_is_remapped_to_transient() -> None:
+    """cliproxyapi sometimes drops the response stream halfway through
+    with an upstream-side EOF, surfacing as bare openai.APIError with
+    'unexpected EOF' in the message. Must hit P2 backoff retry so the
+    trial doesn't crash with INTERNAL_CRASH. Regression guard for the
+    2026-05-15 PROD bench (commit 6271d84) where t020 and t024 both
+    failed with this exact shape, dropping pass rate from 29/31 to
+    27/31."""
+    import openai
+
+    fake_client = MagicMock()
+    fake_client.beta.chat.completions.parse.side_effect = openai.APIError(
+        message="unexpected EOF",
+        request=MagicMock(),
+        body=None,
+    )
+    backend = OpenAIChatBackend(
+        client=fake_client,
+        model="gpt-5.4",
+        reasoning_effort="medium",
+        use_structured_output=True,
+    )
+    with pytest.raises(TransientBackendError):
+        backend.next_step([Message(role="user", content="t")], NextStep, 30.0)
+
+
 def test_http2_stream_error_is_remapped_to_transient() -> None:
     """HTTP/2 RST_STREAM errors from the upstream codex API surface as bare
     openai.APIError with 'stream error' in the message. Must be caught as
