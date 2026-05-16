@@ -463,11 +463,14 @@ class AgentLoop:
             enforcer_action: str | None = None
 
             if isinstance(fn, ReportTaskCompletion):
-                # Per-model post-processing of the terminal before validation.
-                # Gpt-oss drops grounding_refs that were never read so
-                # hallucinated paths don't reject the whole terminal via R1.
-                # Default adapter hook is identity — non-gpt-oss models
-                # see byte-identical behavior.
+                # Post-process the terminal before validation. Two layers:
+                #  (1) universal refusal-citation enforcer
+                #      (refusal_cite_enforcer) — strips contested entity
+                #      refs on DENIED_SECURITY per the cite-iff-checkable-
+                #      claim rule from "Cite Before You Speak"
+                #      (Yan et al., ICML 2025);
+                #  (2) per-model adapter hook — gpt-oss drops never-read
+                #      grounding_refs to avoid R1 rejection cascades.
                 fn = self._post_process_terminal(fn, session)
                 if fn is not step_obj.function:
                     step_obj = step_obj.model_copy(update={"function": fn})

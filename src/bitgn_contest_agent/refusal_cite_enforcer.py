@@ -242,13 +242,24 @@ def _message_verifies_entity(message: str, entity_id: str, task_text: str) -> bo
 
 
 def _classify_ref(
-    ref: str, task_text: str, message: str, is_pii_refusal: bool,
+    ref: str,
+    task_text: str,
+    message: str,
+    is_pii_refusal: bool,
+    *,
+    person_refs_count: int,
 ) -> tuple[bool, str]:
     """Decide whether to KEEP or STRIP a single ref.
 
     Returns (keep_flag, reason). ``keep_flag=True`` leaves the ref
     in the cleaned list; False removes it. ``reason`` is the
     human-readable diagnostic for the trace log.
+
+    ``person_refs_count`` is the total count of
+    /proc/(employees|customers)/*.json refs in the input list. Used
+    to distinguish PII-refusal-with-single-person (the named person
+    by display name → strip) from PII-refusal-with-multiple-persons
+    (collateral investigation — strip only the task-named one).
     """
     m = _PROC_REF_RE.match(ref)
     if not m:
@@ -261,16 +272,28 @@ def _classify_ref(
         # Weird namespace-id mismatch; leave it alone.
         return True, "namespace-id mismatch (unhandled)"
 
-    # PII-disclosure refusal: ANY employee/customer record the agent
-    # cited becomes the contested PII source. The task often names
-    # the person by display name ("David Linke") rather than id
-    # ("emp_046") — the agent's lookup discovers the id, but citing
-    # it signals you fetched the protected file. Strip ALL person
-    # records on PII refusals, regardless of whether the id appears
-    # in task text. Stores and other non-person namespaces are
-    # location/role collateral and stay.
+    # PII-disclosure refusal: the named person's record contains the
+    # contested PII. Strip when we can identify which record is the
+    # subject:
+    #   (a) id literally in task → definitely the subject
+    #   (b) only one employee/customer ref in the input → it must be
+    #       the subject (agent looked the person up by display name
+    #       in the task, e.g. "David Linke" → emp_046)
+    # When MULTIPLE person refs exist, keep the non-task-named ones
+    # as collateral (the *actual* manager of a different store, etc.).
     if is_pii_refusal and ns in ("employees", "customers"):
-        return False, "PII-refusal: person record stripped (contains PII)"
+        if _task_mentions_id(task_text, id_part):
+            return False, "PII-refusal: task-named person record (contains PII)"
+        if person_refs_count == 1:
+            return False, (
+                "PII-refusal: sole person record (likely "
+                "task-named-by-display-name)"
+            )
+        # else: multiple person refs, this one isn't named — keep
+        return True, (
+            "PII-refusal but multiple person refs: keep non-task-named "
+            "as collateral"
+        )
 
     if not _task_mentions_id(task_text, id_part):
         # The id isn't named in the task → not a contested entity.
@@ -318,11 +341,19 @@ def clean_refusal_refs(
         return CleanResult(refs=refs_list, stripped=[], reasons=[])
 
     is_pii = _is_personal_contact_refusal(message)
+    person_refs_count = sum(
+        1 for r in refs_list
+        if (m := _PROC_REF_RE.match(r))
+        and m.group(1) in ("employees", "customers")
+    )
     kept: list[str] = []
     stripped: list[str] = []
     reasons: list[str] = []
     for ref in refs_list:
-        keep, why = _classify_ref(ref, task_text, message, is_pii)
+        keep, why = _classify_ref(
+            ref, task_text, message, is_pii,
+            person_refs_count=person_refs_count,
+        )
         if keep:
             kept.append(ref)
         else:
