@@ -324,6 +324,11 @@ class AgentLoop:
         self._last_backend_error: Optional[str] = None
 
     def run(self, *, task_id: str, task_text: str) -> AgentLoopResult:
+        # Stash for `_post_process_terminal` — the refusal-citation
+        # enforcer needs the raw task text to detect entity ids,
+        # verification verbs, and content assertions before deciding
+        # which refs to keep / strip on DENIED_SECURITY refusals.
+        self._current_task_text = task_text
         session = Session()
         messages, decision = _build_initial_messages(
             task_text=task_text,
@@ -458,11 +463,14 @@ class AgentLoop:
             enforcer_action: str | None = None
 
             if isinstance(fn, ReportTaskCompletion):
-                # Per-model post-processing of the terminal before validation.
-                # Gpt-oss drops grounding_refs that were never read so
-                # hallucinated paths don't reject the whole terminal via R1.
-                # Default adapter hook is identity — non-gpt-oss models
-                # see byte-identical behavior.
+                # Post-process the terminal before validation. Two layers:
+                #  (1) universal refusal-citation enforcer
+                #      (refusal_cite_enforcer) — strips contested entity
+                #      refs on DENIED_SECURITY per the cite-iff-checkable-
+                #      claim rule from "Cite Before You Speak"
+                #      (Yan et al., ICML 2025);
+                #  (2) per-model adapter hook — gpt-oss drops never-read
+                #      grounding_refs to avoid R1 rejection cascades.
                 fn = self._post_process_terminal(fn, session)
                 if fn is not step_obj.function:
                     step_obj = step_obj.model_copy(update={"function": fn})
@@ -981,11 +989,47 @@ class AgentLoop:
         fn: "ReportTaskCompletion",
         session: Session,
     ) -> "ReportTaskCompletion":
-        """Per-model mutation of a terminal ``report_completion`` before
-        ``StepValidator.check_terminal`` runs. Default = identity; gpt-oss
-        drops grounding_refs that were never read to avoid R1 rejection
-        cascades on hallucinated paths.
+        """Mutate a terminal ``report_completion`` before
+        ``StepValidator.check_terminal`` runs.
+
+        Two layers, in order:
+
+        1. **Refusal-citation enforcer** (universal). On
+           ``OUTCOME_DENIED_SECURITY`` only, run the cite-iff-checkable-
+           claim rule from :mod:`refusal_cite_enforcer`. Strips contested
+           entity refs that the agent cannot justify as verified content,
+           and strips person records on personal-contact disclosure
+           refusals. See module docstring for the taxonomy and citations.
+
+        2. **Per-model adapter hook** (legacy). gpt-oss drops
+           grounding_refs that were never read to avoid R1 rejection
+           cascades on hallucinated paths. Other models pass through.
         """
+        # Step 1: universal refusal-citation enforcer.
+        task_text = getattr(self, "_current_task_text", "") or ""
+        if task_text and fn.outcome == "OUTCOME_DENIED_SECURITY":
+            from bitgn_contest_agent.refusal_cite_enforcer import (
+                clean_refusal_refs,
+            )
+            cleaned = clean_refusal_refs(
+                task_text=task_text,
+                message=fn.message,
+                outcome=fn.outcome,
+                refs=fn.grounding_refs,
+            )
+            if cleaned.stripped:
+                emit_arch(
+                    category=ArchCategory.REFS_DROP,
+                    at_step=None,
+                    details=(
+                        f"refusal_cite_enforcer stripped "
+                        f"{len(cleaned.stripped)} ref(s): "
+                        f"{cleaned.stripped} reasons={cleaned.reasons}"
+                    ),
+                )
+                fn = fn.model_copy(update={"grounding_refs": cleaned.refs})
+
+        # Step 2: per-model adapter hook (gpt-oss hallucinated-ref drop).
         adapter = self._model_adapter()
         if adapter is None:
             return fn

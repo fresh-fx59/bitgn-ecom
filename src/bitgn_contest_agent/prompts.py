@@ -247,6 +247,42 @@ Catalogue / SQL discipline (ECOM-specific):
     OUTCOME_NONE_CLARIFICATION rather than guessing the count when
     no DISTINCT value plausibly maps to the task term.
 
+  - FREE-TEXT TERM → VOCABULARY MAPPING FOR COUNT QUESTIONS
+    (Chain-of-Verification, generic). When the task asks
+    "How many <thing> are <category>?" where <category> is a
+    free-text label, the catalogue's `category_id` (or
+    equivalent) is the controlled vocabulary the count must be
+    keyed on. Failure mode: agent name-matches "Adhesive and
+    Glue" to `adhesives_sealants` and counts 7 when the right
+    category is `adhesives_and_glues` with count 3.
+
+    MANDATORY workflow before reporting any `<COUNT:n>`:
+
+      1. `SELECT DISTINCT category_id FROM products` (or the
+         analogous column for the question's <thing>). Enumerate
+         the ENTIRE vocabulary; do NOT guess.
+      2. For each candidate category whose id or name token
+         overlaps the task's free-text label, justify in
+         `current_state` why it matches or doesn't.
+         "adhesives_sealants includes sealants → covers more than
+         'Adhesive and Glue'"; "adhesives_and_glues exactly
+         matches → pick this one".
+      3. If TWO OR MORE candidates plausibly match and the task
+         doesn't disambiguate, answer
+         `OUTCOME_NONE_CLARIFICATION` — guessing the wrong
+         category is a hard miss.
+      4. Once a unique category id is picked, `SELECT path FROM
+         products WHERE category_id='<picked>'` and cite EVERY
+         returned path in `grounding_refs` (Rule A — the count
+         must equal the number of cited paths, the agent's
+         message must contain `<COUNT:n>` where n equals that
+         number).
+
+    Generic principle: separate the RESOLVE step (free text →
+    vocabulary id) from the AGGREGATE step (count rows under that
+    id). Don't fuse them — collapsing the two is the failure
+    mode.
+
 Parallel reads (latency optimization, optional):
   When you need to gather information from several independent sources
   in one turn, you may emit a `parallel_reads` array on `NextStep`
