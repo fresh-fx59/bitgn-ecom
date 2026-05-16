@@ -87,7 +87,8 @@ class Snapshot:
     required_refs: list[str] = field(default_factory=list)
     forbidden_refs: list[str] = field(default_factory=list)
     context_date: str | None = None
-    actor_id: str = "agent"
+    actor_id: str = "anonymous"
+    roles: str = "GUEST"
     source: str | None = None
     notes: str | None = None
 
@@ -111,7 +112,8 @@ class Snapshot:
             required_refs=list(m.get("required_refs") or []),
             forbidden_refs=list(m.get("forbidden_refs") or []),
             context_date=m.get("context_date"),
-            actor_id=m.get("actor_id") or "agent",
+            actor_id=m.get("actor_id") or "anonymous",
+            roles=m.get("roles") or "GUEST",
             source=m.get("source"),
             notes=m.get("notes"),
         )
@@ -238,6 +240,7 @@ def _run_one(
             tmp_ws,
             context_date=snap.context_date,
             actor_id=snap.actor_id,
+            roles=snap.roles,
         )
         traced = TracingEcomClient(runtime, writer=None)
         adapter = EcomAdapter(runtime=traced, max_tool_result_bytes=64 * 1024)

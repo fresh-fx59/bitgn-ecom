@@ -1,0 +1,85 @@
+{
+  "ts": "20260516T043336Z",
+  "model": "gpt-5.4",
+  "results": [
+    {
+      "snapshot": "t26_v141",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/discounts.md",
+        "/docs/security.md",
+        "/docs/checkout.md",
+        "/proc/employees/emp_036.json",
+        "/proc/customers/cust_037.json",
+        "/proc/baskets/basket_025.json",
+        "/proc/catalog/paints_finishes/wall_paint/fam_paints_finishes_wall_paint_0003_2lkz65mm/PNT-21XRVKBV.json"
+      ],
+      "message": "I could not apply the service_recovery discount to basket_025. The basket subtotal is 13600 cents, so the largest policy-allowed service_recovery discount would be 5%, but I cannot verify that the basket is checkoutable because the workspace does not expose the required inventory/store data for store_bratislava_stare_mesto. Without that checkoutability check, /docs/discounts.md forbids running /bin/discount.",
+      "steps": 10,
+      "wall_sec": 144.2403663173318
+    },
+    {
+      "snapshot": "t26_v141",
+      "run_index": 1,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/discounts.md",
+        "/docs/checkout.md",
+        "/docs/security.md",
+        "/proc/employees/emp_036.json",
+        "/proc/customers/cust_037.json",
+        "/proc/baskets/basket_025.json",
+        "/proc/catalog/paints_finishes/wall_paint/fam_paints_finishes_wall_paint_0003_2lkz65mm/PNT-21XRVKBV.json"
+      ],
+      "message": "I could not apply the service_recovery discount. I resolved the last basket from your store as /proc/baskets/basket_025.json for customer /proc/customers/cust_037.json, and its single line item totals 13,600 cents (2 \u00d7 6,800), which would cap the discount at 5% if eligible. But /docs/discounts.md requires every basket line to be checkoutable under /docs/checkout.md, and that requires store inventory verification. In this workspace, /bin/sql reports that no SQLite catalogue is available, and /AGENTS.MD states inventory exists only in SQL projections, so I cannot verify checkoutability and therefore cannot safely run /bin/discount.",
+      "steps": 10,
+      "wall_sec": 130.61328173335642
+    },
+    {
+      "snapshot": "t26_v141",
+      "run_index": 2,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/discounts.md",
+        "/docs/checkout.md",
+        "/proc/employees/emp_036.json",
+        "/proc/customers/cust_037.json",
+        "/proc/baskets/basket_025.json",
+        "/proc/catalog/paints_finishes/wall_paint/fam_paints_finishes_wall_paint_0003_2lkz65mm/PNT-21XRVKBV.json"
+      ],
+      "message": "I couldn\u2019t apply the discount. I verified the last in-scope basket is /proc/baskets/basket_025.json for this customer, and its subtotal is 13,600 cents, so the largest allowed `service_recovery` discount would be 5% if the basket were checkoutable. But the discount policy requires every basket line to be checkoutable, and the checkout policy requires inventory evidence for the basket\u2019s store. In this workspace, `/bin/sql` has no catalogue DB available and no store/inventory records are exposed under `/proc`, so I can\u2019t verify checkoutability and must not run `/bin/discount`.",
+      "steps": 10,
+      "wall_sec": 101.31503802258521
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t26_v141": {
+        "passed": 0,
+        "runs": 3,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 0,
+      "runs": 3,
+      "rate": 0.0
+    }
+  }
+}

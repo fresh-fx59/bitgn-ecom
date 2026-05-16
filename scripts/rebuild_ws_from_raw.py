@@ -296,6 +296,44 @@ def load_agent_outcome(jsonl_path: Path) -> str | None:
     return None
 
 
+def extract_actor_from_dump(
+    matched: list[dict],
+) -> tuple[str | None, str | None, str | None]:
+    """Pull the PROD trial's `/bin/id` stdout from the matched dump
+    records and parse out actor + roles + the `/bin/date` stamp.
+
+    Returns (actor_id, roles, context_date). The local mock defaults
+    to anonymous/GUEST; without this, a rebuilt snapshot of a trial
+    that ran as an employee (e.g. emp_036, discount_manager) would
+    behave incorrectly locally because the agent's prepass would see
+    GUEST and refuse role-gated actions.
+    """
+    user_re = re.compile(r"^user:\s*(.+)$", re.MULTILINE)
+    roles_re = re.compile(r"^roles:\s*(.+)$", re.MULTILINE)
+    actor: str | None = None
+    roles: str | None = None
+    ctx_date: str | None = None
+    for rec in matched:
+        if rec.get("op") != "exec":
+            continue
+        req = rec.get("request") or {}
+        resp = rec.get("response") or {}
+        path = req.get("path") or ""
+        stdout = (resp.get("stdout") or "")
+        if path == "/bin/id" and stdout:
+            m_user = user_re.search(stdout)
+            m_roles = roles_re.search(stdout)
+            if m_user and actor is None:
+                actor = m_user.group(1).strip()
+            if m_roles and roles is None:
+                roles = m_roles.group(1).strip()
+        elif path == "/bin/date" and stdout and ctx_date is None:
+            s = stdout.strip()
+            if s:
+                ctx_date = s
+    return actor, roles, ctx_date
+
+
 def derive_grader_hints(score_detail: list[str]) -> dict[str, Any]:
     """Map the grader's failure strings to metadata fields.
 
@@ -388,9 +426,20 @@ def rebuild_task(
     if expected_outcome is None:
         expected_outcome = load_agent_outcome(trace_path)
 
+    # Pull the trial's actual identity + clock from the dump's
+    # /bin/id and /bin/date probes. Without this the snapshot would
+    # default to anonymous/GUEST locally even when the PROD trial
+    # ran as an employee or customer — local A/B would mis-classify
+    # role-gated tasks.
+    actor_id, roles, ctx_date = extract_actor_from_dump(matched)
+    if ctx_date is None:
+        ctx_date = tt.context_date
+
     metadata = {
         "instruction": instruction,
-        "context_date": tt.context_date,
+        "context_date": ctx_date,
+        "actor_id": actor_id or "anonymous",
+        "roles": roles or "GUEST",
         "source": f"rebuilt from {dump_dir.name} on {datetime.now(timezone.utc).strftime('%Y-%m-%d')}",
         "notes": (
             f"Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. "
@@ -398,7 +447,8 @@ def rebuild_task(
             f"Window: started_at={tt.ts_first}. "
             f"Trial outcome was {bench_meta.get('outcome') or 'unknown'} "
             f"with score {bench_meta.get('score')}; "
-            f"score_detail={bench_meta.get('score_detail') or []}."
+            f"score_detail={bench_meta.get('score_detail') or []}. "
+            f"Identity: actor={actor_id!r} roles={roles!r}."
         ),
         "expected_outcome": expected_outcome,
         "required_refs": grader_hints["required_refs"],

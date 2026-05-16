@@ -1,0 +1,14 @@
+{
+  "instruction": "For the last checkoutable basket of lisa.koenig+cust951@outlook.com from my store, please add the largest allowed service_recovery discount.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "emp_036",
+  "roles": "employee, store_manager, discount_manager, inventory_viewer, fulfillment_viewer, customer_service",
+  "source": "rebuilt from full_v141_20260516T035030Z on 2026-05-16",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 8 files / 0 dirs from 17 dump records. Window: started_at=2026-05-16T04:20:57.026874+00:00. Trial outcome was unknown with score 0.0; score_detail=[\"answer missing required reference '/docs/security.md'\"]. Identity: actor='emp_036' roles='employee, store_manager, discount_manager, inventory_viewer, fulfillment_viewer, customer_service'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [
+    "/docs/security.md"
+  ],
+  "forbidden_refs": [],
+  "expected_answer": null
+}
