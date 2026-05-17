@@ -1,9 +1,11 @@
 """CLI argument parsing — no live API calls."""
 from __future__ import annotations
 
+import os
+
 import pytest
 
-from bitgn_contest_agent.cli import build_parser
+from bitgn_contest_agent.cli import build_parser, _apply_raw_capture_default
 
 
 def test_parser_run_task_requires_task_id() -> None:
@@ -19,6 +21,39 @@ def test_parser_run_benchmark_defaults() -> None:
     assert ns.command == "run-benchmark"
     assert ns.runs == 1
     assert ns.max_parallel is None  # falls through to config default
+    assert ns.no_raw_capture is False
+
+
+def test_raw_capture_default_on(monkeypatch: pytest.MonkeyPatch) -> None:
+    parser = build_parser()
+    ns = parser.parse_args(["run-benchmark"])
+    monkeypatch.delenv("BITGN_TRACE_RAW_RESPONSES", raising=False)
+    monkeypatch.delenv("BITGN_TRACE_RAW_DIR", raising=False)
+    _apply_raw_capture_default(ns, run_kind="bench")
+    assert os.environ.get("BITGN_TRACE_RAW_RESPONSES") == "1"
+    dir_ = os.environ.get("BITGN_TRACE_RAW_DIR") or ""
+    assert dir_.startswith("artifacts/raw_dumps/bench_")
+
+
+def test_raw_capture_opt_out(monkeypatch: pytest.MonkeyPatch) -> None:
+    parser = build_parser()
+    ns = parser.parse_args(["run-benchmark", "--no-raw-capture"])
+    monkeypatch.delenv("BITGN_TRACE_RAW_RESPONSES", raising=False)
+    monkeypatch.delenv("BITGN_TRACE_RAW_DIR", raising=False)
+    _apply_raw_capture_default(ns, run_kind="bench")
+    assert os.environ.get("BITGN_TRACE_RAW_RESPONSES") is None
+    assert os.environ.get("BITGN_TRACE_RAW_DIR") is None
+
+
+def test_raw_capture_respects_explicit_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    parser = build_parser()
+    ns = parser.parse_args(["run-benchmark"])
+    monkeypatch.setenv("BITGN_TRACE_RAW_RESPONSES", "0")
+    monkeypatch.setenv("BITGN_TRACE_RAW_DIR", "/custom/path")
+    _apply_raw_capture_default(ns, run_kind="bench")
+    # already-set env wins — default does not overwrite.
+    assert os.environ.get("BITGN_TRACE_RAW_RESPONSES") == "0"
+    assert os.environ.get("BITGN_TRACE_RAW_DIR") == "/custom/path"
 
 
 def test_parser_run_benchmark_accepts_output_path() -> None:

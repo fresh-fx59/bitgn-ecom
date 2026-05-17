@@ -116,6 +116,7 @@ Suggested template:
       --log-dir logs
     ```
     Pre-launch checklist: probe the proxy with `curl -sS -H "Authorization: Bearer $CLIPROXY_API_KEY" "$CLIPROXY_BASE_URL/models"` to confirm the selected `AGENT_MODEL` (e.g. `gpt-5.4`) is listed; run `scripts/local_runner.py --workspace tests/fixtures/local_ecom --prepass-only` and `pytest` to validate adapter/local-mock alignment before burning real trials (memory: `feedback_local_first`).
+  - **Raw-response capture is ON by default for `run-benchmark`** (since v0.1.45). Each bench writes a per-process protobuf request/response dump to `artifacts/raw_dumps/bench_<UTC-timestamp>/ecom_responses.<pid>.jsonl`, which `scripts/rebuild_ws_from_raw.py` consumes to materialise byte-accurate local snapshots from failed trials. Disk cost is small (~600KB per 30-task run). To opt out, pass `--no-raw-capture` or set `BITGN_TRACE_RAW_RESPONSES=0` before launch. To redirect, set `BITGN_TRACE_RAW_DIR=...` before launch (user-set env always wins). After a failing bench, point `rebuild_ws_from_raw.py --dump-dir` at this auto-created directory.
   - PROD smoke test (first 5 trials from PROD leaderboard, cheap validation):
     ```
     set -a && source .worktrees/plan-b/.env && set +a

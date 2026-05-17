@@ -86,6 +86,15 @@ def build_parser() -> argparse.ArgumentParser:
                                 "skips trials already DONE/ERROR and submits with force=True. "
                                 "Implies --runs 1. If passed with no value, reads run_id "
                                 "from .last_run_id (written on start_run).")
+    run_bench.add_argument("--no-raw-capture", action="store_true", default=False,
+                           help="disable the default per-trial raw protobuf "
+                                "request/response dump (BITGN_TRACE_RAW_RESPONSES). "
+                                "Raw capture is ON by default for bench runs so any "
+                                "failed trial can be rebuilt into a byte-accurate local "
+                                "snapshot via scripts/rebuild_ws_from_raw.py without "
+                                "burning another PROD trial. Disk cost is ~600KB per "
+                                "30-task run; opt out only when running on a "
+                                "very-small-disk box.")
 
     tri = subs.add_parser("triage", help="classify bench failures")
     tri.add_argument("summary", nargs="?", default=None,
@@ -103,6 +112,43 @@ _ADAPTER_DRIVEN_ENV_VARS = (
     "LLM_HTTP_TIMEOUT_SEC",
     "AGENT_REASONING_EFFORT",
 )
+
+
+def _apply_raw_capture_default(args: argparse.Namespace, *, run_kind: str) -> None:
+    """Default-on per-trial raw protobuf request/response capture for
+    bench runs, so every failed trial leaves a byte-accurate dump under
+    ``artifacts/raw_dumps/<bench_run_id>/`` and can be rebuilt into a
+    local snapshot via ``scripts/rebuild_ws_from_raw.py`` without
+    burning another PROD trial.
+
+    Precedence — user wins:
+      * ``--no-raw-capture`` (CLI) → capture OFF, env left as-is.
+      * ``BITGN_TRACE_RAW_RESPONSES`` already set (env) → respected.
+      * Otherwise → capture ON, dump dir defaulted to
+        ``artifacts/raw_dumps/<run_kind>_<UTC-timestamp>/``.
+
+    Idempotent: re-calling does not overwrite values it already wrote
+    (the env-already-set short-circuit covers that path too).
+
+    Why default-on: a single bench costs ~600KB of dump per 30 tasks
+    (v0.1.41 measurement on `full_v141`). The cost of a missed dump is
+    a full PROD rerun for the same task — vastly more expensive than
+    a kilobyte of disk.
+    """
+    if getattr(args, "no_raw_capture", False):
+        return
+    if os.environ.get("BITGN_TRACE_RAW_RESPONSES"):
+        return
+    os.environ["BITGN_TRACE_RAW_RESPONSES"] = "1"
+    if not os.environ.get("BITGN_TRACE_RAW_DIR"):
+        ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        os.environ["BITGN_TRACE_RAW_DIR"] = (
+            f"artifacts/raw_dumps/{run_kind}_{ts}"
+        )
+    logging.getLogger(__name__).info(
+        "raw-response capture ON (default) → %s",
+        os.environ["BITGN_TRACE_RAW_DIR"],
+    )
 
 
 def _apply_adapter_profile(cfg: AgentConfig) -> AgentConfig:
@@ -582,6 +628,7 @@ def _run_tasks_and_summarize(
 
 def _cmd_run_benchmark(args: argparse.Namespace) -> int:
     cfg = _resolve_config(args)
+    _apply_raw_capture_default(args, run_kind="bench")
 
     # --smoke overrides task list and parallelism BEFORE harness/backend creation.
     # dataclasses.replace hits max_parallel_tasks a SECOND time (after _resolve_config
