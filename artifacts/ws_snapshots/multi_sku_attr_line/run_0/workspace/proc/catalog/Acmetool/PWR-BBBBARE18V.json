@@ -1,0 +1,18 @@
+{
+  "sku": "PWR-BBBBARE18V",
+  "path": "/proc/catalog/Acmetool/PWR-BBBBARE18V.json",
+  "category_id": "power_tools",
+  "kind_id": "cordless_drill_driver",
+  "family_id": "fam_power_tools_cordless_drill_driver_0099_acmeline",
+  "brand": "Acmetool",
+  "series": "Acmetool Pro Z9",
+  "model": "Z9-DR1",
+  "name": "Cordless Drill Driver",
+  "price_cents": 13900,
+  "price_currency": "EUR",
+  "properties": {
+    "voltage": "18 V",
+    "battery_platform": "18v-system",
+    "kit_contents": "bare tool"
+  }
+}

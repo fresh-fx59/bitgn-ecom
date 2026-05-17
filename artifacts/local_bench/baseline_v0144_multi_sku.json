@@ -1,0 +1,161 @@
+{
+  "ts": "20260517T175152Z",
+  "model": "gpt-5.4",
+  "results": [
+    {
+      "snapshot": "multi_sku_attr_line",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Acmetool/PWR-AAACASE18V.json",
+        "/proc/stores/store_acmetown_central.json"
+      ],
+      "message": "0",
+      "steps": 9,
+      "wall_sec": 94.39968204125762
+    },
+    {
+      "snapshot": "multi_sku_attr_line",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-AAACASE18V.json"
+      ],
+      "message": "0",
+      "steps": 8,
+      "wall_sec": 75.58961027767509
+    },
+    {
+      "snapshot": "multi_sku_attr_line",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-AAACASE18V.json"
+      ],
+      "message": "0",
+      "steps": 7,
+      "wall_sec": 75.2335695931688
+    },
+    {
+      "snapshot": "multi_sku_attr_line",
+      "run_index": 3,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Acmetool/PWR-AAACASE18V.json",
+        "/proc/stores/store_acmetown_central.json"
+      ],
+      "message": "0",
+      "steps": 8,
+      "wall_sec": 115.1924335192889
+    },
+    {
+      "snapshot": "multi_sku_attr_line",
+      "run_index": 4,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-AAACASE18V.json"
+      ],
+      "message": "0",
+      "steps": 9,
+      "wall_sec": 129.02666034270078
+    },
+    {
+      "snapshot": "multi_sku_attr_line",
+      "run_index": 5,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Acmetool/PWR-AAACASE18V.json",
+        "/proc/stores/store_acmetown_central.json"
+      ],
+      "message": "0",
+      "steps": 9,
+      "wall_sec": 81.55756932497025
+    },
+    {
+      "snapshot": "multi_sku_attr_line",
+      "run_index": 6,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Acmetool/PWR-AAACASE18V.json",
+        "/proc/stores/store_acmetown_central.json"
+      ],
+      "message": "0",
+      "steps": 7,
+      "wall_sec": 98.76283625513315
+    },
+    {
+      "snapshot": "multi_sku_attr_line",
+      "run_index": 7,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Acmetool/PWR-AAACASE18V.json",
+        "/proc/stores/store_acmetown_central.json"
+      ],
+      "message": "0",
+      "steps": 8,
+      "wall_sec": 86.1999238440767
+    },
+    {
+      "snapshot": "multi_sku_attr_line",
+      "run_index": 8,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Acmetool/PWR-AAACASE18V.json",
+        "/proc/stores/store_acmetown_central.json"
+      ],
+      "message": "0",
+      "steps": 8,
+      "wall_sec": 105.89300046581775
+    },
+    {
+      "snapshot": "multi_sku_attr_line",
+      "run_index": 9,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-AAACASE18V.json"
+      ],
+      "message": "0",
+      "steps": 9,
+      "wall_sec": 82.24751804023981
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "multi_sku_attr_line": {
+        "passed": 10,
+        "runs": 10,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 10,
+      "runs": 10,
+      "rate": 1.0
+    }
+  }
+}

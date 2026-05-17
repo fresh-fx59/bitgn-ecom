@@ -1,0 +1,18 @@
+{
+  "sku": "PWR-P1RIGHT",
+  "path": "/proc/catalog/Acmetool/PWR-P1RIGHT.json",
+  "category_id": "power_tools",
+  "kind_id": "cordless_drill_driver",
+  "family_id": "fam_pwr-p1right_seed",
+  "brand": "Acmetool",
+  "series": "Acmetool Pro Z9",
+  "model": "Z9-DR1",
+  "name": "Cordless Drill Driver",
+  "price_cents": 18900,
+  "price_currency": "EUR",
+  "properties": {
+    "voltage": "18 V",
+    "battery_platform": "18v-system",
+    "kit_contents": "case"
+  }
+}

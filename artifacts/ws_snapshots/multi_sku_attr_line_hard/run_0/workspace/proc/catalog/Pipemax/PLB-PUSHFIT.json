@@ -1,0 +1,18 @@
+{
+  "sku": "PLB-PUSHFIT",
+  "path": "/proc/catalog/Pipemax/PLB-PUSHFIT.json",
+  "category_id": "plumbing",
+  "kind_id": "pipe_fitting",
+  "family_id": "fam_plb-pushfit_seed",
+  "brand": "Pipemax",
+  "series": "Pipemax Professional Sanflow 7QO-NNG",
+  "model": "7QO-NNG",
+  "name": "Pipe Fitting",
+  "price_cents": 4400,
+  "price_currency": "EUR",
+  "properties": {
+    "fitting_type": "pipe fitting",
+    "diameter": "22 mm",
+    "connection_type": "push fit"
+  }
+}

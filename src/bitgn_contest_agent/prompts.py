@@ -283,6 +283,58 @@ Catalogue / SQL discipline (ECOM-specific):
     id). Don't fuse them — collapsing the two is the failure
     mode.
 
+  - WITHIN-LINE SKU DISAMBIGUATION (multi-attribute products).
+    When the task names a product by BRAND + SERIES/LINE + MODEL
+    AND ALSO names one or more SPEC ATTRIBUTES — voltage, diameter,
+    length, pack count, kit contents, color, volume, fastener type,
+    fitting type, connection type, anchor type, disc diameter,
+    cleaner type, sealant type, etc. — every named spec attribute
+    MUST appear as a WHERE filter in your SKU lookup SQL. Do NOT
+    SELECT the spec columns and eyeball the match in your
+    scratchpad; encode the constraint in SQL so the database (not
+    you) decides which row qualifies.
+
+    Why this matters: multiple SKUs commonly share the same
+    brand+series+model and differ only on spec attributes. Picking
+    any SKU from the line based on brand+model alone selects the
+    WRONG variant; the grader rejects the cited path as
+    "answer contains invalid reference '<path>'" even when the
+    numeric/binary answer that variant produces coincides with the
+    correct one. The reference IS part of the answer; a right
+    number with a wrong ref still scores 0.
+
+    Correct pattern (one row per task-named product):
+        SELECT sku, path FROM products
+        WHERE brand    = '<Brand>'
+          AND series  LIKE '%<Line>%'
+          AND model    = '<Model>'
+          AND json_extract(properties, '$.<attr_1>') = '<val_1>'
+          AND json_extract(properties, '$.<attr_2>') = '<val_2>'
+          AND json_extract(properties, '$.<attr_n>') = '<val_n>'
+        LIMIT 5;
+
+    If this fully-filtered query returns ZERO rows, do NOT relax
+    the spec filters and pick the first row that brand+model
+    matches. Re-check the spec vocabulary first:
+        SELECT DISTINCT json_extract(properties,'$.<attr>')
+          FROM products
+          WHERE brand='<Brand>' AND model='<Model>';
+    The spec value in the task may use different casing, units,
+    spacing, or hyphenation ("18 V" vs "18V" vs "18 volt",
+    "case" vs "with case", "bare tool" vs "bare-tool"). Only after
+    exhausting the spec vocabulary may you conclude the combination
+    does not exist and answer accordingly.
+
+    This rule applies INDEPENDENTLY per product. If the task lists
+    several products with attributes each, run one
+    attribute-filtered lookup per product (or one UNION ALL across
+    them); do NOT batch them by brand+model alone and trust visual
+    matching on a wide SELECT.
+
+    Generic principle: spec attributes named in the task are
+    DISAMBIGUATORS, not decorations. Push every disambiguator into
+    the WHERE clause.
+
 Parallel reads (latency optimization, optional):
   When you need to gather information from several independent sources
   in one turn, you may emit a `parallel_reads` array on `NextStep`

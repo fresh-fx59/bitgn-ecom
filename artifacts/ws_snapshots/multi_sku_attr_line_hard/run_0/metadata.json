@@ -1,0 +1,25 @@
+{
+  "instruction": "How many of these products have at least 1 items available in Acmetown Central hardware store today: the Cordless Drill Driver from Acmetool in the Acmetool Pro Z9 Z9-DR1 Cordless Drill Driver line that has voltage 18 V, battery platform 18v-system, and kit contents case,the Nut Bolt and Washer from Boltech in the Boltech Industrial PRO 4F1-IM PRO 4F1-IM-22 Nut Bolt and Washer line that has fastener type bolt, diameter 12 mm, length 40 mm, and pack count 100 pcs,the Anchor and Wall Plug from Fastonix in the Fastonix MaxFix MX2-A77 MX2-A77 Anchor and Wall Plug line that has anchor type cavity fixing,the Corded Angle Grinder from Grindex in the Grindex Compact GC-PRO 9KX GC-PRO 9KX Corded Angle Grinder line that has disc diameter 125 mm,the Pipe Fitting from Pipemax in the Pipemax Professional Sanflow 7QO-NNG 7QO-NNG Pipe Fitting line that has fitting type compression coupler and diameter 32 mm,the Pipe Fitting from Pipemax in the Pipemax Professional Sanflow 7QO-NNG 7QO-NNG Pipe Fitting line that has fitting type pipe fitting, diameter 15 mm, and connection type threaded? Answer in exactly format \"%d\" (no quotes)",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": "3",
+  "required_refs": [
+    "/proc/stores/store_acmetown_central.json",
+    "/proc/catalog/Acmetool/PWR-P1RIGHT.json",
+    "/proc/catalog/Fastonix/FST-P3ONLY.json",
+    "/proc/catalog/Pipemax/PLB-P5RIGHT.json"
+  ],
+  "forbidden_refs": [
+    "/proc/catalog/Acmetool/PWR-P1BARE.json",
+    "/proc/catalog/Acmetool/PWR-P1LOW.json",
+    "/proc/catalog/Boltech/FST-P2SMALL.json",
+    "/proc/catalog/Boltech/FST-P2NUT.json",
+    "/proc/catalog/Boltech/FST-P2WASH.json",
+    "/proc/catalog/Grindex/PWR-P4BIG.json",
+    "/proc/catalog/Pipemax/PLB-PUSHFIT.json"
+  ],
+  "context_date": "2026-05-17T12:00:00Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "synthetic — exercises within-line SKU disambiguation at the same scale as the v0.1.44 PROD failure (v144 t14: 6 products in one question, each with multi-attribute spec, several multi-SKU lines). Brand/store names invented so no PROD vocabulary appears.",
+  "notes": "Six products in the question. Three product lines (Acmetool, Boltech, Grindex, Pipemax — wait, FOUR lines) have multiple SKUs that share brand+series+model and differ only on spec attributes. Only one SKU per line matches the full task spec. Inventory is designed so wrong-SKU picks would either inflate the answer count beyond 3 (Boltech, Grindex, Pipemax wrong SKUs all have stock) or cite a forbidden path even when the count happens to coincide. Correct answer: 3 (P1 Acmetool right SKU stock 2; P3 Fastonix single SKU stock 1; P5 Pipemax compression-coupler stock 3). An agent that filters only by brand+series+model fails both required_refs and forbidden_refs (likely both, given the wrong-SKU inventory is non-zero)."
+}

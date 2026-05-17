@@ -1,0 +1,181 @@
+{
+  "ts": "20260517T185651Z",
+  "model": "gpt-5.4",
+  "results": [
+    {
+      "snapshot": "multi_sku_attr_line_hard",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-P1RIGHT.json",
+        "/proc/catalog/Fastonix/FST-P3ONLY.json",
+        "/proc/catalog/Pipemax/PLB-P5RIGHT.json"
+      ],
+      "message": "3",
+      "steps": 7,
+      "wall_sec": 80.6895559662953
+    },
+    {
+      "snapshot": "multi_sku_attr_line_hard",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-P1RIGHT.json",
+        "/proc/catalog/Fastonix/FST-P3ONLY.json",
+        "/proc/catalog/Pipemax/PLB-P5RIGHT.json"
+      ],
+      "message": "3",
+      "steps": 8,
+      "wall_sec": 98.88334523048252
+    },
+    {
+      "snapshot": "multi_sku_attr_line_hard",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-P1RIGHT.json",
+        "/proc/catalog/Fastonix/FST-P3ONLY.json",
+        "/proc/catalog/Pipemax/PLB-P5RIGHT.json"
+      ],
+      "message": "3",
+      "steps": 7,
+      "wall_sec": 106.36004415899515
+    },
+    {
+      "snapshot": "multi_sku_attr_line_hard",
+      "run_index": 3,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-P1RIGHT.json",
+        "/proc/catalog/Fastonix/FST-P3ONLY.json",
+        "/proc/catalog/Pipemax/PLB-P5RIGHT.json"
+      ],
+      "message": "3",
+      "steps": 6,
+      "wall_sec": 89.98570429161191
+    },
+    {
+      "snapshot": "multi_sku_attr_line_hard",
+      "run_index": 4,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-P1RIGHT.json",
+        "/proc/catalog/Fastonix/FST-P3ONLY.json",
+        "/proc/catalog/Pipemax/PLB-P5RIGHT.json"
+      ],
+      "message": "3",
+      "steps": 7,
+      "wall_sec": 103.66649583168328
+    },
+    {
+      "snapshot": "multi_sku_attr_line_hard",
+      "run_index": 5,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-P1RIGHT.json",
+        "/proc/catalog/Fastonix/FST-P3ONLY.json",
+        "/proc/catalog/Pipemax/PLB-P5RIGHT.json"
+      ],
+      "message": "3",
+      "steps": 9,
+      "wall_sec": 191.2168860444799
+    },
+    {
+      "snapshot": "multi_sku_attr_line_hard",
+      "run_index": 6,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-P1RIGHT.json",
+        "/proc/catalog/Fastonix/FST-P3ONLY.json",
+        "/proc/catalog/Pipemax/PLB-P5RIGHT.json"
+      ],
+      "message": "3",
+      "steps": 6,
+      "wall_sec": 76.00208145566285
+    },
+    {
+      "snapshot": "multi_sku_attr_line_hard",
+      "run_index": 7,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-P1RIGHT.json",
+        "/proc/catalog/Fastonix/FST-P3ONLY.json",
+        "/proc/catalog/Pipemax/PLB-P5RIGHT.json"
+      ],
+      "message": "3",
+      "steps": 9,
+      "wall_sec": 102.48157085292041
+    },
+    {
+      "snapshot": "multi_sku_attr_line_hard",
+      "run_index": 8,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-P1RIGHT.json",
+        "/proc/catalog/Fastonix/FST-P3ONLY.json",
+        "/proc/catalog/Pipemax/PLB-P5RIGHT.json"
+      ],
+      "message": "3",
+      "steps": 7,
+      "wall_sec": 86.50944380555302
+    },
+    {
+      "snapshot": "multi_sku_attr_line_hard",
+      "run_index": 9,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-P1RIGHT.json",
+        "/proc/catalog/Fastonix/FST-P3ONLY.json",
+        "/proc/catalog/Pipemax/PLB-P5RIGHT.json"
+      ],
+      "message": "3",
+      "steps": 7,
+      "wall_sec": 80.56559552904218
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "multi_sku_attr_line_hard": {
+        "passed": 10,
+        "runs": 10,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 10,
+      "runs": 10,
+      "rate": 1.0
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "sku": "PWR-P1LOW",
+  "path": "/proc/catalog/Acmetool/PWR-P1LOW.json",
+  "category_id": "power_tools",
+  "kind_id": "cordless_drill_driver",
+  "family_id": "fam_pwr-p1low_seed",
+  "brand": "Acmetool",
+  "series": "Acmetool Pro Z9",
+  "model": "Z9-DR1",
+  "name": "Cordless Drill Driver",
+  "price_cents": 15900,
+  "price_currency": "EUR",
+  "properties": {
+    "voltage": "12 V",
+    "battery_platform": "12v-system",
+    "kit_contents": "case"
+  }
+}

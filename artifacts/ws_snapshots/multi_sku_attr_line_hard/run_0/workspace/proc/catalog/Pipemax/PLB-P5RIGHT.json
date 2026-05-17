@@ -1,0 +1,17 @@
+{
+  "sku": "PLB-P5RIGHT",
+  "path": "/proc/catalog/Pipemax/PLB-P5RIGHT.json",
+  "category_id": "plumbing",
+  "kind_id": "pipe_fitting",
+  "family_id": "fam_plb-p5right_seed",
+  "brand": "Pipemax",
+  "series": "Pipemax Professional Sanflow 7QO-NNG",
+  "model": "7QO-NNG",
+  "name": "Pipe Fitting",
+  "price_cents": 3300,
+  "price_currency": "EUR",
+  "properties": {
+    "fitting_type": "compression coupler",
+    "diameter": "32 mm"
+  }
+}

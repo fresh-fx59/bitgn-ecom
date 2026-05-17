@@ -1,0 +1,16 @@
+{
+  "sku": "PWR-P4RIGHT",
+  "path": "/proc/catalog/Grindex/PWR-P4RIGHT.json",
+  "category_id": "power_tools",
+  "kind_id": "corded_angle_grinder",
+  "family_id": "fam_pwr-p4right_seed",
+  "brand": "Grindex",
+  "series": "Grindex Compact GC-PRO 9KX",
+  "model": "GC-PRO 9KX",
+  "name": "Corded Angle Grinder",
+  "price_cents": 8900,
+  "price_currency": "EUR",
+  "properties": {
+    "disc_diameter": "125 mm"
+  }
+}

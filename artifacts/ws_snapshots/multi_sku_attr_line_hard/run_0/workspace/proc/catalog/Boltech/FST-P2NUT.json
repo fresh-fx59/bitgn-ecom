@@ -1,0 +1,19 @@
+{
+  "sku": "FST-P2NUT",
+  "path": "/proc/catalog/Boltech/FST-P2NUT.json",
+  "category_id": "fasteners",
+  "kind_id": "nut_bolt_and_washer",
+  "family_id": "fam_fst-p2nut_seed",
+  "brand": "Boltech",
+  "series": "Boltech Industrial PRO 4F1-IM",
+  "model": "PRO 4F1-IM-22",
+  "name": "Nut Bolt and Washer",
+  "price_cents": 2500,
+  "price_currency": "EUR",
+  "properties": {
+    "fastener_type": "nut",
+    "diameter": "12 mm",
+    "length": "0 mm",
+    "pack_count": "200 pcs"
+  }
+}

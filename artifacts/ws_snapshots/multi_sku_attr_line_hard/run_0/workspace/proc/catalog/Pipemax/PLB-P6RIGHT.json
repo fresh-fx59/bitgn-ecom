@@ -1,0 +1,18 @@
+{
+  "sku": "PLB-P6RIGHT",
+  "path": "/proc/catalog/Pipemax/PLB-P6RIGHT.json",
+  "category_id": "plumbing",
+  "kind_id": "pipe_fitting",
+  "family_id": "fam_plb-p6right_seed",
+  "brand": "Pipemax",
+  "series": "Pipemax Professional Sanflow 7QO-NNG",
+  "model": "7QO-NNG",
+  "name": "Pipe Fitting",
+  "price_cents": 2800,
+  "price_currency": "EUR",
+  "properties": {
+    "fitting_type": "pipe fitting",
+    "diameter": "15 mm",
+    "connection_type": "threaded"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "instruction": "How many of these products have at least 1 items available in the Central hardware store of Acmetown today: the Cordless Drill Driver from Acmetool in the Acmetool Pro Z9 Z9-DR1 Cordless Drill Driver line that has voltage 18 V, battery platform 18v-system, and kit contents case? Answer in exactly format \"%d\" (no quotes)",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": "0",
+  "required_refs": [
+    "/proc/catalog/Acmetool/PWR-AAACASE18V.json",
+    "/proc/stores/store_acmetown_central.json"
+  ],
+  "forbidden_refs": [
+    "/proc/catalog/Acmetool/PWR-BBBBARE18V.json",
+    "/proc/catalog/Acmetool/PWR-CCCCASE12V.json"
+  ],
+  "context_date": "2026-05-17T12:00:00Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "synthetic — exercises within-line SKU disambiguation; modelled after a class of failure observed on PROD inventory-count tasks where multiple SKUs share brand+series+model and differ only on spec attributes (voltage, battery_platform, kit_contents, diameter, pack_count, etc.). Uses invented brand/store names ('Acmetool', 'Acmetown') so no PROD vocabulary appears.",
+  "notes": "Setup: 3 SKUs share brand='Acmetool' AND series='Acmetool Pro Z9' AND model='Z9-DR1' AND name='Cordless Drill Driver'. They differ ONLY on properties JSON keys voltage / battery_platform / kit_contents. Inventory at the single store has available_today=0 for all three SKUs — answer is '0' regardless of which SKU the agent picks. The forbidden_refs check is the discriminator: an agent that filters only on brand+series+model (and picks the first SKU it sees) cites the WRONG SKU's path and fails forbidden_refs. An agent that filters on every named spec attribute (voltage='18 V' AND battery_platform='18v-system' AND kit_contents='case') resolves to PWR-AAACASE18V and passes."
+}

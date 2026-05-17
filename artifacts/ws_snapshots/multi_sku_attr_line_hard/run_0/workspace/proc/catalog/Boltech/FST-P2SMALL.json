@@ -1,0 +1,19 @@
+{
+  "sku": "FST-P2SMALL",
+  "path": "/proc/catalog/Boltech/FST-P2SMALL.json",
+  "category_id": "fasteners",
+  "kind_id": "nut_bolt_and_washer",
+  "family_id": "fam_fst-p2small_seed",
+  "brand": "Boltech",
+  "series": "Boltech Industrial PRO 4F1-IM",
+  "model": "PRO 4F1-IM-22",
+  "name": "Nut Bolt and Washer",
+  "price_cents": 1900,
+  "price_currency": "EUR",
+  "properties": {
+    "fastener_type": "bolt",
+    "diameter": "10 mm",
+    "length": "30 mm",
+    "pack_count": "50 pcs"
+  }
+}

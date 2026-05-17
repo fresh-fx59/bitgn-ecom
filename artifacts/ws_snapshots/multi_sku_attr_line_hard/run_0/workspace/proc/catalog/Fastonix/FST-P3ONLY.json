@@ -1,0 +1,16 @@
+{
+  "sku": "FST-P3ONLY",
+  "path": "/proc/catalog/Fastonix/FST-P3ONLY.json",
+  "category_id": "fasteners",
+  "kind_id": "anchor_and_wall_plug",
+  "family_id": "fam_fst-p3only_seed",
+  "brand": "Fastonix",
+  "series": "Fastonix MaxFix MX2-A77",
+  "model": "MX2-A77",
+  "name": "Anchor and Wall Plug",
+  "price_cents": 4200,
+  "price_currency": "EUR",
+  "properties": {
+    "anchor_type": "cavity fixing"
+  }
+}
