@@ -1,4 +1,4 @@
-"""BitGN PAC1 contest agent package."""
+"""BitGN ECOM contest agent package (ported from the PAC1 lineage; see README)."""
 from __future__ import annotations
 
 from pathlib import Path

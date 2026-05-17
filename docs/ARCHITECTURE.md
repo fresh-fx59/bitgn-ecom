@@ -1,5 +1,15 @@
 # Architecture
 
+> **PAC1-era historical reference.** This document describes the PAC1
+> build the ECOM agent was ported from (`feat/perf-speedups`,
+> `58e22d1`, PROD 104/104). The high-level ReAct/SGR shape, validator/
+> enforcer pipeline, parallel reads, and trace writer still apply, but
+> the module names below reflect the PAC1 lineage — the runtime adapter
+> is now `adapter/ecom.py` (was the PCM adapter), and `enforcer.py` has
+> been split into `validator.py` and `refusal_cite_enforcer.py`. Use
+> the source tree as the source of truth; this document for structural
+> intent.
+
 Single-session SGR (structured-generation-reasoning) agent for BitGN PAC1.
 This document describes the runtime as it shipped on `feat/perf-speedups` at
 commit `58e22d1` (PROD score 104/104). It exists so future contest cycles

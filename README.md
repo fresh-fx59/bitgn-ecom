@@ -144,6 +144,8 @@ All tunables are set via environment variables:
 | `MAX_INFLIGHT_LLM` | `6` | Concurrent LLM calls across all workers |
 | `LOG_DIR` | `logs` | Trace output directory |
 | `BITGN_HARNESS_RAW_JSON` | (unset) | When `1`, falls back to urllib for `StartRun` (in case a future SDK pin lags the proto schema) |
+| `BITGN_TRACE_RAW_RESPONSES` | (auto `1` for `run-benchmark`) | Append every protobuf request/response pair to a per-process JSONL dump. `run-benchmark` defaults this ON since v0.1.45 (pass `--no-raw-capture` to disable); other entry points are still opt-in. Powers `scripts/rebuild_ws_from_raw.py` for byte-accurate snapshot rebuilds. |
+| `BITGN_TRACE_RAW_DIR` | `artifacts/raw_dumps/bench_<UTC-ts>/` (auto for `run-benchmark`) | Directory the raw-response dump is written to. User-set value wins over the auto-default. |
 
 ---
 
@@ -158,15 +160,18 @@ src/bitgn_contest_agent/
   adapter/ecom_tracing.py  # TracingEcomClient — per-call ecom_op trace records
   backend/          # Provider-agnostic LLM interface (OpenAI-compat + cliproxyapi)
   schemas.py        # Pydantic tool schemas (NextStep discriminated union)
-  enforcer.py       # Terminal policy: grounding-refs reachability, no-surrender gate
+  validator.py      # Per-step tier-1 rules + LLM-triggered correction
+  refusal_cite_enforcer.py  # Terminal policy: refusal grounding_refs strip/keep
   session.py        # Per-task state + loop detector
   prompts.py        # Static system prompt (bit-identical for caching)
   task_hints.py     # Narrow per-failure-cluster hint injections
   trace_writer.py   # Thread-safe incremental JSONL tracing
 
 artifacts/bench/    # Saved benchmark run summaries
+artifacts/raw_dumps/ # Per-process protobuf request/response dumps (auto-on for run-benchmark)
+artifacts/ws_snapshots/ # Local-replay workspaces for failed trials
 docs/               # Design specs (PAC1-era, kept as historical reference)
-tests/              # Unit + coverage tests (450 passing)
+tests/              # Unit + coverage tests (500+ passing)
 ```
 
 ---

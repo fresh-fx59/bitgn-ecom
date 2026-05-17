@@ -1,5 +1,28 @@
 # Prompt Rules
 
+> **PAC1-era historical reference — DO NOT use as authoritative for the
+> current ECOM build.** The rules indexed below described the PAC1
+> `_STATIC_SYSTEM_PROMPT` (Obsidian-vault inboxes, document migration,
+> birthday/life-event date handling, finance entity traversal, outbox
+> writes). When this repo was ported from `bitgn-contest-with-claude`
+> to drive `bitgn/ecom1-dev`, the entire PAC1 domain section of
+> `prompts.py` was replaced with ECOM-shaped guidance (catalogue SQL,
+> grounding-refs discipline rules A–F, refusal action-target stripping,
+> within-line SKU disambiguation, etc.). Line numbers, file paths,
+> bench-of-origin labels, and the `src/bitgn_contest_agent/skills/*.md`
+> references in this document refer to the PAC1 lineage and **do not
+> match the current `prompts.py`**.
+>
+> **Current ECOM rules live inline in `src/bitgn_contest_agent/prompts.py`
+> (`_STATIC_SYSTEM_PROMPT`)** with each rule's rationale in the same
+> file. Refusal-citation policy lives in `refusal_cite_enforcer.py`.
+> Per-step validation in `validator.py`. See `AGENTS.md` for the
+> failed-task fix flow that governs adding new ECOM rules.
+
+---
+
+## PAC1 lineage rules (historical)
+
 The static system prompt lives in `src/bitgn_contest_agent/prompts.py`
 (`_STATIC_SYSTEM_PROMPT`, lines 13–518). This document indexes the rules
 that landed as broad correctness fixes between commits `b3ea679` and
