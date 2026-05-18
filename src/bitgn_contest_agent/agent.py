@@ -353,7 +353,7 @@ class AgentLoop:
         # injected into the conversation so skill bodies can reference
         # discovered workspace roots without a separate LLM step.
         prepass = self._adapter.run_prepass(
-            session=session, trace_writer=self._writer
+            session=session, trace_writer=self._writer, task_text=task_text,
         )
         # Tolerate test mocks that return None or a bare list.
         bootstrap_content = getattr(prepass, "bootstrap_content", None)

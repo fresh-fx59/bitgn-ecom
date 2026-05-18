@@ -81,7 +81,7 @@ def test_write_and_delete_recorded_in_session_mutations(tmp_path: Path) -> None:
         )),
     ])
     adapter = MagicMock(spec=EcomAdapter)
-    adapter.run_prepass = MagicMock(side_effect=lambda *, session, trace_writer: _fake_prepass(session))
+    adapter.run_prepass = MagicMock(side_effect=lambda *, session, trace_writer, task_text="": _fake_prepass(session))
     adapter.dispatch.return_value = ToolResult(
         ok=True, content="ok", refs=(), error=None, error_code=None, wall_ms=5,
     )
@@ -127,7 +127,7 @@ def test_failed_dispatch_not_recorded_as_mutation(tmp_path: Path) -> None:
         )),
     ])
     adapter = MagicMock(spec=EcomAdapter)
-    adapter.run_prepass = MagicMock(side_effect=lambda *, session, trace_writer: _fake_prepass(session))
+    adapter.run_prepass = MagicMock(side_effect=lambda *, session, trace_writer, task_text="": _fake_prepass(session))
     # First dispatch FAILS, terminal succeeds.
     adapter.dispatch.return_value = ToolResult(
         ok=False, content="", refs=(), error="permission denied", error_code="EPERM", wall_ms=5,

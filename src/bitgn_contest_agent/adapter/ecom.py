@@ -376,7 +376,13 @@ class EcomAdapter:
                 wall_ms=wall_ms,
             )
 
-    def run_prepass(self, *, session: Any, trace_writer: Any) -> PrepassResult:
+    def run_prepass(
+        self,
+        *,
+        session: Any,
+        trace_writer: Any,
+        task_text: str = "",
+    ) -> PrepassResult:
         """Best-effort identity bootstrap.
 
         Attempts tree(/, level=2), read(/AGENTS.MD), exec(/bin/id), and
@@ -469,6 +475,31 @@ class EcomAdapter:
                     error_code=result.error_code,
                     schema_roots=None,
                 )
+
+        # Fraud-detection preflight: when the task names fraud + an
+        # archived-payment/transaction concept together, deterministically
+        # run the seven SQL pattern probes documented in
+        # `prompts.py` (a..g) and surface the UNION of candidate
+        # payment paths as a pre-pass observation. The agent then
+        # collapses from "investigate + decide which cluster" to
+        # "verify + cite the union". See
+        # `src/bitgn_contest_agent/preflight/fraud.py` for the patterns;
+        # the prompt rule remains as a fallback for rephrasings the
+        # lexical trigger misses.
+        try:
+            from bitgn_contest_agent.preflight.fraud import run_fraud_probes
+            fraud = run_fraud_probes(
+                adapter=self,
+                task_text=task_text,
+                session=session,
+                trace_writer=trace_writer,
+            )
+            obs = fraud.as_observation()
+            if obs is not None:
+                bootstrap_content.append(obs)
+        except Exception:  # noqa: BLE001 — preflight is best-effort
+            _LOG.exception("fraud preflight failed (continuing)")
+
         return PrepassResult(
             bootstrap_content=bootstrap_content,
             schema=parse_schema_content(""),  # ECOM: empty stub for shape compat

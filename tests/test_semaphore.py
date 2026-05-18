@@ -64,7 +64,7 @@ def _run_one_agent(backend: _SlowBackend, semaphore: threading.Semaphore, tmp_pa
     """Spin up a minimal AgentLoop and run one task. Designed to block inside
     backend.next_step under the semaphore."""
     adapter = _mk_adapter_mock()
-    adapter.run_prepass.side_effect = lambda *, session, trace_writer: _fake_prepass(session)
+    adapter.run_prepass.side_effect = lambda *, session, trace_writer, task_text="": _fake_prepass(session)
     # _mk_writer appends "trace.jsonl" internally, so pass a unique subdir
     writer = _mk_writer(tmp_path / str(idx))
     loop = AgentLoop(
@@ -105,7 +105,7 @@ def test_agent_loop_accepts_none_semaphore(tmp_path: Path) -> None:
     # Full behavioral coverage lives in test_agent_loop.py.
     backend = _SlowBackend()
     adapter = _mk_adapter_mock()
-    adapter.run_prepass.side_effect = lambda *, session, trace_writer: _fake_prepass(session)
+    adapter.run_prepass.side_effect = lambda *, session, trace_writer, task_text="": _fake_prepass(session)
     writer = _mk_writer(tmp_path / "none_sem")
     loop = AgentLoop(
         backend=backend,

@@ -114,7 +114,7 @@ def test_agent_loop_happy_path_read_then_report(tmp_path: Path) -> None:
         ]
     )
     adapter = _mk_adapter_mock()
-    adapter.run_prepass.side_effect = lambda *, session, trace_writer: _fake_prepass(session)
+    adapter.run_prepass.side_effect = lambda *, session, trace_writer, task_text="": _fake_prepass(session)
     writer = _mk_writer(tmp_path)
 
     loop = AgentLoop(
@@ -165,7 +165,7 @@ def test_agent_loop_enforcer_rejects_fabricated_ref_then_retries(tmp_path: Path)
         ]
     )
     adapter = _mk_adapter_mock()
-    adapter.run_prepass.side_effect = lambda *, session, trace_writer: _fake_prepass(session)
+    adapter.run_prepass.side_effect = lambda *, session, trace_writer, task_text="": _fake_prepass(session)
     writer = _mk_writer(tmp_path)
 
     loop = AgentLoop(
@@ -202,7 +202,7 @@ def test_agent_loop_submits_anyway_after_exhausted_enforcer_retry(tmp_path: Path
     ))
     backend = _ScriptedBackend([bad_terminal, bad_terminal])
     adapter = _mk_adapter_mock()
-    adapter.run_prepass.side_effect = lambda *, session, trace_writer: _fake_prepass(session)
+    adapter.run_prepass.side_effect = lambda *, session, trace_writer, task_text="": _fake_prepass(session)
     writer = _mk_writer(tmp_path)
 
     loop = AgentLoop(backend=backend, adapter=adapter, writer=writer, max_steps=5, llm_http_timeout_sec=30.0)
@@ -219,7 +219,7 @@ def test_agent_loop_hits_max_steps_and_fails(tmp_path: Path) -> None:
     read_step = _wrap(_mk_step({"tool": "read", "path": "AGENTS.md"}))
     backend = _ScriptedBackend([read_step] * 10)
     adapter = _mk_adapter_mock()
-    adapter.run_prepass.side_effect = lambda *, session, trace_writer: _fake_prepass(session)
+    adapter.run_prepass.side_effect = lambda *, session, trace_writer, task_text="": _fake_prepass(session)
     writer = _mk_writer(tmp_path)
 
     loop = AgentLoop(backend=backend, adapter=adapter, writer=writer, max_steps=3, llm_http_timeout_sec=30.0)
@@ -273,7 +273,7 @@ def test_agent_loop_retries_on_transient_backend_error(tmp_path: Path, monkeypat
         raise_times=2,
     )
     adapter = _mk_adapter_mock()
-    adapter.run_prepass.side_effect = lambda *, session, trace_writer: _fake_prepass(session)
+    adapter.run_prepass.side_effect = lambda *, session, trace_writer, task_text="": _fake_prepass(session)
     writer = _mk_writer(tmp_path)
 
     loop = AgentLoop(
@@ -332,7 +332,7 @@ def test_agent_loop_sleeps_for_reload_after_model_unloaded(tmp_path: Path, monke
     backend.next_step = _raising_next_step  # type: ignore[assignment]
 
     adapter = _mk_adapter_mock()
-    adapter.run_prepass.side_effect = lambda *, session, trace_writer: _fake_prepass(session)
+    adapter.run_prepass.side_effect = lambda *, session, trace_writer, task_text="": _fake_prepass(session)
     writer = _mk_writer(tmp_path)
 
     loop = AgentLoop(
@@ -360,7 +360,7 @@ def test_agent_loop_fails_task_after_backend_exhaustion(tmp_path: Path, monkeypa
             raise TransientBackendError("no capacity")
 
     adapter = _mk_adapter_mock()
-    adapter.run_prepass.side_effect = lambda *, session, trace_writer: _fake_prepass(session)
+    adapter.run_prepass.side_effect = lambda *, session, trace_writer, task_text="": _fake_prepass(session)
     writer = _mk_writer(tmp_path)
 
     loop = AgentLoop(
@@ -399,7 +399,7 @@ def test_agent_loop_writes_real_tokens_into_trace_and_totals(tmp_path: Path, mon
         ]
     )
     adapter = _mk_adapter_mock()
-    adapter.run_prepass.side_effect = lambda *, session, trace_writer: _fake_prepass(session)
+    adapter.run_prepass.side_effect = lambda *, session, trace_writer, task_text="": _fake_prepass(session)
     writer = _mk_writer(tmp_path)
 
     loop = AgentLoop(
@@ -462,7 +462,7 @@ def test_agent_loop_dispatches_parallel_reads(tmp_path: Path) -> None:
 
     adapter = MagicMock(spec=EcomAdapter)
     adapter.run_prepass = MagicMock(
-        side_effect=lambda *, session, trace_writer: _fake_prepass(session)
+        side_effect=lambda *, session, trace_writer, task_text="": _fake_prepass(session)
     )
     # Distinct ToolResult per dispatch so we can verify ordering preserved.
     def _dispatch(req):
@@ -522,7 +522,7 @@ def test_agent_loop_drops_parallel_reads_when_primary_is_write(tmp_path: Path) -
     )
     backend = _ScriptedBackend([_wrap(step1), _wrap(terminal_step), _wrap(terminal_step)])
     adapter = _mk_adapter_mock()
-    adapter.run_prepass.side_effect = lambda *, session, trace_writer: _fake_prepass(session)
+    adapter.run_prepass.side_effect = lambda *, session, trace_writer, task_text="": _fake_prepass(session)
     writer = _mk_writer(tmp_path)
     loop = AgentLoop(
         backend=backend, adapter=adapter, writer=writer,
