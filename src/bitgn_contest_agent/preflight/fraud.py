@@ -113,7 +113,11 @@ WHERE p.basket_archived = 1
 """
 
 # Pattern (d): one customer, consecutive payments at different stores
-# inside an interval too short for plausible travel (3600s default).
+# inside an interval too short for plausible travel (300s / 5 min
+# default). v0.1.52 PROD evidence showed a 3600s threshold caught
+# ~30-40 legit cross-store sessions per fraud task (customers doing
+# real cross-store errands within an hour); 300s is below the human
+# travel floor between any two distinct stores in the same city.
 # Both rows of every triggering pair are included.
 _PROBE_TIME_IMPOSSIBLE = """
 WITH pairs AS (
@@ -123,7 +127,7 @@ WITH pairs AS (
    AND a.basket_archived = 1 AND b.basket_archived = 1
    AND a.store_id <> b.store_id
    AND a.created_at < b.created_at
-   AND (strftime('%s', b.created_at) - strftime('%s', a.created_at)) < 3600
+   AND (strftime('%s', b.created_at) - strftime('%s', a.created_at)) < 300
 )
 SELECT DISTINCT id, 'time_impossible_for_one_customer' AS pattern FROM (
   SELECT a_id AS id FROM pairs
@@ -132,16 +136,16 @@ SELECT DISTINCT id, 'time_impossible_for_one_customer' AS pattern FROM (
 )
 """
 
-# Pattern (e): observed_lat / observed_lon far from the row's
-# store_id lat/lon. ~0.25 degrees squared ≈ ~50km radius; coordinate
-# spoofing typically produces deltas well in excess of this.
-_PROBE_OBSERVED_VS_STORE = """
-SELECT DISTINCT p.id, 'observed_far_from_store' AS pattern
-FROM payments p JOIN stores s ON s.id = p.store_id
-WHERE p.basket_archived = 1
-  AND ((p.observed_lat - s.lat)*(p.observed_lat - s.lat)
-     + (p.observed_lon - s.lon)*(p.observed_lon - s.lon)) > 0.25
-"""
+# Pattern (e) "observed_vs_store" REMOVED in v0.1.53. v0.1.52 PROD
+# evidence: at the 0.25-squared (~50 km) threshold the probe matched
+# 140+ legitimate payment rows per fraud task (real customers commonly
+# transact at coords somewhat away from the store record's centroid:
+# delivery, mobile pickup, store-floor wifi anchor drift). Tightening
+# the threshold would either miss the actual spoofed-coord fraud rows
+# (which are caught by `coord_cluster` anyway) or still over-fire on
+# legit data. Net: pattern (e) added 90+ FPs per task with no
+# precision payoff vs the other four probes. Removed entirely; the
+# coord_cluster probe still catches multi-customer coord spoofing.
 
 # Pattern (g): identical observed coordinate (rounded to ~110 m) shared
 # across multiple customer_ids AND that coordinate is NOT near any
@@ -175,7 +179,6 @@ _PROBES: list[tuple[str, str]] = [
     ("card_sharing", _PROBE_CARD_SHARING),
     ("device_sharing", _PROBE_DEVICE_SHARING),
     ("time_impossible", _PROBE_TIME_IMPOSSIBLE),
-    ("observed_vs_store", _PROBE_OBSERVED_VS_STORE),
     ("coord_cluster", _PROBE_COORD_CLUSTER),
 ]
 
@@ -212,7 +215,7 @@ class FraudPreflightResult:
             ) or "no patterns ran"
             return (
                 "PRE-PASS fraud probes — already executed, do NOT re-run.\n"
-                f"The five fraud-pattern probes returned ZERO archived "
+                f"The four fraud-pattern probes returned ZERO archived "
                 f"payment rows ({counts_blob}). The world may use a "
                 "non-archived schema or use patterns outside (a)..(g) "
                 "in /AGENTS.MD. Fall back to the prompt rule and "
@@ -224,7 +227,7 @@ class FraudPreflightResult:
         path_list = "\n".join(f"  {p}" for p in self.union_paths)
         return (
             "PRE-PASS fraud probes — already executed, do NOT re-run.\n"
-            "Five SQL pattern probes against payments WHERE "
+            "Four SQL pattern probes against payments WHERE "
             "basket_archived=1 produced this UNION of candidate fraud "
             f"rows (hit counts: {counts_blob}). Every path below has "
             "been READ during the preflight so it is grounded for "
