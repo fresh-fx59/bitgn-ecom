@@ -476,29 +476,18 @@ class EcomAdapter:
                     schema_roots=None,
                 )
 
-        # Fraud-detection preflight: when the task names fraud + an
-        # archived-payment/transaction concept together, deterministically
-        # run the seven SQL pattern probes documented in
-        # `prompts.py` (a..g) and surface the UNION of candidate
-        # payment paths as a pre-pass observation. The agent then
-        # collapses from "investigate + decide which cluster" to
-        # "verify + cite the union". See
-        # `src/bitgn_contest_agent/preflight/fraud.py` for the patterns;
-        # the prompt rule remains as a fallback for rephrasings the
-        # lexical trigger misses.
-        try:
-            from bitgn_contest_agent.preflight.fraud import run_fraud_probes
-            fraud = run_fraud_probes(
-                adapter=self,
-                task_text=task_text,
-                session=session,
-                trace_writer=trace_writer,
-            )
-            obs = fraud.as_observation()
-            if obs is not None:
-                bootstrap_content.append(obs)
-        except Exception:  # noqa: BLE001 — preflight is best-effort
-            _LOG.exception("fraud preflight failed (continuing)")
+        # Fraud-detection preflight (disabled in v0.1.54).
+        # v0.1.52/v0.1.53 PROD benches showed that auto-running and
+        # surfacing the SQL pattern probes hurt fraud-task scores vs
+        # the v0.1.49 prompt-rule-only baseline (t38 dropped 0.95 →
+        # 0.665, t39 1.0 → 0.632 across v0.1.53 vs v0.1.49). The
+        # agent's natural query strategy adapts per-world while a
+        # fixed probe set does not. Keep the module + tests
+        # (`src/bitgn_contest_agent/preflight/fraud.py`,
+        # `tests/preflight/test_fraud.py`) for reference but do not
+        # call run_fraud_probes from the live prepass path. The
+        # v0.1.49 prompt rule remains the authoritative fraud
+        # guidance.
 
         return PrepassResult(
             bootstrap_content=bootstrap_content,
