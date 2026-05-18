@@ -471,19 +471,18 @@ Catalogue / SQL discipline (ECOM-specific):
            appears with multiple `customer_id` values — a stronger
            signal than (a) or (b) alone but does not subsume them.
        (d) Time-impossibility for one customer: same `customer_id`
-           has consecutive payments at DIFFERENT `store_id`s
-           within a tight time window (∆t < 300 seconds / 5 min
-           is the empirically-correct threshold per v0.1.58 PROD
-           fraud-world traces). The cross-store + tight-time pair
-           is impossible regardless of whether the stores are in
-           different cities or different districts of the same
-           city — a customer making payments at Graz Jakomini AND
-           Graz Lend 24 seconds apart is fraud. Compute via
-           self-join on customer_id ordered by created_at; cite
-           BOTH rows of every such pair. This is by far the
-           highest-precision-and-recall single pattern observed
-           across v157/v158 PROD fraud worlds — every fraud world
-           seeded so far uses this pattern as its primary signal.
+           has consecutive payments at DIFFERENT `store_id`s whose
+           geographic distance exceeds plausible travel for the
+           created_at delta (e.g. > 1 degree of lat/lon between
+           stores when ∆t < 30 minutes). Compute via self-join on
+           customer_id ordered by created_at; cite both rows.
+           NOTE: 30-min window is the recall threshold; use a
+           BROADER window when the customer's burst spans many
+           rows — the burst is a transitive cluster, not just
+           pair-wise. If row A pairs with B (∆t < 30 min) and B
+           pairs with C (∆t < 30 min), then A, B, AND C are all
+           in the same fraud cluster even if (A, C) ∆t > 30 min.
+           Cite the whole transitive cluster.
        (e) Observed-location anomaly vs store: `observed_lat/lon`
            far from the row's `store_id` lat/lon (squared-distance
            threshold typical of ~0.5° / ~50 km or more). Join
@@ -547,12 +546,15 @@ Catalogue / SQL discipline (ECOM-specific):
          * device_fingerprint shared by ≥ 3 distinct customer_ids
            (same logic as cards).
          * time-impossible pair where two payments share a
-           customer_id AND have DIFFERENT store_ids AND ∆t < 300s
-           (5 minutes). Same-city / different-district pairs
-           COUNT — v0.1.58 PROD evidence shows fraud worlds seed
-           Graz Jakomini → Graz Lend bursts at 24-second gaps,
-           which are physically impossible regardless of city
-           identity. Drop the "different cities" requirement.
+           customer_id AND have DIFFERENT store_ids AND ∆t < 30
+           min — OR they belong to a transitive time-impossible
+           cluster (one customer's burst of rapid cross-store
+           payments). Same-city / different-district pairs COUNT
+           (Graz Jakomini → Graz Lend in 24 seconds is fraud
+           regardless of city identity). Apply this filter row-
+           wise: a row stays if it pairs with another row of the
+           same cluster, even when its INDIVIDUAL pair gap exceeds
+           the pairwise threshold — clusters are transitive.
          * observed coord cluster shared by ≥ 3 distinct
            customer_ids AND that coord does NOT match any store's
            lat/lon within ~1.1 km (`ROUND(s.lat, 2)` /
