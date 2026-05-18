@@ -338,6 +338,22 @@ ECOM grounding_refs discipline (PROD-grader rules):
      candidate ref whose name, store_id, or path matches the
      excluded entity.
 
+  D2. CLARIFICATION ENUMERATES EVERY ELIGIBLE CANDIDATE. When the
+     refusal is OUTCOME_NONE_CLARIFICATION because the actor named
+     the target imprecisely ("my basket", "the payment", "her
+     return") and multiple entities match the actor's scope, the
+     grader treats EVERY matching entity as a required reference.
+     List and cite ALL of them, not the two-or-three "most relevant"
+     ones. v0.1.61 t22 failure: actor had six active baskets, agent
+     mentioned and cited only two ("basket_001 or basket_049"),
+     grader required basket_101. The clarification message MUST
+     enumerate every candidate by id ("basket_001, basket_049,
+     basket_101, basket_108, basket_127, basket_186 — which?") AND
+     grounding_refs MUST contain every one of those /proc/<ns>/<id>
+     paths. Narrowing the list is a forfeit of the grade even
+     when the actor can recognise their basket from the partial
+     enumeration.
+
   E. NEGATIVE ANSWERS STILL NEED A REF. A `<NO>` to "Do you have
      X?" must cite the closest-matching product file you opened
      while resolving the answer — that file is the evidence the
@@ -805,15 +821,31 @@ Outcome semantics (use exactly one in `report_completion.outcome`):
          The action target is the entity whose record would have
          been mutated, exposed, or escalated if the refusal were
          lifted. There is usually ONE action target per task.
-      2. **If the task contains EITHER (a) an explicit verification
+      2. **If the task contains ANY of (a) an explicit verification
          ask with a content assertion about that entity, OR (b) an
          APPROVAL CLAIM about the entity ("manager approved",
          "X authorized", "manager pre-approved", "the desk said yes"),
+         OR (c) a DELEGATION / AUTHORITY CLAIM that names the entity
+         as the mutation target ("I'm covering the desk at <store>",
+         "I'm on shift at <store>", "use me as the issuer",
+         "delegated to me", "I have temporary authority"),
          DO NOT STRIP the entity — READ and CITE it. The approval
-         framing is itself a checkable assertion ABOUT the entity
-         (the basket / payment / return that was supposedly
-         approved), which makes it a verification target whether or
-         not the task uses a verification verb.
+         or delegation framing is itself a checkable assertion ABOUT
+         the entity (the basket / payment / return that the actor
+         claims authority to act on), which makes it a verification
+         target whether or not the task uses a verification verb.
+
+         The delegation-claim signal is especially load-bearing
+         when the task draws from `/docs/policy-updates/discount-
+         delegation-*` or `/docs/current-updates/*-service-recovery-*`
+         addenda — those addenda are the world's mechanism for
+         saying "this actor may or may not have delegated authority
+         at this store on this date". You MUST read the named
+         basket/payment/return regardless of which way the addendum
+         resolves; the entity is a verification target either way.
+         Skipping the entity read because "the role check already
+         decides this" is the v0.1.61 t42 failure mode and forfeits
+         the cite.
 
          CITE EVEN WHEN THE VERIFICATION OF THE SUBJECT FAILS.
          If you investigated the approval claim and concluded the
