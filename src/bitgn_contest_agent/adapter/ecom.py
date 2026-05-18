@@ -427,6 +427,31 @@ class EcomAdapter:
             ("exec_id", Req_Exec(tool="exec", path="/bin/id")),
             ("exec_date", Req_Exec(tool="exec", path="/bin/date")),
             ("tree_docs", Req_Tree(tool="tree", root="/docs", level=3)),
+            # /AGENTS.MD line 1: "readme.md files take role of agents.md.
+            # Trust them, follow the chain of command." The six /proc/*/
+            # README.md files contain authoritative namespace knowledge
+            # that the contest expects the agent to apply — most
+            # critically `/proc/stores/README.md` which holds the
+            # descriptor→store mapping ("central Graz → Jakomini",
+            # "north Graz → Lend", "central Vienna → Praterstern",
+            # "west-side Vienna → Meidling", etc.). v0.1.57 PROD t14
+            # failed on "central Graz" exactly because the agent never
+            # listed /proc/stores/README.md. Read all six in parallel
+            # in the prepass — total ~4.6 KB, ~1200 tokens — so every
+            # task starts with the workspace's authoritative naming
+            # conventions in context.
+            ("read_proc_stores_readme",
+             Req_Read(tool="read", path="/proc/stores/README.md")),
+            ("read_proc_employees_readme",
+             Req_Read(tool="read", path="/proc/employees/README.md")),
+            ("read_proc_payments_readme",
+             Req_Read(tool="read", path="/proc/payments/README.md")),
+            ("read_proc_baskets_readme",
+             Req_Read(tool="read", path="/proc/baskets/README.md")),
+            ("read_proc_customers_readme",
+             Req_Read(tool="read", path="/proc/customers/README.md")),
+            ("read_proc_returns_readme",
+             Req_Read(tool="read", path="/proc/returns/README.md")),
         ]
 
         def _dispatch_with_origin(req: Any) -> ToolResult:
@@ -479,6 +504,36 @@ class EcomAdapter:
                             "arithmetic — `today + delta`, `N days ago`, "
                             "etc. — NOT a stored timestamp from a file):\n"
                             f"{result.content}"
+                        )
+                    # The six /proc/*/README.md bootstraps surface the
+                    # contest's authoritative namespace conventions per
+                    # /AGENTS.MD line 1 ("readme.md files take role of
+                    # agents.md"). Most critically /proc/stores/README.md
+                    # carries the descriptor→store mapping that resolves
+                    # ambiguous city-descriptors ("central Graz",
+                    # "north Vienna", "old-town Bratislava", etc.).
+                    _README_LABELS = {
+                        "read_proc_stores_readme": "/proc/stores/README.md",
+                        "read_proc_employees_readme": "/proc/employees/README.md",
+                        "read_proc_payments_readme": "/proc/payments/README.md",
+                        "read_proc_baskets_readme": "/proc/baskets/README.md",
+                        "read_proc_customers_readme": "/proc/customers/README.md",
+                        "read_proc_returns_readme": "/proc/returns/README.md",
+                    }
+                    if label in _README_LABELS and result.content:
+                        path_str = _README_LABELS[label]
+                        bootstrap_content.append(
+                            f"PRE-PASS read(path=\"{path_str}\") — already "
+                            "executed, do NOT re-run. Per /AGENTS.MD line 1, "
+                            "readme.md files take role of AGENTS.md — trust "
+                            "the content below as authoritative naming / "
+                            "structure for this namespace. The store README "
+                            "in particular contains the canonical "
+                            "descriptor→store mapping (\"central Graz\", "
+                            "\"north Vienna\", \"old-town Bratislava\", etc.) "
+                            "needed to disambiguate task wording that does "
+                            "NOT literally match any /proc/stores/store_*.json "
+                            f"name field:\n{result.content}"
                         )
                     if label == "tree_docs" and result.content:
                         bootstrap_content.append(

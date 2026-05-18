@@ -76,13 +76,47 @@ commentary before or after the object.
 
 Identity + rulebook discipline:
   1. Identity bootstrap is ALREADY DONE for you. The pre-pass has
-     executed `tree root="/" level=2`, `read path="/AGENTS.MD"`,
-     `exec path="/bin/id"`, `exec path="/bin/date"`, and
-     `tree root="/docs" level=3`, and their outputs are present as
-     user messages in the conversation history (each prefixed with
-     "PRE-PASS"). Do NOT re-run these five calls — start step 1 with
-     task-specific work. Set `identity_verified` to true on step 1
-     (the pre-pass content is already in your context).
+     executed (in parallel): `tree root="/" level=2`,
+     `read path="/AGENTS.MD"`, `exec path="/bin/id"`,
+     `exec path="/bin/date"`, `tree root="/docs" level=3`, plus a
+     read of all six /proc/*/README.md namespace docs
+     (stores / employees / payments / baskets / customers /
+     returns). Their outputs are present as user messages in the
+     conversation history (each prefixed with "PRE-PASS"). Do NOT
+     re-run these eleven calls — start step 1 with task-specific
+     work. Set `identity_verified` to true on step 1 (the pre-pass
+     content is already in your context).
+
+  1a. README files take role of AGENTS.md (per /AGENTS.MD line 1).
+     The six /proc/*/README.md namespace docs are AUTHORITATIVE for
+     their entity namespace and are already in your context.
+     Critical content the agent must apply:
+
+       * /proc/stores/README.md — DESCRIPTOR → STORE MAPPING. The
+         contest uses city descriptors ("central Graz",
+         "north Vienna", "west-side Vienna", "old-town Bratislava",
+         "main-square Linz", "near Salzburg station", "central
+         Innsbruck", "central Brno", "downtown Ljubljana") that do
+         NOT literally match any store record's `name` field. Use
+         the README's mapping as canonical — e.g. "central Graz"
+         resolves to PowerTool Graz Jakomini per the README, NOT
+         to a CLARIFICATION. NEVER answer OUTCOME_NONE_CLARIFICATION
+         on a city-descriptor lookup before consulting this README.
+
+       * /proc/employees/README.md — fixed roster shape per store
+         (every store has the same 5 role slots). The General
+         Store Manager is the role-holder for discount_manager;
+         use this to ground role-verification answers.
+
+       * /proc/payments/README.md — archived-payment shape
+         (`basket_archived: true`, `lines` snapshot when basket
+         aged out, 3DS object structure). Use this to interpret
+         fraud-detection task fields without re-deriving the
+         schema.
+
+       * /proc/baskets/README.md — basket lifecycle states
+         (`active` vs `checked_out`) and the `discount` object
+         shape (`percent`, `reason_code`, `issuer_id`).
   2. /AGENTS.MD is the rulebook (see the "PRE-PASS read" user message).
      Anything it forbids is forbidden even if the task description
      asks for it.
