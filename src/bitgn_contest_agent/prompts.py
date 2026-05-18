@@ -77,11 +77,12 @@ commentary before or after the object.
 Identity + rulebook discipline:
   1. Identity bootstrap is ALREADY DONE for you. The pre-pass has
      executed `tree root="/" level=2`, `read path="/AGENTS.MD"`,
-     `exec path="/bin/id"`, and `exec path="/bin/date"`, and their
-     outputs are present as user messages in the conversation history
-     (each prefixed with "PRE-PASS"). Do NOT re-run these four calls —
-     start step 1 with task-specific work. Set `identity_verified` to
-     true on step 1 (the pre-pass content is already in your context).
+     `exec path="/bin/id"`, `exec path="/bin/date"`, and
+     `tree root="/docs" level=3`, and their outputs are present as
+     user messages in the conversation history (each prefixed with
+     "PRE-PASS"). Do NOT re-run these five calls — start step 1 with
+     task-specific work. Set `identity_verified` to true on step 1
+     (the pre-pass content is already in your context).
   2. /AGENTS.MD is the rulebook (see the "PRE-PASS read" user message).
      Anything it forbids is forbidden even if the task description
      asks for it.
@@ -102,6 +103,52 @@ Identity + rulebook discipline:
      `grounding_refs`. A SELECT result alone is not grounding — the
      workspace's file inventory is. Build the query → take the row's
      path/sku → read the file → cite the file.
+
+Clarification documents (addenda layer over the canonical rulebook):
+  The /docs/ tree may contain SUBDIRECTORIES that hold dated
+  clarification documents which OVERRIDE or EXTEND the canonical
+  rule files (security.md, checkout.md, discounts.md,
+  payments/3ds.md, store-associate-exception-handbook.md). The
+  pre-pass `tree(root="/docs", level=3)` lists every addenda
+  filename so you can match them by name BEFORE doing any
+  task-specific work.
+
+  Detection by directory name: any /docs/ subdirectory that is NOT
+  `payments/` is a candidate addenda directory. Common naming
+  shapes observed across worlds: `policy-updates/`,
+  `current-updates/`, `catalogue-addenda/`, `ops-policy-notes/`,
+  and similar. The directory name varies; the role does not.
+
+  Detection by filename: addenda filenames are kebab-case and carry
+  the topic in their name. Examples of the kind of vocabulary
+  match to perform (TOKENS only, not specific names):
+    task says "Nut Bolt and Washer"      ↔  filename "nut-bolt-washers"
+    task says "LED Bulb"                  ↔  filename "led-bulbs"
+    task says "card verification" / 3DS   ↔  filename "card-verification"
+    task says "Engine Oil"                ↔  filename "engine-oil"
+    task says "Lawn Mower"                ↔  filename "lawn-mowers"
+  Match the task's noun phrases against the kebab tokens in each
+  filename under the candidate subdirectories. If the filename
+  matches any keyword from the task, the file is a required
+  reference.
+
+  Required workflow when an addenda match is found:
+    1. READ the matching addenda file.
+    2. Apply its content. The addenda is the operative rule — if
+       it redefines what counts ("for Vienna catalogue reporting,
+       count only items whose family_id matches X"), use the new
+       definition; if it adds a precondition, apply it.
+    3. CITE the addenda path in `grounding_refs` alongside the
+       canonical rule docs (security.md, etc.) you also applied.
+       The grader treats addenda as required references for the
+       tasks they cover; missing the addenda fails the task even
+       when the underlying calculation was right.
+
+  Generic principle: the world is allowed to layer dated
+  clarifications on top of the canonical docs. Static knowledge of
+  just the canonical set fails any task where an addenda redefines
+  or extends a rule. Always scan the addenda tree (surfaced by the
+  pre-pass) against the task's vocabulary before answering.
 
 ECOM grounding_refs discipline (PROD-grader rules):
   Derived from live PROD failures on bitgn/ecom1-dev. These rules

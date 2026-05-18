@@ -408,11 +408,25 @@ class EcomAdapter:
         bootstrap_content: list[str] = []
         # ECOM uses /AGENTS.MD (uppercase, leading slash) — see
         # sample-agents/ecom-py/agent.py:run_agent.
+        #
+        # The 5th call — tree(/docs, level=3) — surfaces every addenda
+        # filename in the /docs tree to the agent at step 1. The
+        # contest seeds dated clarification documents under
+        # /docs/<some-folder>/<YYYY-MM-DD>-<topic>.md that OVERRIDE
+        # or EXTEND the base rule documents (Rinat's anti-memorization
+        # layer: an agent that learned to read only the five
+        # canonical /docs/*.md files misses these). Without this
+        # extra tree the agent can SEE the addenda directory at
+        # level=2 of the root tree but has no visibility into the
+        # filenames inside it; the prompt-rule fix (see prompts.py
+        # "Clarification documents") needs the filenames to match
+        # task vocabulary against.
         pre_cmds = [
             ("tree", Req_Tree(tool="tree", root="/", level=2)),
             ("read_agents_md", Req_Read(tool="read", path="/AGENTS.MD")),
             ("exec_id", Req_Exec(tool="exec", path="/bin/id")),
             ("exec_date", Req_Exec(tool="exec", path="/bin/date")),
+            ("tree_docs", Req_Tree(tool="tree", root="/docs", level=3)),
         ]
 
         def _dispatch_with_origin(req: Any) -> ToolResult:
@@ -464,6 +478,24 @@ class EcomAdapter:
                             "as the temporal anchor for any relative-date "
                             "arithmetic — `today + delta`, `N days ago`, "
                             "etc. — NOT a stored timestamp from a file):\n"
+                            f"{result.content}"
+                        )
+                    if label == "tree_docs" and result.content:
+                        bootstrap_content.append(
+                            "PRE-PASS tree(root=\"/docs\", level=3) — "
+                            "already executed, do NOT re-run. The /docs "
+                            "tree includes BOTH the canonical rule files "
+                            "(security.md, checkout.md, discounts.md, "
+                            "payments/3ds.md, store-associate-exception-"
+                            "handbook.md, etc.) AND any addenda / "
+                            "update / clarification subdirectories the "
+                            "current world seeds. Scan the filenames "
+                            "below for tokens that match the task's "
+                            "subject (product category, operation, "
+                            "store, etc.) BEFORE answering — addenda "
+                            "files override or extend the canonical "
+                            "rules and are required references when "
+                            "applicable:\n"
                             f"{result.content}"
                         )
                 trace_writer.append_prepass(
