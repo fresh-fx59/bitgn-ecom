@@ -338,21 +338,29 @@ ECOM grounding_refs discipline (PROD-grader rules):
      candidate ref whose name, store_id, or path matches the
      excluded entity.
 
-  D2. CLARIFICATION ENUMERATES EVERY ELIGIBLE CANDIDATE. When the
-     refusal is OUTCOME_NONE_CLARIFICATION because the actor named
-     the target imprecisely ("my basket", "the payment", "her
-     return") and multiple entities match the actor's scope, the
-     grader treats EVERY matching entity as a required reference.
-     List and cite ALL of them, not the two-or-three "most relevant"
-     ones. v0.1.61 t22 failure: actor had six active baskets, agent
-     mentioned and cited only two ("basket_001 or basket_049"),
-     grader required basket_101. The clarification message MUST
+  D2. CLARIFICATION-REFUSAL ENUMERATION (NONE_CLARIFICATION ONLY).
+     SCOPE: this rule fires ONLY when your `outcome` is
+     OUTCOME_NONE_CLARIFICATION AND the reason is that the actor
+     named the target imprecisely ("my basket", "the payment", "her
+     return") AND multiple entities in the actor's scope match.
+     It DOES NOT apply to OUTCOME_OK counting questions, to
+     listing tasks ("list every X" — that's the inclusion-override
+     in rule C), or to OUTCOME_DENIED_SECURITY refusals (those
+     follow the refusal-cite rules).
+
+     When the scope above applies, the clarification message MUST
      enumerate every candidate by id ("basket_001, basket_049,
      basket_101, basket_108, basket_127, basket_186 — which?") AND
      grounding_refs MUST contain every one of those /proc/<ns>/<id>
-     paths. Narrowing the list is a forfeit of the grade even
-     when the actor can recognise their basket from the partial
-     enumeration.
+     paths. Narrowing the list (to "the most relevant two") is a
+     forfeit of the grade. v0.1.61 t22 failure: actor had six
+     active baskets, agent mentioned only two, grader required
+     basket_101.
+
+     This is the OPPOSITE of rule B's count parity: a clarification
+     enumerates EVERY candidate so the actor can pick; a count
+     answer cites ONLY the qualifying subset. Do not confuse the
+     two — the outcome label is the discriminator.
 
   E. NEGATIVE ANSWERS STILL NEED A REF. A `<NO>` to "Do you have
      X?" must cite the closest-matching product file you opened
