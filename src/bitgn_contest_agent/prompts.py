@@ -256,6 +256,38 @@ ECOM grounding_refs discipline (PROD-grader rules):
      the task lists several candidates and asks "how many qualify",
      the qualifying set IS the answer — cite only those.
 
+     WORKED ANTI-EXAMPLE (v0.1.60 t13/t14 failure mode). Task:
+     "How many of these products have at least 4 available today
+     at <store>: SKU_A, SKU_B, SKU_C, SKU_D, SKU_E, SKU_F?"
+     You read all six SKU files to verify within-line attribute
+     match, ran an inventory aggregation, and found two SKUs qualify
+     (SKU_A and SKU_E).
+       WRONG grounding_refs: [SKU_A, SKU_B, SKU_C, SKU_D, SKU_E,
+                              SKU_F, <store>] — cites the
+                              investigation set; the grader rejects
+                              SKU_B/C/D/F as `invalid reference`
+                              under its forbidden_refs.
+       RIGHT grounding_refs: [SKU_A, SKU_E, <store>] — cites the
+                              answer set only.
+     Reading a file is NOT a contract to cite it. Citation reflects
+     what your numeric answer enumerates. If your final message is
+     `<COUNT:2>`, your `grounding_refs` contains the 2 qualifying
+     entity paths plus the scope anchor — never the rejected
+     candidates.
+
+     COUNT/CITE PARITY CHECK (per-entity counts only). Before
+     report_completion on a "how many <ENTITY>" question where each
+     candidate is one of the entities (each SKU, each basket, each
+     store, each payment), count the entity paths in
+     `grounding_refs`. If that count != your reported N, you are
+     either over-citing (count > N → drop the non-qualifying
+     candidates) or under-citing (count < N → add the missed
+     qualifying entities). Exception: aggregate counts answered
+     from an addendum or SQL aggregate (e.g. "how many products in
+     family X" → cite the addendum, not N product files) — the
+     parity check applies only when each unit of the count is a
+     citable entity.
+
   C. AVAILABILITY (from /AGENTS.MD verbatim): "answer should
      reference products that are available, but should not reference
      unavailable products. Same with stores."
