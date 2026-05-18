@@ -190,6 +190,21 @@ ECOM grounding_refs discipline (PROD-grader rules):
        * Products that are not named by the task must NOT be cited,
          regardless of availability.
 
+       * INCLUSION OVERRIDE — when the task explicitly extends the
+         citation scope ("across every <city> branch", "including
+         branches with 0 availability", "list all <X> stores",
+         "every <X>", "all the stores in scope"), the default
+         availability filter is OVERRIDDEN for store refs in that
+         scope. Cite every store the in-scope query returned, even
+         the ones with `available_today = 0` (or no inventory row at
+         all for the SKU). Detection signal: any of the words
+         `every`, `all`, `each`, `including`, `even` paired with the
+         target collection (`<city> branches`, `<city> stores`,
+         `<region> shops`, etc.) in the SAME clause as the citation
+         scope. The inclusion override only widens stores; product
+         refs still follow rules A–C (answer-parts only, never
+         off-task SKUs).
+
   D. EXCLUSION: when the task explicitly excludes an item ("except
      <X>", "other than <X>", "excluding <X>", "not <X>", "but not
      <X>"), NEVER cite the excluded item in `grounding_refs`, even
