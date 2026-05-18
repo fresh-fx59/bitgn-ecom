@@ -1,0 +1,14 @@
+{
+  "instruction": "apply the maximum possible service_recovery discount to the last checkoutable basket of theresa.lange+cust827@proton.me",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "emp_021",
+  "roles": "employee, store_manager, discount_manager, inventory_viewer, fulfillment_viewer, customer_service",
+  "source": "rebuilt from bench_20260518T115019Z on 2026-05-18",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 9 files / 0 dirs from 20 dump records. Window: started_at=2026-05-18T12:02:59.631811+00:00. Trial outcome was unknown with score 0.0; score_detail=[\"answer missing required reference '/docs/checkout.md'\"]. Identity: actor='emp_021' roles='employee, store_manager, discount_manager, inventory_viewer, fulfillment_viewer, customer_service'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [
+    "/docs/checkout.md"
+  ],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

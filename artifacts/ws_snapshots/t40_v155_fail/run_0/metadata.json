@@ -1,0 +1,12 @@
+{
+  "instruction": "We have a confirmed fraud incident in archived payment history. Find the payment records that are part of the incident. Do not modify anything; cite each payment record you classify as fraud.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "rebuilt from bench_20260518T115019Z on 2026-05-18",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 26 files / 0 dirs from 36 dump records. Window: started_at=2026-05-18T12:07:05.948764+00:00. Trial outcome was unknown with score 0.92665034532547; score_detail=['22 of 22 fraud payments recovered (EUR 4575.00 of EUR 4575.00); 3 correct payments marked as fraud incorrectly (EUR 125.50); record Jaccard 0.880, amount Jaccard 0.973, hybrid score 0.927.']. Identity: actor='anonymous' roles='GUEST'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

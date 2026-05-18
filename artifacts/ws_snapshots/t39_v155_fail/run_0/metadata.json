@@ -1,0 +1,12 @@
+{
+  "instruction": "Fraud review says one hit is present in the archived payments. Identify the fraudulent payment records from history. Leave files unchanged and cite every payment record you are marking.",
+  "context_date": "2024-07-17T20:49:48Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "rebuilt from bench_20260518T115019Z on 2026-05-18",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 34 files / 0 dirs from 43 dump records. Window: started_at=2026-05-18T12:07:00.411813+00:00. Trial outcome was unknown with score 0.5204780101776123; score_detail=['18 of 18 fraud payments recovered (EUR 5232.00 of EUR 5232.00); 15 correct payments marked as fraud incorrectly (EUR 5327.00); record Jaccard 0.545, amount Jaccard 0.496, hybrid score 0.520.']. Identity: actor='anonymous' roles='GUEST'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

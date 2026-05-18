@@ -111,6 +111,40 @@ _PII_REFUSAL_TERMS: tuple[str, ...] = (
 )
 
 
+# Role / identity policy refusal detection — separate from PII.
+# Fires when the agent refused because the runtime identity / role
+# does not authorize the requested action. Adds a second trigger to
+# the "strip the verified person's record" branch, because v0.1.55
+# evidence (t28 v155 trial) showed the agent kept a verified
+# manager's /proc/employees/<emp>.json on a role-policy refusal —
+# the grader flagged it as an invalid reference. The verified
+# person's RECORD is investigation-only; the role proof comes from
+# the store record (`/proc/stores/<id>.json`) that lists the
+# manager assignment, NOT from the employee record itself.
+_ROLE_POLICY_REFUSAL_TERMS: tuple[str, ...] = (
+    "current runtime identity",
+    "runtime identity is",
+    "role is `customer`",
+    "role is customer",
+    "role is `guest`",
+    "role is guest",
+    "not `discount_manager`",
+    "not discount_manager",
+    "not `store_manager`",
+    "not store_manager",
+    "requires `discount_manager`",
+    "requires discount_manager",
+    "cannot apply",
+    "cannot perform",
+    "does not allow manager approval",
+    "manager approval claims in the request",
+    "claimed prior manager approval",
+    "does not authorize",
+    "/bin/id returns",
+    "role gate",
+)
+
+
 # Verification-claim detection: phrases the agent uses when it
 # DID verify the entity's content before refusing. If any match,
 # the ref counts as "checkable claim is in the response" and must
@@ -211,6 +245,52 @@ def _is_personal_contact_refusal(message: str) -> bool:
     return any(term in lower for term in _PII_REFUSAL_TERMS)
 
 
+def _is_role_policy_refusal(message: str) -> bool:
+    """Heuristic: does the agent's `message` refuse on role/identity
+    policy grounds (action not authorised for current /bin/id role)?
+
+    Same conservative philosophy as :func:`_is_personal_contact_refusal`
+    — false positives only cause the strip-of-verified-person branch
+    to fire, which is safe when the person ref was investigation-only
+    (the v155 PROD evidence is that the grader treats employee refs
+    as invalid for role-policy refusals exactly the same way as for
+    PII refusals).
+
+    NOTE: caller pairs this with :func:`_message_verifies_a_person`
+    before stripping. A bare "I cannot apply that discount" message
+    without any person-verification claim is collateral, not a
+    verified-subject refusal — those keep their person refs.
+    """
+    if not message:
+        return False
+    lower = message.lower()
+    return any(term in lower for term in _ROLE_POLICY_REFUSAL_TERMS)
+
+
+_PERSON_VERIFICATION_TERMS: tuple[str, ...] = (
+    "verified",
+    "is the manager",
+    "is a manager",
+    "is the store manager",
+    "are a manager",
+    "is the assigned manager",
+    "the manager of",
+)
+
+
+def _message_verifies_a_person(message: str) -> bool:
+    """True iff the agent's `message` claims it verified a PERSON's
+    role / identity. Used to gate the role-policy strip branch — we
+    only strip the verified person's record when the agent actually
+    performed a person-verification, NOT for plain role refusals
+    where any collateral person ref was incidental investigation.
+    """
+    if not message:
+        return False
+    lower = message.lower()
+    return any(term in lower for term in _PERSON_VERIFICATION_TERMS)
+
+
 def _message_verifies_entity(message: str, entity_id: str, task_text: str) -> bool:
     """True iff the agent's message + task pairing implies a
     verification claim was made about the entity.
@@ -255,6 +335,7 @@ def _classify_ref(
     task_text: str,
     message: str,
     is_pii_refusal: bool,
+    is_role_policy_refusal: bool,
     *,
     person_refs_count: int,
 ) -> tuple[bool, str]:
@@ -266,8 +347,8 @@ def _classify_ref(
 
     ``person_refs_count`` is the total count of
     /proc/(employees|customers)/*.json refs in the input list. Used
-    to distinguish PII-refusal-with-single-person (the named person
-    by display name → strip) from PII-refusal-with-multiple-persons
+    to distinguish refusal-with-single-person (the named person
+    by display name → strip) from refusal-with-multiple-persons
     (collateral investigation — strip only the task-named one).
     """
     m = _PROC_REF_RE.match(ref)
@@ -281,26 +362,36 @@ def _classify_ref(
         # Weird namespace-id mismatch; leave it alone.
         return True, "namespace-id mismatch (unhandled)"
 
-    # PII-disclosure refusal: the named person's record contains the
-    # contested PII. Strip when we can identify which record is the
-    # subject:
+    # Refusal-with-verified-person: the agent looked the person up to
+    # verify the request, but the ROLE / IDENTITY policy or the PII
+    # boundary forbade the action. The verified person's record is
+    # investigation-only; the role-proof comes from the store record
+    # that lists the manager. Strip when we can identify which record
+    # is the subject:
     #   (a) id literally in task → definitely the subject
     #   (b) only one employee/customer ref in the input → it must be
     #       the subject (agent looked the person up by display name
     #       in the task, e.g. "David Linke" → emp_046)
     # When MULTIPLE person refs exist, keep the non-task-named ones
     # as collateral (the *actual* manager of a different store, etc.).
-    if is_pii_refusal and ns in ("employees", "customers"):
+    # Both is_pii_refusal and is_role_policy_refusal trigger this branch
+    # because v0.1.55 evidence (t28 v155 trial) showed the grader
+    # treats employee refs as invalid on role-policy refusals the same
+    # way as on PII refusals.
+    if (is_pii_refusal or is_role_policy_refusal) and ns in ("employees", "customers"):
         if _task_mentions_id(task_text, id_part):
-            return False, "PII-refusal: task-named person record (contains PII)"
+            return False, (
+                "refusal-strip: task-named person record "
+                "(PII or role-policy refusal)"
+            )
         if person_refs_count == 1:
             return False, (
-                "PII-refusal: sole person record (likely "
+                "refusal-strip: sole person record (likely "
                 "task-named-by-display-name)"
             )
         # else: multiple person refs, this one isn't named — keep
         return True, (
-            "PII-refusal but multiple person refs: keep non-task-named "
+            "refusal but multiple person refs: keep non-task-named "
             "as collateral"
         )
 
@@ -422,6 +513,15 @@ def clean_refusal_refs(
         return CleanResult(refs=refs_list, stripped=[], reasons=[])
 
     is_pii = _is_personal_contact_refusal(message)
+    # Role-policy strip requires BOTH a role-policy refusal AND a
+    # person-verification claim. Without the verification claim a
+    # bare role refusal ("I cannot apply") may have person refs that
+    # are real collateral (the actual manager of a different store);
+    # don't strip those.
+    is_role_policy = (
+        _is_role_policy_refusal(message)
+        and _message_verifies_a_person(message)
+    )
     person_refs_count = sum(
         1 for r in refs_list
         if (m := _PROC_REF_RE.match(r))
@@ -432,7 +532,7 @@ def clean_refusal_refs(
     reasons: list[str] = []
     for ref in refs_list:
         keep, why = _classify_ref(
-            ref, task_text, message, is_pii,
+            ref, task_text, message, is_pii, is_role_policy,
             person_refs_count=person_refs_count,
         )
         if keep:
