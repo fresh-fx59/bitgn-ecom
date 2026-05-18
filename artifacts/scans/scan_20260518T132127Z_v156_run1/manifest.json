@@ -1,0 +1,855 @@
+{
+  "scanner_version": "0.1",
+  "benchmark": "bitgn/ecom1-dev",
+  "run_id": "run-22Pyqybnaxgtbs6tKQyFV8xXs",
+  "started_at": "2026-05-18T13:21:32.095413+00:00",
+  "trials": [
+    {
+      "task_id": "t01",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1a",
+      "path_count": 1613,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1105,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 1624,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t02",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1b",
+      "path_count": 1730,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 100,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1102,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 1741,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t03",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1c",
+      "path_count": 2656,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 1000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1099,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 2667,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t04",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1d",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t05",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1e",
+      "path_count": 1613,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1105,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 1624,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t06",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1f",
+      "path_count": 1730,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 100,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1102,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 1741,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t07",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1g",
+      "path_count": 2656,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 1000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1099,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 2667,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t08",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1h",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t09",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1i",
+      "path_count": 1615,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 10,
+        "proc:baskets": 281,
+        "proc:catalog": 10,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1105,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 1626,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t10",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1j",
+      "path_count": 1732,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 10,
+        "proc:baskets": 281,
+        "proc:catalog": 100,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1102,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 1743,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t11",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1k",
+      "path_count": 2658,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 10,
+        "proc:baskets": 281,
+        "proc:catalog": 1000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1099,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 2669,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t12",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1m",
+      "path_count": 12562,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 10,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12573,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t13",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1n",
+      "path_count": 1613,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1105,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 1624,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t14",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1o",
+      "path_count": 1730,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 100,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1102,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 1741,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t15",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1p",
+      "path_count": 2656,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 1000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1099,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 2667,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t16",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1q",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t17",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1r",
+      "path_count": 1613,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1105,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 1624,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t18",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1s",
+      "path_count": 1730,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 100,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1102,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 1741,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t19",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1t",
+      "path_count": 2656,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 1000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1099,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 2667,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t20",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1u",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t21",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1v",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t22",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1w",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t23",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1x",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t24",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1y",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t25",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT1z",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t26",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT21",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t27",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT22",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t28",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT23",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t29",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT24",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t30",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT25",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t31",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT26",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t32",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT27",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t33",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT28",
+      "path_count": 2656,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 1000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1099,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 2667,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t34",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT29",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t35",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT2A",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t36",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT2B",
+      "path_count": 2656,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 1000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1099,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 2667,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t37",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT2C",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t38",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT2D",
+      "path_count": 1730,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 100,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1102,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 1741,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t39",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT2E",
+      "path_count": 2656,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 1000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1099,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 2667,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t40",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT2F",
+      "path_count": 12560,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 9,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12571,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t41",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT2G",
+      "path_count": 2658,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 10,
+        "proc:baskets": 281,
+        "proc:catalog": 1000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1099,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 2669,
+      "n_failed_probes": 0
+    },
+    {
+      "task_id": "t42",
+      "trial_id": "vm2-Lx8cuGLpjVcKagiCQCjFLC6NT2H",
+      "path_count": 12562,
+      "groups": {
+        "misc": 2,
+        "bin": 7,
+        "docs": 10,
+        "proc:baskets": 281,
+        "proc:catalog": 10000,
+        "proc:customers": 101,
+        "proc:employees": 51,
+        "proc:payments": 1103,
+        "proc:README.md": 1,
+        "proc:returns": 21,
+        "proc:stores": 11
+      },
+      "n_probes": 12573,
+      "n_failed_probes": 0
+    }
+  ],
+  "config": {
+    "read_every": true,
+    "sample_per_dir": 3,
+    "max_trials": null,
+    "label": "v156_run1"
+  },
+  "ended_at": "2026-05-18T16:40:01.562216+00:00"
+}
