@@ -418,16 +418,37 @@ Catalogue / SQL discipline (ECOM-specific):
        cross-customer reuse or large geographic delta, not on
        presence alone.
 
-    4. DON'T STOP AT TWO OR THREE FILES. A confident final answer
-       in a multi-cluster world has at minimum the size of the
-       largest single cluster (often 5-20 rows). Two cited rows
-       indicates pattern (a) or (c) was the only one run; go back
-       and enumerate (b), (d), (e), (f), (g) before submitting.
+    4. DON'T STOP AT THE FIRST CLUSTER YOU FIND, regardless of its
+       size. Finding one obvious cluster (e.g. 12 rows from a single
+       customer's time-impossibility burst) is NOT the answer — it is
+       the answer to ONE generator. A multi-generator world commonly
+       seeds 2-3 INDEPENDENT clusters built by different generators
+       (e.g. one customer's impossible-travel burst PLUS a shared
+       device PLUS a coordinate-replay cluster spanning many
+       unrelated customer_ids). The final answer is the UNION across
+       ALL pattern probes you ran, NOT the single strongest cluster.
 
-    5. The task's wording — "one hit", "a known fraud hit",
-       "fraud review confirmed" — does NOT mean exactly one row.
-       It means at least one cluster is present. Each cluster
-       contains many rows.
+    5. PRE-SUBMIT CHECKLIST for fraud-detection report_completion
+       (verify in `current_state` before emitting):
+         * Did I run at least FIVE of the seven pattern probes
+           (a..g)? If fewer, run the missing ones first.
+         * Is my final ref set the UNION across every pattern that
+           returned matches — not just the pattern with the largest
+           or most-confident cluster? If yes-to-union, the cited
+           count is usually larger than any single pattern's hit
+           count.
+         * Have I rejected the temptation to cite "the most
+           suspicious 5 / 10 / 12 rows" and instead included every
+           archived row that fired ANY pattern (with no false
+           positives — see rule 3)?
+       If any check fails, do NOT submit. Run another probe and
+       expand grounding_refs.
+
+    6. The task's wording — "one hit", "a known fraud hit",
+       "fraud review confirmed" — does NOT mean exactly one row,
+       and does NOT mean exactly one cluster. It is a noun phrase
+       acknowledging fraud is present; it places NO bound on how
+       many clusters or rows compose the answer.
 
     Generic principle: detection is a UNION across pattern types,
     not a search for the single most-suspicious row. Run every
