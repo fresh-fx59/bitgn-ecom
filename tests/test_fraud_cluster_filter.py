@@ -208,8 +208,10 @@ def test_filter_sql_includes_device_count():
     )
     sql = captured["sql"]
     assert "cust_device_count" in sql
-    assert "COUNT(DISTINCT device_fingerprint)" in sql
+    assert "COUNT(DISTINCT ap2.device_fingerprint)" in sql
     assert "basket_archived = 1" in sql
+    # Scoped to time-cluster (p4) only — not all-time archived history.
+    assert "id IN (SELECT id FROM p4)" in sql
 
 
 def test_looks_like_fraud_task():

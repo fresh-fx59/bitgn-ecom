@@ -261,8 +261,14 @@ def _fetch_multi_pattern_signals(
         "  (CASE WHEN ap.id IN (SELECT id FROM p3) THEN 1 ELSE 0 END) AS n_id_share,"
         "  (CASE WHEN ap.id IN (SELECT id FROM p4) THEN 1 ELSE 0 END) AS in_time_cluster,"
         "  (CASE WHEN ap.id IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS in_coord_cluster,"
-        "  (SELECT COUNT(DISTINCT device_fingerprint) FROM ap ap2"
-        "    WHERE ap2.customer_id = ap.customer_id) AS cust_device_count "
+        # Distinct devices the customer uses WITHIN the time-cluster only
+        # — not across all-time archived history. cust_025 in PROD likely
+        # has other archived payments outside the fraud burst with
+        # different devices, so all-time COUNT would inflate. Scoping to
+        # p4 (time-impossible cluster members) isolates the burst.
+        "  (SELECT COUNT(DISTINCT ap2.device_fingerprint) FROM ap ap2"
+        "    WHERE ap2.customer_id = ap.customer_id"
+        "      AND ap2.id IN (SELECT id FROM p4)) AS cust_device_count "
         "FROM ap WHERE ap.id IN (" + quoted + ");"
     )
     out = run_sql(sql)
