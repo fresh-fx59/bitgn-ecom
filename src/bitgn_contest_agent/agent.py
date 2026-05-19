@@ -1102,6 +1102,54 @@ class AgentLoop:
                     update={"grounding_refs": completer_res.refs}
                 )
 
+        # Step 1d: fraud cluster filter. Drops cited
+        # /proc/payments/*.json refs that are not part of a same-
+        # customer rapid cross-store cluster — the documented fraud
+        # invariant. Validates each cited payment via SQL against
+        # the live payments table. See fraud_cluster_filter module.
+        if task_text and fn.outcome == "OUTCOME_OK" and fn.grounding_refs:
+            from bitgn_contest_agent.adapter.ecom import Req_Exec
+            from bitgn_contest_agent.fraud_cluster_filter import (
+                filter_fraud_refs,
+                looks_like_fraud_task,
+            )
+
+            if looks_like_fraud_task(task_text):
+
+                def _run_sql(sql: str) -> str | None:
+                    try:
+                        tr = self._adapter.dispatch(
+                            Req_Exec(
+                                tool="exec",
+                                path="/bin/sql",
+                                args=[],
+                                stdin=sql,
+                            )
+                        )
+                        return tr.content if tr.ok else None
+                    except Exception:
+                        return None
+
+                fraud_filtered = filter_fraud_refs(
+                    task_text=task_text,
+                    refs=list(fn.grounding_refs),
+                    run_sql=_run_sql,
+                )
+                if fraud_filtered.dropped:
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP,
+                        at_step=None,
+                        details=(
+                            f"fraud_cluster_filter stripped "
+                            f"{len(fraud_filtered.dropped)} ref(s): "
+                            f"{fraud_filtered.dropped} "
+                            f"reasons={fraud_filtered.reasons}"
+                        ),
+                    )
+                    fn = fn.model_copy(
+                        update={"grounding_refs": fraud_filtered.refs}
+                    )
+
         # Step 2: per-model adapter hook (gpt-oss hallucinated-ref drop).
         adapter = self._model_adapter()
         if adapter is None:

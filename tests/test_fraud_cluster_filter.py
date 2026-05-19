@@ -1,0 +1,184 @@
+"""Tests for fraud_cluster_filter."""
+from __future__ import annotations
+
+from datetime import datetime, timezone
+
+from bitgn_contest_agent.fraud_cluster_filter import (
+    PaymentRow,
+    WINDOW_SECONDS,
+    _build_cluster_membership,
+    _parse_iso,
+    filter_fraud_refs,
+    looks_like_fraud_task,
+)
+
+
+def _t(s: str) -> float:
+    return _parse_iso(s)
+
+
+def test_parse_iso_z_suffix():
+    assert _parse_iso("2021-04-28T14:38:38Z") is not None
+
+
+def test_parse_iso_offset():
+    assert _parse_iso("2021-04-28T14:38:38+00:00") is not None
+
+
+def test_parse_iso_compact():
+    assert _parse_iso("20210428T143838Z") is not None
+
+
+def test_parse_iso_invalid_returns_none():
+    assert _parse_iso("not-a-date") is None
+    assert _parse_iso("") is None
+
+
+def test_cluster_singletons_not_in_cluster():
+    rows = [
+        PaymentRow("pay_1", "cust_A", "store_X", _t("2021-04-28T14:00:00Z")),
+        PaymentRow("pay_2", "cust_B", "store_Y", _t("2021-04-28T14:00:00Z")),
+    ]
+    assert _build_cluster_membership(rows) == set()
+
+
+def test_cluster_pair_same_customer_diff_store_within_window():
+    rows = [
+        PaymentRow("pay_1", "cust_A", "store_X", _t("2021-04-28T14:00:00Z")),
+        PaymentRow("pay_2", "cust_A", "store_Y", _t("2021-04-28T14:05:00Z")),
+    ]
+    assert _build_cluster_membership(rows) == {"pay_1", "pay_2"}
+
+
+def test_cluster_same_store_does_not_pair():
+    rows = [
+        PaymentRow("pay_1", "cust_A", "store_X", _t("2021-04-28T14:00:00Z")),
+        PaymentRow("pay_2", "cust_A", "store_X", _t("2021-04-28T14:05:00Z")),
+    ]
+    assert _build_cluster_membership(rows) == set()
+
+
+def test_cluster_outside_window_does_not_pair():
+    rows = [
+        PaymentRow("pay_1", "cust_A", "store_X", _t("2021-04-28T14:00:00Z")),
+        PaymentRow("pay_2", "cust_A", "store_Y", _t("2021-04-28T15:00:00Z")),
+    ]
+    assert _build_cluster_membership(rows) == set()
+
+
+def test_cluster_transitive_three_rows():
+    """A pairs with B (5min), B pairs with C (10min), but A-C is 15min
+    — all three are still in the cluster transitively."""
+    rows = [
+        PaymentRow("pay_1", "cust_A", "store_X", _t("2021-04-28T14:00:00Z")),
+        PaymentRow("pay_2", "cust_A", "store_Y", _t("2021-04-28T14:05:00Z")),
+        PaymentRow("pay_3", "cust_A", "store_Z", _t("2021-04-28T14:15:00Z")),
+    ]
+    assert _build_cluster_membership(rows) == {"pay_1", "pay_2", "pay_3"}
+
+
+def test_filter_drops_standalone_payment():
+    """Reproduce the v0.1.66 t40 3-FP scenario: 22 clustered fraud
+    rows correctly cited + 3 standalone FPs that the agent mistakenly
+    flagged. Filter should drop the 3 standalones."""
+    # Two clustered fraud rows (same customer, different stores)
+    # and one standalone false positive (different customer, alone).
+    sql_output = (
+        "pay_id|customer_id|store_id|created_at\n"
+        "pay_001|cust_A|store_X|2021-04-28T14:00:00Z\n"
+        "pay_002|cust_A|store_Y|2021-04-28T14:05:00Z\n"
+        "pay_003|cust_B|store_Z|2021-04-29T10:00:00Z\n"
+    )
+    res = filter_fraud_refs(
+        task_text="confirmed fraud incident; identify the payment records",
+        refs=[
+            "/proc/payments/pay_001.json",
+            "/proc/payments/pay_002.json",
+            "/proc/payments/pay_003.json",
+        ],
+        run_sql=lambda sql: sql_output,
+    )
+    assert "/proc/payments/pay_001.json" in res.refs
+    assert "/proc/payments/pay_002.json" in res.refs
+    assert "/proc/payments/pay_003.json" in res.dropped
+
+
+def test_filter_keeps_non_payment_refs():
+    sql_output = "pay_id|customer_id|store_id|created_at\n"
+    res = filter_fraud_refs(
+        task_text="fraud incident",
+        refs=[
+            "/AGENTS.MD",
+            "/docs/security.md",
+            "/proc/payments/pay_001.json",
+            "/proc/payments/pay_002.json",
+        ],
+        run_sql=lambda sql: sql_output,
+    )
+    assert "/AGENTS.MD" in res.refs
+    assert "/docs/security.md" in res.refs
+
+
+def test_filter_passthrough_when_under_two_payments():
+    """Filter cannot evaluate cluster membership without at least 2
+    payments; abstain."""
+    res = filter_fraud_refs(
+        task_text="fraud",
+        refs=["/proc/payments/pay_001.json", "/AGENTS.MD"],
+        run_sql=lambda sql: pytest.fail("should not be called"),
+    )
+    assert res.refs == ["/proc/payments/pay_001.json", "/AGENTS.MD"]
+    assert res.dropped == []
+
+
+def test_filter_abstains_when_sql_fails():
+    res = filter_fraud_refs(
+        task_text="fraud incident",
+        refs=[
+            "/proc/payments/pay_001.json",
+            "/proc/payments/pay_002.json",
+            "/proc/payments/pay_003.json",
+        ],
+        run_sql=lambda sql: None,
+    )
+    assert res.aborted is True
+    assert res.dropped == []
+    assert "/proc/payments/pay_003.json" in res.refs
+
+
+def test_filter_abstains_when_pid_missing_from_sql():
+    """SQL returned rows for some pids but not all — leave the
+    unknown ones alone (e.g., archived payments not in the live
+    table)."""
+    sql_output = (
+        "pay_001|cust_A|store_X|2021-04-28T14:00:00Z\n"
+        "pay_002|cust_A|store_Y|2021-04-28T14:05:00Z\n"
+    )
+    res = filter_fraud_refs(
+        task_text="fraud incident",
+        refs=[
+            "/proc/payments/pay_001.json",
+            "/proc/payments/pay_002.json",
+            "/proc/payments/pay_unknown.json",
+        ],
+        run_sql=lambda sql: sql_output,
+    )
+    assert "/proc/payments/pay_unknown.json" in res.refs
+    assert res.dropped == []
+
+
+def test_looks_like_fraud_task():
+    assert looks_like_fraud_task(
+        "We have a confirmed fraud incident in archived payment history."
+    )
+    assert looks_like_fraud_task(
+        "Identify the fraudulent payment records from history."
+    )
+    assert not looks_like_fraud_task(
+        "Recover the 3DS flow for payment pay_001"
+    )
+    assert not looks_like_fraud_task("How many products are wood screws?")
+
+
+# Import pytest for the conditional fail() in test_filter_passthrough
+import pytest
