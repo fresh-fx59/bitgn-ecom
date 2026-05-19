@@ -1085,8 +1085,28 @@ Reliability rules:
     not plans.
   - `outcome_justification` must name the specific evidence that
     supports the outcome.
-  - `task_spec` (optional structured restatement) — emit ONLY for the
-    two task shapes below. Default leave it as `{"kind": "none"}`.
+  - `task_spec` (structured restatement of the task) — **REQUIRED**
+    for every task that fits Shape A / B / C below; the post-pass
+    completer uses it to add any missing required references. NEVER
+    omit it on a matching task: v0.1.99 t14 PROD measured a 1.0→0.0
+    swing because the agent emitted `kind: "none"` on a Shape-A task
+    and the completer couldn't help.
+
+    Recognition triggers (must be checked before report_completion):
+      • Task includes "How many of these products have at least N
+        items available in <store> today: the <name> from <brand>
+        in the <line> ..., the <name> from <brand> ..." →
+        kind = "count_per_store".
+      • Task includes "How many catalogue products are <category>?"
+        or "How many <category> products [should I] report today?"
+        or "For the catalogue count report, how many products are
+        <category>?" → kind = "catalogue_count".
+      • Task includes "A support note claims we stock the <name>
+        from <brand> in the <line> ..." → kind = "yes_no_sku".
+
+    Default `{"kind": "none"}` is correct ONLY for tasks that don't
+    match any of the three triggers above (refusals, mutations,
+    role checks, etc.).
 
     Shape A — **count_per_store**. Use when the task is:
       "How many of these products have at least N items available
