@@ -26,10 +26,34 @@ fraud pattern this does not happen — every incident is multi-row.
 """
 from __future__ import annotations
 
+import csv
+import io
+import json as _json
 import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Callable, Iterable, Sequence
+
+
+def _unwrap_sql_output(raw: str) -> str:
+    """Unwrap ``/bin/sql`` exec output.
+
+    The adapter returns the runtime's response as a string. For
+    ``/bin/sql`` invocations this string is a JSON object with a
+    ``stdout`` key containing the CSV body. If the input isn't JSON
+    we assume it's already the raw body.
+    """
+    raw = (raw or "").strip()
+    if not raw:
+        return ""
+    if raw.startswith("{"):
+        try:
+            obj = _json.loads(raw)
+            if isinstance(obj, dict):
+                return obj.get("stdout") or ""
+        except Exception:
+            pass
+    return raw
 
 # 30 minutes — matches the prompt's recall-side window. The
 # transitive cluster rule kicks in when consecutive pairs span the
@@ -274,15 +298,27 @@ def _fetch_multi_pattern_signals(
     out = run_sql(sql)
     if out is None:
         return None
+    body = _unwrap_sql_output(out)
     res: dict[str, tuple[int, int, int, int, int]] = {}
-    for line in out.splitlines():
-        s = line.strip()
-        if not s or s.startswith("[") or s.startswith("id|"):
+    # /bin/sql returns CSV; tolerate either ',' or '|' separator so
+    # callers writing pipe-output mocks (legacy tests) still work.
+    reader = csv.reader(
+        io.StringIO(body),
+        delimiter=("|" if "|" in body and "," not in body else ","),
+    )
+    for row in reader:
+        if not row:
             continue
-        parts = [p.strip() for p in s.split("|")]
-        if len(parts) != 6:
+        # Skip header row.
+        if row[0].strip() in {"id", "pay_id"}:
             continue
-        pid, n_str, id_share_str, time_str, coord_str, dev_str = parts
+        if len(row) != 6:
+            continue
+        pid, n_str, id_share_str, time_str, coord_str, dev_str = (
+            c.strip() for c in row
+        )
+        if pid.startswith("[") or not pid:
+            continue
         try:
             res[pid] = (
                 int(n_str),

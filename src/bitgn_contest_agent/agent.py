@@ -1126,33 +1126,8 @@ class AgentLoop:
                                 stdin=sql,
                             )
                         )
-                        if not tr.ok:
-                            emit_arch(
-                                category=ArchCategory.REFS_DROP,
-                                at_step=None,
-                                details=(
-                                    f"fraud_cluster_filter SQL failed "
-                                    f"err={tr.error!r}"
-                                ),
-                            )
-                            return None
-                        out = tr.content or ""
-                        # Debug: surface the first 600 chars of SQL output
-                        emit_arch(
-                            category=ArchCategory.REFS_DROP,
-                            at_step=None,
-                            details=(
-                                f"fraud_cluster_filter SQL output "
-                                f"(first 600 chars): {out[:600]!r}"
-                            ),
-                        )
-                        return out
-                    except Exception as exc:
-                        emit_arch(
-                            category=ArchCategory.REFS_DROP,
-                            at_step=None,
-                            details=f"fraud_cluster_filter exception: {exc!r}",
-                        )
+                        return tr.content if tr.ok else None
+                    except Exception:
                         return None
 
                 fraud_filtered = filter_fraud_refs(

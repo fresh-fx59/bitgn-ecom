@@ -214,6 +214,47 @@ def test_filter_sql_includes_device_count():
     assert "id IN (SELECT id FROM p4)" in sql
 
 
+def test_parser_handles_csv_json_wrapped_output():
+    """v0.1.77 PROD bug repro: /bin/sql returns CSV inside a JSON
+    {"stdout": "..."} wrapper. Parser must unwrap + split on commas."""
+    csv_output = (
+        'id,n_patterns,n_id_share,in_time_cluster,in_coord_cluster,cust_device_count\n'
+        'pay_fraud_1,1,0,1,0,2\n'
+        'pay_fraud_2,1,0,1,0,2\n'
+        'pay_legit_1,1,0,1,0,1\n'
+    )
+    json_wrapped = '{"stdout": "' + csv_output.replace('\n', '\\n') + '", "stderr": "", "exit_code": 0}'
+
+    res = filter_fraud_refs(
+        task_text="fraud incident",
+        refs=[
+            "/proc/payments/pay_fraud_1.json",
+            "/proc/payments/pay_fraud_2.json",
+            "/proc/payments/pay_legit_1.json",
+        ],
+        run_sql=lambda sql: json_wrapped,
+    )
+    assert "/proc/payments/pay_fraud_1.json" in res.refs
+    assert "/proc/payments/pay_fraud_2.json" in res.refs
+    assert "/proc/payments/pay_legit_1.json" in res.dropped
+
+
+def test_parser_handles_raw_csv_output():
+    """If output is raw CSV (no JSON wrapper) the parser still works."""
+    csv_output = (
+        'id,n_patterns,n_id_share,in_time_cluster,in_coord_cluster,cust_device_count\n'
+        'pay_a,1,0,1,0,2\n'
+        'pay_b,1,0,1,0,1\n'
+    )
+    res = filter_fraud_refs(
+        task_text="fraud incident",
+        refs=["/proc/payments/pay_a.json", "/proc/payments/pay_b.json"],
+        run_sql=lambda sql: csv_output,
+    )
+    assert "/proc/payments/pay_a.json" in res.refs
+    assert "/proc/payments/pay_b.json" in res.dropped
+
+
 def test_looks_like_fraud_task():
     assert looks_like_fraud_task("confirmed fraud incident in archived payment history")
     assert looks_like_fraud_task("identify the fraudulent payment records")
