@@ -198,6 +198,119 @@ def test_completer_abstains_when_store_unresolvable(snapshot_db, snapshot_metada
     assert res.aborted is True
 
 
+def test_spec_driven_completer_adds_qualifying_skus(snapshot_db, snapshot_metadata):
+    """v0.1.98 P1 path: agent emits task_spec, completer uses it
+    directly (no NL regex parse). Should recover the required SKU
+    set from the multi_sku_attr_line_hard metadata."""
+    from bitgn_contest_agent.schemas import (
+        ProductFilter, TaskSpec,
+    )
+    from bitgn_contest_agent.sku_completer import (
+        complete_sku_refs_from_spec,
+    )
+
+    spec = TaskSpec(
+        kind="count_per_store",
+        store_descriptor="Acmetown Central",
+        threshold=1,
+        products=[
+            ProductFilter(
+                brand="Acmetool",
+                series="Acmetool Pro Z9",
+                model="Z9-DR1",
+                name="Cordless Drill Driver",
+                attributes={
+                    "voltage": "18 V",
+                    "battery_platform": "18v-system",
+                    "kit_contents": "case",
+                },
+            ),
+            ProductFilter(
+                brand="Fastonix",
+                series="Fastonix MaxFix MX2-A77",
+                model="MX2-A77",
+                name="Anchor and Wall Plug",
+                attributes={"anchor_type": "cavity fixing"},
+            ),
+            ProductFilter(
+                brand="Pipemax",
+                series="Pipemax Professional Sanflow 7QO-NNG",
+                model="7QO-NNG",
+                name="Pipe Fitting",
+                attributes={
+                    "fitting_type": "compression coupler",
+                    "diameter": "32 mm",
+                },
+            ),
+        ],
+    )
+    res = complete_sku_refs_from_spec(
+        task_spec=spec,
+        refs=["/proc/stores/store_acmetown_central.json"],
+        run_sql=_sql_runner(snapshot_db),
+    )
+    assert res.aborted is False
+    # Every required SKU path must now be in refs.
+    for required in snapshot_metadata["required_refs"]:
+        if required.startswith("/proc/catalog/"):
+            assert required in res.refs, (
+                f"task_spec completer missed required {required}"
+            )
+
+
+def test_spec_driven_completer_relaxes_overconstrained_attrs(snapshot_db):
+    """v0.1.96 t15 failure repro: agent emitted attributes whose
+    case/normalization doesn't match catalogue exactly. The
+    relaxed-fallback retries with brand+model alone."""
+    from bitgn_contest_agent.schemas import ProductFilter, TaskSpec
+    from bitgn_contest_agent.sku_completer import (
+        complete_sku_refs_from_spec,
+    )
+
+    spec = TaskSpec(
+        kind="count_per_store",
+        store_descriptor="Acmetown Central",
+        threshold=1,
+        products=[
+            ProductFilter(
+                brand="Acmetool",
+                series="Acmetool Pro Z9",
+                model="Z9-DR1",
+                name="Cordless Drill Driver",
+                # Intentionally OVER-CONSTRAINED — voltage is wrong
+                # casing. The relaxed fallback should still find the
+                # qualifying SKU after dropping the attribute filter.
+                attributes={"voltage": "18 v"},
+            ),
+        ],
+    )
+    res = complete_sku_refs_from_spec(
+        task_spec=spec,
+        refs=[],
+        run_sql=_sql_runner(snapshot_db),
+    )
+    # At least one Acmetool SKU should still be added.
+    assert any(
+        "/Acmetool/" in p for p in res.added
+    ), f"expected an Acmetool SKU added; got {res.added}"
+
+
+def test_spec_driven_completer_abstains_on_kind_none():
+    from bitgn_contest_agent.schemas import TaskSpec
+    from bitgn_contest_agent.sku_completer import (
+        complete_sku_refs_from_spec,
+    )
+
+    spec = TaskSpec(kind="none")
+    res = complete_sku_refs_from_spec(
+        task_spec=spec,
+        refs=["/AGENTS.MD"],
+        run_sql=lambda sql: "",
+    )
+    assert res.aborted is True
+    assert res.added == []
+
+
 def test_completer_does_not_add_disqualifying_skus(snapshot_db, snapshot_metadata):
     """SKUs with mismatched attributes or insufficient inventory
     must NOT be added. The metadata's forbidden_refs are the

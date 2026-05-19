@@ -1085,6 +1085,46 @@ Reliability rules:
     not plans.
   - `outcome_justification` must name the specific evidence that
     supports the outcome.
+  - `task_spec` (optional structured restatement) — emit ONLY for the
+    two task shapes below. Default leave it as `{"kind": "none"}`.
+
+    Shape A — **count_per_store**. Use when the task is:
+      "How many of these products have at least N items available
+       in <store_descriptor> today: the <name> from <brand> in the
+       <series> <model> <name> line that has <attrs>, the <name>
+       from <brand> ..., ..."
+    Emit:
+      task_spec = {
+        "kind": "count_per_store",
+        "store_descriptor": "<store_descriptor verbatim>",
+        "threshold": <N>,
+        "products": [
+          { "brand": "<Brand>", "series": "<series text>",
+            "model": "<Model>", "name": "<category>",
+            "attributes": {"<attr_key>": "<attr_val>", ...} },
+          ...one entry per product in the list...
+        ]
+      }
+    `attributes` keys MUST be snake_case (`battery_platform` not
+    `battery platform`). Values use the spec value verbatim from the
+    task (`"18 V"` not `"18V"`).
+
+    Shape B — **catalogue_count**. Use when the task is:
+      "How many catalogue products are <category>?", or
+      "How many <category> products [should I] report today?", or
+      "For the catalogue count report, how many products are
+       <category>?"
+    Emit:
+      task_spec = {
+        "kind": "catalogue_count",
+        "category_human": "<category verbatim from task>",
+      }
+
+    The post-pass uses `task_spec` to deterministically resolve
+    qualifying SKUs (count_per_store) or matching addenda
+    (catalogue_count) and ADD any missing required references to
+    `grounding_refs`. It NEVER removes refs you cited, so emitting a
+    correct task_spec is pure upside.
   - Every file path referenced in `message` or `outcome_justification`
     MUST appear in `grounding_refs` and MUST have been successfully
     read (or stat'd) in this run. `grounding_refs` is FILE PATHS only

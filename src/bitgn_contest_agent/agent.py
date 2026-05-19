@@ -1205,9 +1205,55 @@ class AgentLoop:
                     update={"grounding_refs": addenda_res.refs}
                 )
 
-        # Step 1c2 (SKU completer) — still disabled. Pending
-        # structured TaskSpec emission from the agent (SPEC_NEXT P1)
-        # to replace the brittle multi-product regex parse.
+        # Step 1c2 (SKU completer, v0.1.98 P1): structured-input path.
+        # When the agent emitted a task_spec with kind=count_per_store,
+        # use it to SQL-resolve qualifying SKUs and union into refs.
+        # NEVER removes — pure superset enforcement. The legacy regex-
+        # parsed entry point stays disabled.
+        if task_text and fn.outcome == "OUTCOME_OK":
+            task_spec_obj = getattr(fn, "task_spec", None)
+            if (
+                task_spec_obj is not None
+                and getattr(task_spec_obj, "kind", "none") == "count_per_store"
+            ):
+                from bitgn_contest_agent.adapter.ecom import Req_Exec
+                from bitgn_contest_agent.sku_completer import (
+                    complete_sku_refs_from_spec as _complete_sku_from_spec,
+                )
+
+                def _run_sql_skucomp_spec(sql: str) -> str | None:
+                    try:
+                        tr = self._adapter.dispatch(
+                            Req_Exec(
+                                tool="exec",
+                                path="/bin/sql",
+                                args=[],
+                                stdin=sql,
+                            )
+                        )
+                        return tr.content if tr.ok else None
+                    except Exception:
+                        return None
+
+                sku_spec_res = _complete_sku_from_spec(
+                    task_spec=task_spec_obj,
+                    refs=list(fn.grounding_refs),
+                    run_sql=_run_sql_skucomp_spec,
+                )
+                if sku_spec_res.added:
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP,
+                        at_step=None,
+                        details=(
+                            f"sku_completer (P1/spec-driven) added "
+                            f"{len(sku_spec_res.added)} ref(s): "
+                            f"{sku_spec_res.added} "
+                            f"reasons={sku_spec_res.reasons[:3]}"
+                        ),
+                    )
+                    fn = fn.model_copy(
+                        update={"grounding_refs": sku_spec_res.refs}
+                    )
 
         # Step 1c3: fraud recall completer. ADDS canonical fraud
         # rows the agent under-called. Symmetric to the cluster

@@ -21,12 +21,76 @@ ECOM tool surface (vs the PAC1 lineage this is forked from):
 """
 from __future__ import annotations
 
-from typing import Annotated, List, Literal, Union
+from typing import Annotated, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 from pydantic.types import StringConstraints
 
 NonEmptyStr = Annotated[str, StringConstraints(min_length=1)]
+
+
+# ── TaskSpec (v0.1.98 P1) ────────────────────────────────────────────
+# Optional structured restatement of the task. Used by post-pass
+# completers to resolve catalogue SKUs deterministically instead of
+# regex-parsing the agent's natural-language report. Soft-validated
+# at parse time: malformed task_spec is dropped, the rest of the
+# completion stays. See sku_completer module.
+#
+# Schema is intentionally FLAT (single model, kind=enum) rather than
+# a discriminated union — the tool catalog has a no-oneOf/anyOf
+# invariant (test_tool_catalog_no_oneof_nodes) because small local
+# models fail on JSON Schema with unions. Empty fields outside the
+# `kind` variant's scope are ignored by the completer.
+class ProductFilter(BaseModel):
+    brand: str = Field(description="Brand name as it appears in the task")
+    series: str = Field(
+        default="",
+        description="Series / line name (incl. model code if part of the line)",
+    )
+    model: str = Field(default="", description="Model code")
+    name: str = Field(
+        default="",
+        description="Product category name (e.g. 'Cordless Drill Driver')",
+    )
+    attributes: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Snake_case property key → value as named in the task",
+    )
+
+
+class TaskSpec(BaseModel):
+    kind: Literal["none", "count_per_store", "catalogue_count"] = Field(
+        default="none",
+        description=(
+            "Which shape: 'count_per_store' for 'How many of these "
+            "products have at least N available at <store>: ...'; "
+            "'catalogue_count' for 'How many catalogue products are "
+            "X?' / 'How many X products report today?'; 'none' (the "
+            "default) when the task is not a count task."
+        ),
+    )
+    # count_per_store fields
+    store_descriptor: str = Field(
+        default="",
+        description="The city descriptor or store name from task text",
+    )
+    threshold: int = Field(
+        default=0,
+        ge=0,
+        description="`at least N items` value for count_per_store",
+    )
+    products: List[ProductFilter] = Field(
+        default_factory=list,
+        description="Parsed product list for count_per_store",
+    )
+    # catalogue_count fields
+    category_human: str = Field(
+        default="",
+        description=(
+            "Verbatim category as named in task (e.g. 'Pliers and "
+            "Wrenches'). Required when kind='catalogue_count'."
+        ),
+    )
 
 
 class Req_Read(BaseModel):
@@ -128,6 +192,21 @@ class ReportTaskCompletion(BaseModel):
         "OUTCOME_NONE_UNSUPPORTED",
         "OUTCOME_ERR_INTERNAL",
     ]
+    task_spec: TaskSpec = Field(
+        default_factory=TaskSpec,
+        description=(
+            "Optional structured restatement of the task. Set "
+            "task_spec.kind='count_per_store' on multi-product "
+            "availability tasks ('How many of these products have at "
+            "least N available at <store>: <list>') and fill "
+            "store_descriptor + threshold + products. Set "
+            "task_spec.kind='catalogue_count' on catalogue-count "
+            "tasks ('How many catalogue products are X?' or 'How "
+            "many X products [should I] report') and fill "
+            "category_human. Leave kind='none' otherwise. The "
+            "post-pass uses this to verify your cited SKUs / addenda."
+        ),
+    )
 
 
 FunctionUnion = Annotated[

@@ -1,6 +1,15 @@
 """SKU completer — post-pass enforcer that ensures every qualifying
 catalogue SKU is cited in grounding_refs on count tasks.
 
+v0.1.98 P1: re-enabled with a structured-input path. When the
+agent emits ``task_spec`` with kind=count_per_store, the completer
+uses the parsed product list directly instead of regex-parsing the
+natural-language task text. See ``complete_sku_refs_from_spec``.
+
+The legacy regex-based ``complete_sku_refs`` is kept for callers
+without a task_spec (still disabled by default in agent.py).
+
+
 Target failure family (v0.1.74 / v0.1.81 PROD):
   t14: "How many of these products have at least N available …"
   t15: same shape, different product list
@@ -429,6 +438,164 @@ def complete_sku_refs(
                     f"{path}: qualifying SKU for {spec.brand} "
                     f"{spec.name} at {store_id} (available_today "
                     f">= {threshold}) was missing from grounding_refs"
+                )
+    return CompleterResult(
+        refs=out_refs, added=added, reasons=reasons,
+    )
+
+
+# ── v0.1.98 P1: structured-input completer ───────────────────────────
+
+
+def _find_qualifying_skus_relaxed(
+    brand: str,
+    series: str,
+    model: str,
+    attributes: dict[str, str],
+    store_id: str,
+    threshold: int,
+    run_sql: Callable[[str], str | None],
+) -> list[str] | None:
+    """Like ``_find_qualifying_skus`` but takes brand/series/model
+    plus attributes directly (no ProductSpec). Falls back gracefully
+    if the attribute filters yield zero matches — drops them and
+    retries with brand+model alone, then brand alone. This handles
+    the v0.1.96 t15-shape failure where the agent's SQL over-
+    constrained with a normalized-wrong attribute value.
+
+    Returns None on SQL failure (caller should abstain).
+    """
+    brand_q = _sql_quote(brand)
+    series_clauses: list[str] = []
+    if series:
+        series_clauses.append(f"p.series LIKE '%{_sql_quote(series)}%'")
+    if model:
+        series_clauses.append(f"p.model = '{_sql_quote(model)}'")
+    line_filter = " AND " + " AND ".join(series_clauses) if series_clauses else ""
+
+    # Try strict (all attributes), then relax incrementally.
+    tries: list[tuple[str, list[tuple[str, str]]]] = []
+    if attributes:
+        tries.append(("strict (all attrs)", list(attributes.items())))
+    tries.append(("brand+model", []))
+
+    for label, attr_pairs in tries:
+        attr_clause = ""
+        for k, v in attr_pairs:
+            v_q = _sql_quote(v)
+            attr_clause += (
+                f" AND lower(json_extract(p.properties, '$.{k}')) = "
+                f"lower('{v_q}')"
+            )
+        sql = (
+            "SELECT p.path FROM products p "
+            "JOIN inventory i ON i.sku = p.sku "
+            f"WHERE p.brand = '{brand_q}' COLLATE NOCASE"
+            f"{line_filter}{attr_clause} "
+            f"AND i.store_id = '{_sql_quote(store_id)}' "
+            f"AND i.available_today >= {int(threshold)};"
+        )
+        out = run_sql(sql)
+        if out is None:
+            return None
+        body = _unwrap_sql(out)
+        paths: list[str] = []
+        for line in body.splitlines():
+            s = line.strip()
+            if not s or s.startswith("[") or s == "path" or s.startswith("path|"):
+                continue
+            cols = _csv_split(s)
+            if cols and cols[0].startswith("/proc/catalog/"):
+                paths.append(cols[0])
+        if paths:
+            return paths
+    # All variants returned zero.
+    return []
+
+
+def complete_sku_refs_from_spec(
+    *,
+    task_spec,  # TaskSpec (loose-typed to avoid pydantic cycle)
+    refs: Sequence[str],
+    run_sql: Callable[[str], str | None],
+) -> CompleterResult:
+    """Use the agent-emitted ``task_spec`` (structured) to ADD any
+    missing qualifying catalogue SKU paths to grounding_refs. UNION
+    semantics: this NEVER removes refs the agent emitted.
+
+    Aborts (refs unchanged) if:
+      - task_spec.kind != 'count_per_store'
+      - store_descriptor cannot be resolved to a store_id
+      - SQL fails
+
+    Per `feedback_enforcer_cannot_replace_adaptive_llm`: this is a
+    SUPERSET enforcer. If task_spec is malformed or partial, we
+    leave the LLM's choice alone.
+    """
+    if task_spec is None:
+        return CompleterResult(
+            refs=list(refs), added=[], reasons=[],
+            aborted=True, abort_reason="no task_spec",
+        )
+    kind = getattr(task_spec, "kind", "none")
+    if kind != "count_per_store":
+        return CompleterResult(
+            refs=list(refs), added=[], reasons=[],
+            aborted=True, abort_reason=f"task_spec.kind={kind!r}",
+        )
+    products = getattr(task_spec, "products", []) or []
+    if not products:
+        return CompleterResult(
+            refs=list(refs), added=[], reasons=[],
+            aborted=True, abort_reason="task_spec.products empty",
+        )
+    store_descriptor = getattr(task_spec, "store_descriptor", "") or ""
+    threshold = int(getattr(task_spec, "threshold", 0) or 0)
+
+    store_id = resolve_store_id(store_descriptor, run_sql)
+    if store_id is None:
+        return CompleterResult(
+            refs=list(refs), added=[], reasons=[],
+            aborted=True,
+            abort_reason=f"store unresolved: {store_descriptor!r}",
+        )
+
+    have = set(refs)
+    out_refs = list(refs)
+    added: list[str] = []
+    reasons: list[str] = []
+
+    for p in products:
+        brand = getattr(p, "brand", "") or ""
+        series = getattr(p, "series", "") or ""
+        model = getattr(p, "model", "") or ""
+        attributes = dict(getattr(p, "attributes", {}) or {})
+        if not brand:
+            continue
+        skus = _find_qualifying_skus_relaxed(
+            brand=brand,
+            series=series,
+            model=model,
+            attributes=attributes,
+            store_id=store_id,
+            threshold=threshold,
+            run_sql=run_sql,
+        )
+        if skus is None:
+            return CompleterResult(
+                refs=list(refs), added=[], reasons=[],
+                aborted=True,
+                abort_reason=f"sql failed for product {brand}",
+            )
+        for path in skus:
+            if path not in have:
+                out_refs.append(path)
+                have.add(path)
+                added.append(path)
+                reasons.append(
+                    f"{path}: qualifying SKU from task_spec "
+                    f"({brand} / {model}) at {store_id} "
+                    f"(avail >= {threshold})"
                 )
     return CompleterResult(
         refs=out_refs, added=added, reasons=reasons,
