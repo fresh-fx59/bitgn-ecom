@@ -1126,6 +1126,53 @@ class AgentLoop:
                     update={"grounding_refs": completer_res.refs}
                 )
 
+        # Step 1c2: SKU completer. For multi-product count tasks
+        # ("How many of these products have at least N available at
+        # <store>: ..."), parse the task spec, find every
+        # qualifying SKU via SQL, and ADD it to grounding_refs if
+        # missing. Closes the t14/t15/t16-shape wrong-SKU-pick
+        # variance family where the agent searches the wrong
+        # catalogue partition. See sku_completer module.
+        if task_text and fn.outcome == "OUTCOME_OK":
+            from bitgn_contest_agent.adapter.ecom import Req_Exec
+            from bitgn_contest_agent.sku_completer import (
+                complete_sku_refs as _complete_sku_refs,
+            )
+
+            def _run_sql_skucomp(sql: str) -> str | None:
+                try:
+                    tr = self._adapter.dispatch(
+                        Req_Exec(
+                            tool="exec",
+                            path="/bin/sql",
+                            args=[],
+                            stdin=sql,
+                        )
+                    )
+                    return tr.content if tr.ok else None
+                except Exception:
+                    return None
+
+            sku_comp_res = _complete_sku_refs(
+                task_text=task_text,
+                refs=list(fn.grounding_refs),
+                run_sql=_run_sql_skucomp,
+            )
+            if sku_comp_res.added:
+                emit_arch(
+                    category=ArchCategory.REFS_DROP,
+                    at_step=None,
+                    details=(
+                        f"sku_completer added "
+                        f"{len(sku_comp_res.added)} ref(s): "
+                        f"{sku_comp_res.added} "
+                        f"reasons={sku_comp_res.reasons[:3]}"
+                    ),
+                )
+                fn = fn.model_copy(
+                    update={"grounding_refs": sku_comp_res.refs}
+                )
+
         # Step 1d: fraud cluster filter. Drops cited
         # /proc/payments/*.json refs that are not part of a same-
         # customer rapid cross-store cluster — the documented fraud
