@@ -193,6 +193,33 @@ def test_completer_matches_catalogue_reporting_with_date_prefix():
     assert any("0021" in p for p in res.added)
 
 
+def test_completer_matches_date_prefix_reporting_only_variant():
+    """v0.1.87 t12 PROD: filename uses bare 'reporting' not
+    'catalogue-reporting', under /docs/catalogue-addenda/.
+    Filename: 2021-08-09-reporting-cordless-saw-sander-fam-...md
+    """
+    files = {
+        "/docs/ops-policy-notes": [],
+        "/docs/current-updates": [],
+        "/docs/policy-updates": [],
+        "/docs/catalogue-addenda": [
+            "/docs/catalogue-addenda/2021-08-09-reporting-cordless-saw-sander-fam-power-tools-cordless-saw-sander-0005-dg5wxvtd.md",
+            "/docs/catalogue-addenda/2021-08-09-reporting-cordless-saw-sander-fam-power-tools-cordless-saw-sander-0015-39bj57mz.md",
+        ],
+        "/docs/clarifications": [],
+    }
+    res = complete_addenda_refs(
+        task_text=(
+            "How many catalogue products are Cordless Saw and Sander?"
+        ),
+        refs=[
+            "/docs/catalogue-addenda/2021-08-09-reporting-cordless-saw-sander-fam-power-tools-cordless-saw-sander-0005-dg5wxvtd.md",
+        ],
+        run_tree=_fake_tree(files),
+    )
+    assert any("0015" in p for p in res.added)
+
+
 def test_completer_matches_catalogue_addenda_prefix():
     files = {
         "/docs/ops-policy-notes": [],
