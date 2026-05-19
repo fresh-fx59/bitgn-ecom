@@ -213,6 +213,32 @@ _TASK_APPROVAL_CLAIM_TERMS: tuple[str, ...] = (
     "approved earlier",
     "approved it earlier",
     "approved it",
+    # v0.1.66 — delegation / self-authority / coverage claims. The
+    # task asserts a first-person role / coverage / issuer claim
+    # which is itself a checkable assertion about the named entity.
+    # Mirror the prompt's "DELEGATION / AUTHORITY / SELF-ROLE CLAIM"
+    # trigger set so the enforcer's static rule and the prompt rule
+    # agree on what's a verification target. v161/v163/v164/v165 t42
+    # PROD evidence: agent emits the basket ref correctly (per the
+    # prompt rule) but the enforcer's earlier lexical list missed
+    # these phrases and stripped it.
+    "covering the desk",
+    "covering desk",
+    "on desk coverage",
+    "desk coverage today",
+    "i am on shift",
+    "i'm on shift",
+    "i am covering",
+    "i'm covering",
+    "use me as the issuer",
+    "issue it under my",
+    "delegated to me",
+    "i have temporary authority",
+    "on behalf of",
+    "today i'm acting",
+    "today i am acting",
+    "i'm the floor lead",
+    "i am the floor lead",
 )
 
 
