@@ -44,9 +44,26 @@ class AddendaCompleterResult:
     abort_reason: str | None = None
 
 
-_CATALOGUE_COUNT_RE = re.compile(
+# Three observed phrasings for the catalogue-count question:
+#   "How many catalogue products are <X>?"
+#   "How many products are <X>?" + earlier mention of "catalogue
+#       count report" / "catalogue counting" / "catalogue reporting"
+#   (variants prepending "For the catalogue count report,")
+# Accept either: a "catalogue products" form, or a "products are X"
+# form gated by a separate catalogue-context regex.
+_CATALOGUE_COUNT_DIRECT_RE = re.compile(
     r"how\s+many\s+catalogue\s+products\s+are\s+(?P<category>[A-Za-z\s\-/]+?)"
     r"\s*\??\s*(?:Answer|$)",
+    re.IGNORECASE,
+)
+_CATALOGUE_COUNT_INDIRECT_RE = re.compile(
+    r"how\s+many\s+products\s+are\s+(?P<category>[A-Za-z\s\-/]+?)"
+    r"\s*\??\s*(?:Answer|$)",
+    re.IGNORECASE,
+)
+_CATALOGUE_CONTEXT_RE = re.compile(
+    r"catalogue[\s\-](?:count|counting|reporting|addenda)\b"
+    r"|catalogue\s+report\b",
     re.IGNORECASE,
 )
 
@@ -65,7 +82,13 @@ _CANDIDATE_DIRS: tuple[str, ...] = (
 def _is_catalogue_count_task(task_text: str) -> str | None:
     """Return the kebab-cased category token if this is a
     catalogue-count task, else None."""
-    m = _CATALOGUE_COUNT_RE.search(task_text)
+    m = _CATALOGUE_COUNT_DIRECT_RE.search(task_text)
+    if not m:
+        # Indirect phrasing requires an explicit catalogue context
+        # word to avoid firing on generic "how many products are X"
+        # tasks (count-per-store, etc.).
+        if _CATALOGUE_CONTEXT_RE.search(task_text):
+            m = _CATALOGUE_COUNT_INDIRECT_RE.search(task_text)
     if not m:
         return None
     raw = m.group("category").strip().rstrip("?")

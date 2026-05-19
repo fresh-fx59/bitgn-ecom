@@ -220,6 +220,31 @@ def test_completer_matches_date_prefix_reporting_only_variant():
     assert any("0015" in p for p in res.added)
 
 
+def test_indirect_phrasing_for_catalogue_count_report():
+    """v0.1.89 stability run t12: task uses 'For the catalogue
+    count report, how many products are <X>?' — no 'catalogue
+    products' verbatim, but 'catalogue count report' is in scope."""
+    s = (
+        "For the catalogue count report, how many products are "
+        "Cordless Drill Driver? Answer in exactly format \"<COUNT:%d>\"."
+    )
+    tok = _is_catalogue_count_task(s)
+    assert tok is not None
+    full, no_and = tok.split("|")
+    assert full == "cordless-drill-driver"
+
+
+def test_indirect_phrasing_requires_catalogue_context():
+    """Bare 'how many products are X' WITHOUT a catalogue context
+    word must NOT trigger (avoid false positives on count-per-store
+    tasks that don't fit the addenda family)."""
+    s = (
+        "How many products are available at Acmetown Central? "
+        "Answer in format ..."
+    )
+    assert _is_catalogue_count_task(s) is None
+
+
 def test_completer_matches_catalogue_addenda_prefix():
     files = {
         "/docs/ops-policy-notes": [],
