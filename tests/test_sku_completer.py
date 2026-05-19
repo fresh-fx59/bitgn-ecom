@@ -295,6 +295,64 @@ def test_spec_driven_completer_relaxes_overconstrained_attrs(snapshot_db):
     ), f"expected an Acmetool SKU added; got {res.added}"
 
 
+def test_yes_no_sku_completer_finds_family(snapshot_db):
+    """yes_no_sku adds all SKUs with matching brand+model."""
+    from bitgn_contest_agent.schemas import ProductFilter, TaskSpec
+    from bitgn_contest_agent.sku_completer import (
+        complete_yes_no_sku_refs,
+    )
+
+    spec = TaskSpec(
+        kind="yes_no_sku",
+        products=[
+            ProductFilter(
+                brand="Acmetool",
+                series="Acmetool Pro Z9",
+                model="Z9-DR1",
+                name="Cordless Drill Driver",
+            )
+        ],
+    )
+    res = complete_yes_no_sku_refs(
+        task_spec=spec,
+        refs=[],
+        run_sql=_sql_runner(snapshot_db),
+    )
+    # Snapshot has 3 Acmetool Z9-DR1 SKUs across different
+    # family_ids (RIGHT, LOW, BARE). All three should be added.
+    assert len(res.added) == 3
+
+
+def test_yes_no_sku_completer_does_NOT_fall_back_to_brand_only(snapshot_db):
+    """v0.1.102 t32 PROD repro: when the task names a model that
+    doesn't exist (false claim), the completer must NOT return all
+    brand SKUs across other product lines."""
+    from bitgn_contest_agent.schemas import ProductFilter, TaskSpec
+    from bitgn_contest_agent.sku_completer import (
+        complete_yes_no_sku_refs,
+    )
+
+    spec = TaskSpec(
+        kind="yes_no_sku",
+        products=[
+            ProductFilter(
+                brand="Acmetool",
+                series="Acmetool Imaginary X9",
+                model="X9-DOESNOTEXIST",
+                name="Cordless Drill Driver",
+            )
+        ],
+    )
+    res = complete_yes_no_sku_refs(
+        task_spec=spec,
+        refs=[],
+        run_sql=_sql_runner(snapshot_db),
+    )
+    # No Acmetool SKU has model='X9-DOESNOTEXIST'. Brand+model
+    # tier returns empty. Completer must NOT spill into brand-only.
+    assert res.added == []
+
+
 def test_spec_driven_completer_abstains_on_kind_none():
     from bitgn_contest_agent.schemas import TaskSpec
     from bitgn_contest_agent.sku_completer import (

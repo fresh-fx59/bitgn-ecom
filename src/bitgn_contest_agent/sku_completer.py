@@ -624,10 +624,17 @@ def _find_family_skus(
 ) -> list[str] | None:
     """Find every SKU in the brand+series(+model) family. Used by
     the yes_no_sku completer to enumerate candidates whose attributes
-    sku_verifier can then prune. Relaxes the line filter on zero
-    results — agent's emitted series text often includes brand and
-    model concatenated, which is too restrictive vs catalogue's
-    `series` column."""
+    sku_verifier can then prune.
+
+    Relaxation ladder: strict (series LIKE + model =) → brand+model.
+    DOES NOT fall back to brand-only — for yes_no_sku, the agent's
+    claim names a specific line/model, and brand-only enumeration
+    pulls in unrelated product categories (v0.1.102 t32 PROD
+    repro: Kopp 'Wiring Device' fallback returned 49 extension-cable
+    SKUs because the wiring-device family didn't exist). When both
+    tiers fail, abstain — the catalogue genuinely lacks a matching
+    SKU and the agent's own 'closest miss' citation is best we can
+    do."""
     brand_q = _sql_quote(brand)
     tries: list[list[str]] = []
     base = f"p.brand = '{brand_q}' COLLATE NOCASE"
@@ -639,7 +646,6 @@ def _find_family_skus(
         ])
     if model:
         tries.append([base, f"p.model = '{_sql_quote(model)}'"])
-    tries.append([base])
 
     for where_clauses in tries:
         sql = (
