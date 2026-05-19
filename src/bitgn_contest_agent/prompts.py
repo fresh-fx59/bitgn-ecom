@@ -1097,12 +1097,25 @@ Reliability rules:
         items available in <store> today: the <name> from <brand>
         in the <line> ..., the <name> from <brand> ..." →
         kind = "count_per_store".
-      • Task includes "How many catalogue products are <category>?"
-        or "How many <category> products [should I] report today?"
-        or "For the catalogue count report, how many products are
-        <category>?" → kind = "catalogue_count".
+      • Task includes ANY of:
+          "How many catalogue products are <category>?"
+          "How many <category> products [should I] report today?"
+          "For the catalogue count report, how many products are
+           <category>?"
+          "For the <category> count, ..."
+          The phrase "catalogue count" / "catalogue counting" /
+           "catalogue reporting" anywhere in the task PLUS a
+           "how many <X>" pattern.
+        → kind = "catalogue_count". When the task says "how many
+        <X> products [should I] report today" the "<X>" IS the
+        category — extract it verbatim into `category_human` (do
+        NOT default to kind='none' just because the wording isn't
+        "catalogue products are <category>"; the contest uses
+        multiple equivalent phrasings).
       • Task includes "A support note claims we stock the <name>
-        from <brand> in the <line> ..." → kind = "yes_no_sku".
+        from <brand> in the <line> ..." OR "Check the actual
+        catalog ..." with a brand+line+attribute spec →
+        kind = "yes_no_sku".
 
     Default `{"kind": "none"}` is correct ONLY for tasks that don't
     match any of the three triggers above (refusals, mutations,

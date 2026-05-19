@@ -504,7 +504,7 @@ def _find_qualifying_skus_relaxed(
             f"{line_filter}{attr_clause} "
             f"AND i.store_id = '{_sql_quote(store_id)}' "
             f"AND i.available_today >= {int(threshold)} "
-            "LIMIT 20;"
+            "LIMIT 50;"
         )
         out = run_sql(sql)
         if out is None:
@@ -644,7 +644,7 @@ def _find_family_skus(
     for where_clauses in tries:
         sql = (
             "SELECT p.path FROM products p "
-            f"WHERE {' AND '.join(where_clauses)} LIMIT 20;"
+            f"WHERE {' AND '.join(where_clauses)} LIMIT 50;"
         )
         out = run_sql(sql)
         if out is None:
