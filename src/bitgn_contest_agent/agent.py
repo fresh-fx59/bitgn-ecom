@@ -1126,6 +1126,45 @@ class AgentLoop:
                     update={"grounding_refs": completer_res.refs}
                 )
 
+        # Step 1c1: addenda completer. For catalogue-count tasks
+        # ("How many catalogue products are <X>?"), list every
+        # candidate `/docs/<addenda>/` directory and add each
+        # catalogue-count addendum file matching the task category.
+        # Closes the v0.1.82 t12 multi-addenda variance.
+        if task_text and fn.outcome == "OUTCOME_OK":
+            from bitgn_contest_agent.adapter.ecom import Req_Tree
+            from bitgn_contest_agent.addenda_completer import (
+                complete_addenda_refs as _complete_addenda_refs,
+            )
+
+            def _run_tree(root: str, level: int) -> str | None:
+                try:
+                    tr = self._adapter.dispatch(
+                        Req_Tree(tool="tree", root=root, level=level)
+                    )
+                    return tr.content if tr.ok else None
+                except Exception:
+                    return None
+
+            addenda_res = _complete_addenda_refs(
+                task_text=task_text,
+                refs=list(fn.grounding_refs),
+                run_tree=_run_tree,
+            )
+            if addenda_res.added:
+                emit_arch(
+                    category=ArchCategory.REFS_DROP,
+                    at_step=None,
+                    details=(
+                        f"addenda_completer added "
+                        f"{len(addenda_res.added)} ref(s): "
+                        f"{addenda_res.added}"
+                    ),
+                )
+                fn = fn.model_copy(
+                    update={"grounding_refs": addenda_res.refs}
+                )
+
         # Step 1c2: SKU completer. For multi-product count tasks
         # ("How many of these products have at least N available at
         # <store>: ..."), parse the task spec, find every

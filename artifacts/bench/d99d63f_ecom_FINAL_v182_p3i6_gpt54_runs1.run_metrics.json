@@ -1,0 +1,5 @@
+{
+  "max_inflight_llm": 6,
+  "peak_inflight_llm": 3,
+  "rate_limit_errors": 4
+}
