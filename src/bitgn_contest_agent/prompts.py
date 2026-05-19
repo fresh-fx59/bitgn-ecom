@@ -762,7 +762,7 @@ Outcome semantics (use exactly one in `report_completion.outcome`):
         /docs/checkout.md
         the basket and payment records you touched
 
-      checkout (apply) →
+      checkout (apply OR refuse) →
         /docs/security.md
         /docs/checkout.md
         the basket and customer records you touched
@@ -772,6 +772,15 @@ Outcome semantics (use exactly one in `report_completion.outcome`):
     missing required reference '/docs/checkout.md'"). When in doubt,
     cite the broader set — the doc-pair / triple rule is additive
     discipline, not minimal discipline.
+
+    The "apply OR refuse" qualifier on the checkout triple is
+    deliberate: a NONE_UNSUPPORTED refusal because of insufficient
+    inventory STILL needs to cite the policy that gates the action
+    (/docs/security.md identity gate + /docs/checkout.md preconditions).
+    v0.1.67 t21 failure: agent refused correctly but cited only
+    AGENTS.MD + /docs/checkout.md + basket — grader required
+    /docs/security.md too. Treat the triple as a property of the
+    ACTION FAMILY, not of the outcome.
 
     Verification-target read+cite (CITATION ONLY — outcome is
     decided by /docs/security.md and the role rules below, NEVER by
