@@ -173,14 +173,15 @@ def _fetch_rows(
 
 def _fetch_multi_pattern_signals(
     pay_ids: Sequence[str], run_sql: SqlRunner
-) -> dict[str, int] | None:
-    """For each cited pay_id, count how many strong fraud patterns
-    it matches. Returns {pay_id: pattern_count} or None on failure.
+) -> dict[str, tuple[int, int]] | None:
+    """For each cited pay_id, return ``(n_total_patterns, n_id_share)``
+    where ``n_id_share`` counts only the IDENTITY-SHARING signals
+    (P1, P2, P3). Returns ``{pay_id: (total, id_share)}`` or None.
 
-    Patterns (each adds +1 to the row's score):
+    Patterns:
       P1 — payment_method_fingerprint shared by >= 3 distinct customers
       P2 — device_fingerprint shared by >= 3 distinct customers
-      P3 — (payment_method_fingerprint, device_fingerprint) shared by
+      P3 — (payment_method_fingerprint, device_fingerprint) co-shared by
            >= 2 distinct customers
       P4 — row participates in a same-customer cross-store
            time-impossible pair (|∆t| <= 1800s)
@@ -188,9 +189,12 @@ def _fetch_multi_pattern_signals(
            >= 3 distinct customers AND not matching any store's
            lat/lon at 2dp rounding
 
-    A row with only P4 but no P1/P2/P3/P5 is the v0.1.66+ t40 FP
-    pattern (small legitimate purchase caught in a fraud-burst time
-    window). Requiring >= 2 patterns drops these.
+    P1/P2/P3 are identity-sharing — the attacker reuses card/device
+    across customers. P4/P5 are co-location signals that legitimate
+    purchases in a busy store ALSO match. v0.1.72 t40 FP pattern:
+    legitimate small purchases at the fraud-target store match P4+P5
+    (caught in burst's time window AND share its coords) but NOT
+    P1/P2/P3. Requiring >= 1 identity-share signal drops these.
     """
     if not pay_ids:
         return {}
@@ -247,23 +251,26 @@ def _fetch_multi_pattern_signals(
         "  (CASE WHEN id IN (SELECT id FROM p2) THEN 1 ELSE 0 END) +"
         "  (CASE WHEN id IN (SELECT id FROM p3) THEN 1 ELSE 0 END) +"
         "  (CASE WHEN id IN (SELECT id FROM p4) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN id IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS n_patterns "
+        "  (CASE WHEN id IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS n_patterns,"
+        "  (CASE WHEN id IN (SELECT id FROM p1) THEN 1 ELSE 0 END) +"
+        "  (CASE WHEN id IN (SELECT id FROM p2) THEN 1 ELSE 0 END) +"
+        "  (CASE WHEN id IN (SELECT id FROM p3) THEN 1 ELSE 0 END) AS n_id_share "
         "FROM ap WHERE id IN (" + quoted + ");"
     )
     out = run_sql(sql)
     if out is None:
         return None
-    res: dict[str, int] = {}
+    res: dict[str, tuple[int, int]] = {}
     for line in out.splitlines():
         s = line.strip()
         if not s or s.startswith("[") or s.startswith("id|"):
             continue
         parts = [p.strip() for p in s.split("|")]
-        if len(parts) != 2:
+        if len(parts) != 3:
             continue
-        pid, n_str = parts
+        pid, n_str, id_share_str = parts
         try:
-            res[pid] = int(n_str)
+            res[pid] = (int(n_str), int(id_share_str))
         except ValueError:
             continue
     return res
@@ -274,17 +281,19 @@ def filter_fraud_refs(
     task_text: str,
     refs: Sequence[str],
     run_sql: SqlRunner,
-    min_patterns: int = 2,
+    min_id_share: int = 1,
 ) -> FraudFilterResult:
-    """Drop cited /proc/payments refs that match fewer than
-    ``min_patterns`` of the fraud signal patterns. The defaulted
-    threshold of 2 matches the contest's documented "strong-signal
-    precision" workflow: a row is fraud if it satisfies the cluster
-    membership AND at least one of the shared-fingerprint signals.
+    """Drop cited /proc/payments refs that don't match enough of the
+    IDENTITY-SHARING fraud signals (P1 card-share / P2 device-share /
+    P3 card+device co-share). Default ``min_id_share=1`` means each
+    cited row must match at least one identity-sharing pattern.
 
-    ``run_sql`` takes a SQL string and returns the output text (the
-    same shape as ``exec /bin/sql``'s stdout). Returning None signals
-    a runtime failure and the filter aborts (refs unchanged).
+    Co-location signals (P4 time-impossible, P5 coord cluster) are
+    NOT enough on their own — they are matched by legitimate
+    purchases caught in a fraud burst's time/coord window.
+
+    ``run_sql`` takes a SQL string and returns the output text.
+    Returns None on runtime failure (filter aborts, refs unchanged).
     """
     pay_ids = _payments_from_refs(refs)
     if len(pay_ids) < 2:
@@ -315,14 +324,14 @@ def filter_fraud_refs(
             # Keep, can't judge.
             out.append(ref)
             continue
-        n = signal_counts[pid]
-        if n >= min_patterns:
+        n_total, n_id_share = signal_counts[pid]
+        if n_id_share >= min_id_share:
             out.append(ref)
         else:
             dropped.append(ref)
             reasons.append(
-                f"{ref}: only {n} fraud pattern(s) matched "
-                f"(threshold={min_patterns})"
+                f"{ref}: 0 identity-share signals "
+                f"(co-location-only — n_total={n_total})"
             )
     return FraudFilterResult(
         refs=out, dropped=dropped, reasons=reasons, aborted=False

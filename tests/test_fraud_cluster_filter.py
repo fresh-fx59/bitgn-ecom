@@ -1,4 +1,4 @@
-"""Tests for fraud_cluster_filter (v0.1.72 multi-pattern signal)."""
+"""Tests for fraud_cluster_filter (v0.1.73 identity-share gating)."""
 from __future__ import annotations
 
 import pytest
@@ -37,7 +37,7 @@ def test_parse_iso_invalid_returns_none():
     assert _parse_iso("") is None
 
 
-# ── cluster builder (legacy single-pattern, kept for completeness) ───
+# ── cluster builder (legacy single-pattern helper) ───────────────────
 
 
 def test_cluster_singletons_not_in_cluster():
@@ -65,25 +65,27 @@ def test_cluster_transitive_three_rows():
     assert _build_cluster_membership(rows) == {"pay_1", "pay_2", "pay_3"}
 
 
-# ── multi-pattern filter (current API) ───────────────────────────────
+# ── identity-share filter (current API) ──────────────────────────────
 
 
-def _multi_pattern_sql_output(rows: dict[str, int]) -> str:
-    """Format rows the way `/bin/sql` returns: '<pid>|<n_patterns>' lines."""
-    lines = []
-    for pid, n in rows.items():
-        lines.append(f"{pid}|{n}")
-    return "\n".join(lines) + "\n"
+def _sql_output(rows: dict[str, tuple[int, int]]) -> str:
+    """Format rows the way `/bin/sql` returns:
+    '<pid>|<n_total>|<n_id_share>' lines."""
+    return "\n".join(
+        f"{pid}|{n_total}|{n_id_share}"
+        for pid, (n_total, n_id_share) in rows.items()
+    ) + "\n"
 
 
-def test_filter_drops_single_pattern_rows():
-    """v0.1.66+ t40 FP pattern: rows that only match the
-    time-impossible cluster (1 pattern) drop, while rows in
-    multiple patterns (2+) stay."""
+def test_filter_drops_colocation_only_rows():
+    """v0.1.72 t40 FP pattern: rows that only match P4+P5 (time-
+    impossible + coord cluster) get dropped — they're legitimate
+    small purchases caught in the fraud-burst time/coord window.
+    Rows with at least one identity-share signal (card/device) stay."""
     rows = {
-        "pay_001": 3,  # 3 patterns — keep
-        "pay_002": 4,  # 4 patterns — keep
-        "pay_003": 1,  # only 1 pattern — drop (legitimate caught in burst)
+        "pay_001": (3, 1),  # 3 total, 1 id-share — KEEP
+        "pay_002": (4, 2),  # 4 total, 2 id-share — KEEP
+        "pay_003": (2, 0),  # 2 total (P4+P5), 0 id-share — DROP
     }
     res = filter_fraud_refs(
         task_text="confirmed fraud incident; identify the payment records",
@@ -92,46 +94,52 @@ def test_filter_drops_single_pattern_rows():
             "/proc/payments/pay_002.json",
             "/proc/payments/pay_003.json",
         ],
-        run_sql=lambda sql: _multi_pattern_sql_output(rows),
+        run_sql=lambda sql: _sql_output(rows),
     )
     assert "/proc/payments/pay_001.json" in res.refs
     assert "/proc/payments/pay_002.json" in res.refs
     assert "/proc/payments/pay_003.json" in res.dropped
 
 
-def test_filter_threshold_2_default():
-    """Default min_patterns=2 keeps n=2 and drops n=1."""
-    rows = {"pay_001": 2, "pay_002": 1}
+def test_filter_keeps_single_id_share():
+    """Just one identity-share signal is enough."""
+    rows = {
+        "pay_001": (1, 1),
+        "pay_002": (1, 0),
+    }
     res = filter_fraud_refs(
         task_text="fraud incident identify",
         refs=[
             "/proc/payments/pay_001.json",
             "/proc/payments/pay_002.json",
         ],
-        run_sql=lambda sql: _multi_pattern_sql_output(rows),
+        run_sql=lambda sql: _sql_output(rows),
     )
     assert "/proc/payments/pay_001.json" in res.refs
     assert "/proc/payments/pay_002.json" in res.dropped
 
 
 def test_filter_threshold_override():
-    """min_patterns=3 raises the bar."""
-    rows = {"pay_001": 2, "pay_002": 3}
+    """min_id_share=2 requires two identity-share signals."""
+    rows = {
+        "pay_001": (3, 1),
+        "pay_002": (3, 2),
+    }
     res = filter_fraud_refs(
         task_text="fraud incident identify",
         refs=[
             "/proc/payments/pay_001.json",
             "/proc/payments/pay_002.json",
         ],
-        run_sql=lambda sql: _multi_pattern_sql_output(rows),
-        min_patterns=3,
+        run_sql=lambda sql: _sql_output(rows),
+        min_id_share=2,
     )
     assert "/proc/payments/pay_001.json" in res.dropped
     assert "/proc/payments/pay_002.json" in res.refs
 
 
 def test_filter_keeps_non_payment_refs():
-    rows = {"pay_001": 3, "pay_002": 3}
+    rows = {"pay_001": (3, 1), "pay_002": (3, 1)}
     res = filter_fraud_refs(
         task_text="fraud incident",
         refs=[
@@ -140,7 +148,7 @@ def test_filter_keeps_non_payment_refs():
             "/proc/payments/pay_001.json",
             "/proc/payments/pay_002.json",
         ],
-        run_sql=lambda sql: _multi_pattern_sql_output(rows),
+        run_sql=lambda sql: _sql_output(rows),
     )
     assert "/AGENTS.MD" in res.refs
     assert "/docs/security.md" in res.refs
@@ -172,10 +180,7 @@ def test_filter_abstains_when_sql_fails():
 
 
 def test_filter_abstains_when_pid_missing_from_sql():
-    """SQL returned signal counts for some pids but not all — leave
-    the unknown ones alone (e.g., archived payments not in the live
-    table)."""
-    rows = {"pay_001": 3, "pay_002": 3}
+    rows = {"pay_001": (3, 1), "pay_002": (3, 1)}
     res = filter_fraud_refs(
         task_text="fraud incident",
         refs=[
@@ -183,19 +188,20 @@ def test_filter_abstains_when_pid_missing_from_sql():
             "/proc/payments/pay_002.json",
             "/proc/payments/pay_unknown.json",
         ],
-        run_sql=lambda sql: _multi_pattern_sql_output(rows),
+        run_sql=lambda sql: _sql_output(rows),
     )
     assert "/proc/payments/pay_unknown.json" in res.refs
     assert res.dropped == []
 
 
-def test_filter_sql_query_uses_id_column():
-    """The fix from v0.1.71 — query column is 'id', not 'pay_id'."""
+def test_filter_sql_query_shape():
+    """SQL queries `id` column from payments WHERE basket_archived=1
+    and selects (id, n_patterns, n_id_share)."""
     captured = {}
 
     def run_sql(sql):
         captured["sql"] = sql
-        return _multi_pattern_sql_output({"pay_001": 3, "pay_002": 3})
+        return _sql_output({"pay_001": (3, 1), "pay_002": (3, 1)})
 
     filter_fraud_refs(
         task_text="fraud incident",
@@ -206,11 +212,10 @@ def test_filter_sql_query_uses_id_column():
         run_sql=run_sql,
     )
     sql = captured["sql"]
-    # Multi-pattern query selects 'id' from the payments table.
     assert "id IN" in sql
     assert "pay_id IN" not in sql
-    # And uses the archived-payment scope.
     assert "basket_archived = 1" in sql
+    assert "n_id_share" in sql
 
 
 def test_looks_like_fraud_task():
