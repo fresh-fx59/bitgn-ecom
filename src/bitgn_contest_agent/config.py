@@ -26,7 +26,14 @@ class AgentConfig:
 
     # Model
     model: str = "gpt-5.3-codex"
-    reasoning_effort: str = "medium"
+    # v0.1.93: high reasoning_effort by default. v0.1.92 PROD A/B
+    # (same code, medium=40/42 vs high=41/42) showed high recovers
+    # SKU-recall variance (t11, t15) at essentially the same token
+    # cost — medium used 4.58M total tokens, high used 4.42M (high
+    # is actually marginally cheaper because the agent converges in
+    # fewer ReAct iterations). The 11% extra reasoning_tokens is
+    # noise vs the +1 deterministic-pass-rate gain.
+    reasoning_effort: str = "high"
 
     # Timeouts / steps (§4.1 calibrated defaults)
     max_steps: int = 40
