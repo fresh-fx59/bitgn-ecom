@@ -1192,6 +1192,50 @@ class AgentLoop:
         # structured TaskSpec emission from the agent (SPEC_NEXT P1)
         # to replace the brittle multi-product regex parse.
 
+        # Step 1c3: fraud recall completer. ADDS canonical fraud
+        # rows the agent under-called. Symmetric to the cluster
+        # filter (DROPS singletons). The pair makes t40
+        # deterministic: filter handles precision, completer
+        # handles recall.
+        if task_text and fn.outcome == "OUTCOME_OK":
+            from bitgn_contest_agent.adapter.ecom import Req_Exec
+            from bitgn_contest_agent.fraud_recall_completer import (
+                complete_fraud_refs as _complete_fraud_refs,
+            )
+
+            def _run_sql_fraud_recall(sql: str) -> str | None:
+                try:
+                    tr = self._adapter.dispatch(
+                        Req_Exec(
+                            tool="exec",
+                            path="/bin/sql",
+                            args=[],
+                            stdin=sql,
+                        )
+                    )
+                    return tr.content if tr.ok else None
+                except Exception:
+                    return None
+
+            fraud_recall_res = _complete_fraud_refs(
+                task_text=task_text,
+                refs=list(fn.grounding_refs),
+                run_sql=_run_sql_fraud_recall,
+            )
+            if fraud_recall_res.added:
+                emit_arch(
+                    category=ArchCategory.REFS_DROP,
+                    at_step=None,
+                    details=(
+                        f"fraud_recall_completer added "
+                        f"{len(fraud_recall_res.added)} ref(s): "
+                        f"{fraud_recall_res.added}"
+                    ),
+                )
+                fn = fn.model_copy(
+                    update={"grounding_refs": fraud_recall_res.refs}
+                )
+
         # Step 1d: fraud cluster filter. Drops cited
         # /proc/payments/*.json refs that are not part of a same-
         # customer rapid cross-store cluster — the documented fraud
