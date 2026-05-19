@@ -1255,6 +1255,50 @@ class AgentLoop:
                         update={"grounding_refs": sku_spec_res.refs}
                     )
 
+            # yes_no_sku: enumerate brand+series family; verifier
+            # prunes wrong-attribute members downstream.
+            if (
+                task_spec_obj is not None
+                and getattr(task_spec_obj, "kind", "none") == "yes_no_sku"
+            ):
+                from bitgn_contest_agent.adapter.ecom import Req_Exec
+                from bitgn_contest_agent.sku_completer import (
+                    complete_yes_no_sku_refs as _complete_ynsku,
+                )
+
+                def _run_sql_yn(sql: str) -> str | None:
+                    try:
+                        tr = self._adapter.dispatch(
+                            Req_Exec(
+                                tool="exec",
+                                path="/bin/sql",
+                                args=[],
+                                stdin=sql,
+                            )
+                        )
+                        return tr.content if tr.ok else None
+                    except Exception:
+                        return None
+
+                yn_res = _complete_ynsku(
+                    task_spec=task_spec_obj,
+                    refs=list(fn.grounding_refs),
+                    run_sql=_run_sql_yn,
+                )
+                if yn_res.added:
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP,
+                        at_step=None,
+                        details=(
+                            f"yes_no_sku_completer added "
+                            f"{len(yn_res.added)} family ref(s): "
+                            f"{yn_res.added[:5]}"
+                        ),
+                    )
+                    fn = fn.model_copy(
+                        update={"grounding_refs": yn_res.refs}
+                    )
+
         # Step 1c3: fraud recall completer. ADDS canonical fraud
         # rows the agent under-called. Symmetric to the cluster
         # filter (DROPS singletons). The pair makes t40

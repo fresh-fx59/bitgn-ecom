@@ -59,14 +59,18 @@ class ProductFilter(BaseModel):
 
 
 class TaskSpec(BaseModel):
-    kind: Literal["none", "count_per_store", "catalogue_count"] = Field(
+    kind: Literal[
+        "none", "count_per_store", "catalogue_count", "yes_no_sku"
+    ] = Field(
         default="none",
         description=(
             "Which shape: 'count_per_store' for 'How many of these "
             "products have at least N available at <store>: ...'; "
             "'catalogue_count' for 'How many catalogue products are "
-            "X?' / 'How many X products report today?'; 'none' (the "
-            "default) when the task is not a count task."
+            "X?' / 'How many X products report today?'; "
+            "'yes_no_sku' for 'A support note claims we stock the X "
+            "from <brand> in the <line> ... Check ...'; 'none' (the "
+            "default) when the task is none of the above."
         ),
     )
     # count_per_store fields

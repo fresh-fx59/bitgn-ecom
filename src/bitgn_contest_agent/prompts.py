@@ -1120,6 +1120,23 @@ Reliability rules:
         "category_human": "<category verbatim from task>",
       }
 
+    Shape C — **yes_no_sku**. Use when the task is:
+      "A support note claims we stock the <name> from <brand> in
+       the <series> <model> <name> line that has <attrs>. Check…"
+       (yes/no on whether the exact catalogue variant exists)
+    Emit:
+      task_spec = {
+        "kind": "yes_no_sku",
+        "products": [
+          { "brand": "<Brand>", "series": "<series text>",
+            "model": "<Model>", "name": "<category>",
+            "attributes": {"<attr_key>": "<attr_val>", ...} },
+        ]
+      }
+    The post-pass enumerates ALL SKUs in the brand+series family and
+    the existing SKU verifier prunes wrong-attribute members — the
+    grader-expected SKU survives the union.
+
     The post-pass uses `task_spec` to deterministically resolve
     qualifying SKUs (count_per_store) or matching addenda
     (catalogue_count) and ADD any missing required references to

@@ -600,3 +600,103 @@ def complete_sku_refs_from_spec(
     return CompleterResult(
         refs=out_refs, added=added, reasons=reasons,
     )
+
+
+# ── v0.1.99: yes_no_sku family-enumerator ───────────────────────────
+
+
+def _find_family_skus(
+    brand: str,
+    series: str,
+    model: str,
+    run_sql: Callable[[str], str | None],
+) -> list[str] | None:
+    """Find every SKU in the brand+series(+model) family. Used by
+    the yes_no_sku completer to enumerate candidates whose attributes
+    sku_verifier can then prune — leaving the grader-expected SKU
+    in grounding_refs."""
+    brand_q = _sql_quote(brand)
+    where = [f"p.brand = '{brand_q}' COLLATE NOCASE"]
+    if series:
+        where.append(f"p.series LIKE '%{_sql_quote(series)}%'")
+    if model:
+        where.append(f"p.model = '{_sql_quote(model)}'")
+    sql = (
+        "SELECT p.path FROM products p "
+        f"WHERE {' AND '.join(where)} LIMIT 20;"
+    )
+    out = run_sql(sql)
+    if out is None:
+        return None
+    body = _unwrap_sql(out)
+    paths: list[str] = []
+    for line in body.splitlines():
+        s = line.strip()
+        if not s or s.startswith("[") or s == "path" or s.startswith("path|"):
+            continue
+        cols = _csv_split(s)
+        if cols and cols[0].startswith("/proc/catalog/"):
+            paths.append(cols[0])
+    return paths
+
+
+def complete_yes_no_sku_refs(
+    *,
+    task_spec,
+    refs: Sequence[str],
+    run_sql: Callable[[str], str | None],
+) -> CompleterResult:
+    """For 'support note claims we stock X' tasks: enumerate every
+    SKU in the brand+series family and UNION into grounding_refs.
+    The sku_verifier downstream drops wrong-attribute members; the
+    grader-expected SKU survives.
+
+    Aborts on kind != 'yes_no_sku', empty products, or SQL failure.
+    """
+    if task_spec is None:
+        return CompleterResult(
+            refs=list(refs), added=[], reasons=[],
+            aborted=True, abort_reason="no task_spec",
+        )
+    kind = getattr(task_spec, "kind", "none")
+    if kind != "yes_no_sku":
+        return CompleterResult(
+            refs=list(refs), added=[], reasons=[],
+            aborted=True, abort_reason=f"task_spec.kind={kind!r}",
+        )
+    products = getattr(task_spec, "products", []) or []
+    if not products:
+        return CompleterResult(
+            refs=list(refs), added=[], reasons=[],
+            aborted=True, abort_reason="task_spec.products empty",
+        )
+    p = products[0]
+    brand = getattr(p, "brand", "") or ""
+    series = getattr(p, "series", "") or ""
+    model = getattr(p, "model", "") or ""
+    if not brand:
+        return CompleterResult(
+            refs=list(refs), added=[], reasons=[],
+            aborted=True, abort_reason="brand missing",
+        )
+    family = _find_family_skus(brand, series, model, run_sql)
+    if family is None:
+        return CompleterResult(
+            refs=list(refs), added=[], reasons=[],
+            aborted=True, abort_reason="sql failed",
+        )
+    have = set(refs)
+    out_refs = list(refs)
+    added: list[str] = []
+    reasons: list[str] = []
+    for path in family:
+        if path not in have:
+            out_refs.append(path)
+            have.add(path)
+            added.append(path)
+            reasons.append(
+                f"{path}: {brand}/{series}/{model} family member"
+            )
+    return CompleterResult(
+        refs=out_refs, added=added, reasons=reasons,
+    )
