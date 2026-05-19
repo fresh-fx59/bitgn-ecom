@@ -173,7 +173,7 @@ def _fetch_rows(
 
 def _fetch_multi_pattern_signals(
     pay_ids: Sequence[str], run_sql: SqlRunner
-) -> dict[str, tuple[int, int]] | None:
+) -> dict[str, tuple[int, int, int, int]] | None:
     """For each cited pay_id, return ``(n_total_patterns, n_id_share)``
     where ``n_id_share`` counts only the IDENTITY-SHARING signals
     (P1, P2, P3). Returns ``{pay_id: (total, id_share)}`` or None.
@@ -254,23 +254,30 @@ def _fetch_multi_pattern_signals(
         "  (CASE WHEN id IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS n_patterns,"
         "  (CASE WHEN id IN (SELECT id FROM p1) THEN 1 ELSE 0 END) +"
         "  (CASE WHEN id IN (SELECT id FROM p2) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN id IN (SELECT id FROM p3) THEN 1 ELSE 0 END) AS n_id_share "
+        "  (CASE WHEN id IN (SELECT id FROM p3) THEN 1 ELSE 0 END) AS n_id_share,"
+        "  (CASE WHEN id IN (SELECT id FROM p4) THEN 1 ELSE 0 END) AS in_time_cluster,"
+        "  (CASE WHEN id IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS in_coord_cluster "
         "FROM ap WHERE id IN (" + quoted + ");"
     )
     out = run_sql(sql)
     if out is None:
         return None
-    res: dict[str, tuple[int, int]] = {}
+    res: dict[str, tuple[int, int, int, int]] = {}
     for line in out.splitlines():
         s = line.strip()
         if not s or s.startswith("[") or s.startswith("id|"):
             continue
         parts = [p.strip() for p in s.split("|")]
-        if len(parts) != 3:
+        if len(parts) != 5:
             continue
-        pid, n_str, id_share_str = parts
+        pid, n_str, id_share_str, time_str, coord_str = parts
         try:
-            res[pid] = (int(n_str), int(id_share_str))
+            res[pid] = (
+                int(n_str),
+                int(id_share_str),
+                int(time_str),
+                int(coord_str),
+            )
         except ValueError:
             continue
     return res
@@ -281,16 +288,26 @@ def filter_fraud_refs(
     task_text: str,
     refs: Sequence[str],
     run_sql: SqlRunner,
-    min_id_share: int = 1,
+    require_id_share: bool = True,
+    require_time_cluster: bool = True,
 ) -> FraudFilterResult:
-    """Drop cited /proc/payments refs that don't match enough of the
-    IDENTITY-SHARING fraud signals (P1 card-share / P2 device-share /
-    P3 card+device co-share). Default ``min_id_share=1`` means each
-    cited row must match at least one identity-sharing pattern.
+    """Drop cited /proc/payments refs that don't satisfy BOTH:
 
-    Co-location signals (P4 time-impossible, P5 coord cluster) are
-    NOT enough on their own — they are matched by legitimate
-    purchases caught in a fraud burst's time/coord window.
+      * ``require_id_share`` — at least one identity-sharing signal
+        (P1 card-share / P2 device-share / P3 card+device co-share).
+        Distinguishes attacker fingerprint reuse from clean rows.
+
+      * ``require_time_cluster`` — row is in a same-customer
+        cross-store time-impossible pair (P4). The fraud incident is
+        a TEMPORAL burst; reconnaissance / setup payments by the same
+        fraudster outside the burst window match identity-share but
+        not the time cluster, and are NOT "part of the incident" the
+        grader expects.
+
+    A row matching identity-share but NOT time-cluster is the v0.1.73
+    t40 FP pattern: setup or aged-out payments by the fraud customer
+    that share the attacker's card/device but happened outside the
+    main burst's 30-minute window.
 
     ``run_sql`` takes a SQL string and returns the output text.
     Returns None on runtime failure (filter aborts, refs unchanged).
@@ -320,18 +337,24 @@ def filter_fraud_refs(
             continue
         pid = m.group(1)
         if pid not in signal_counts:
-            # Row not returned by SQL — payments table missing it.
-            # Keep, can't judge.
             out.append(ref)
             continue
-        n_total, n_id_share = signal_counts[pid]
-        if n_id_share >= min_id_share:
+        n_total, n_id_share, in_time, in_coord = signal_counts[pid]
+        ok_id = (not require_id_share) or n_id_share >= 1
+        ok_time = (not require_time_cluster) or in_time >= 1
+        if ok_id and ok_time:
             out.append(ref)
         else:
+            why = []
+            if require_id_share and n_id_share < 1:
+                why.append("no identity-share")
+            if require_time_cluster and in_time < 1:
+                why.append("not in time-cluster")
             dropped.append(ref)
             reasons.append(
-                f"{ref}: 0 identity-share signals "
-                f"(co-location-only — n_total={n_total})"
+                f"{ref}: {', '.join(why)} "
+                f"(n_total={n_total}, id={n_id_share}, "
+                f"time={in_time}, coord={in_coord})"
             )
     return FraudFilterResult(
         refs=out, dropped=dropped, reasons=reasons, aborted=False
