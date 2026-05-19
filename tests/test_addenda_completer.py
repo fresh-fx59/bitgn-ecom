@@ -164,3 +164,48 @@ def test_completer_abstains_when_no_dirs_exist():
         run_tree=lambda root, level: None,
     )
     assert res.aborted is True
+
+
+def test_completer_matches_catalogue_reporting_with_date_prefix():
+    """v0.1.83 t12 PROD repro: filename is
+    '<DATE>-catalogue-reporting-<category>-fam-...' under
+    /docs/policy-updates/."""
+    files = {
+        "/docs/ops-policy-notes": [],
+        "/docs/current-updates": [],
+        "/docs/policy-updates": [
+            "/docs/policy-updates/2021-08-09-catalogue-reporting-cordless-drill-driver-fam-power-tools-cordless-drill-driver-0016-efi8o1b6.md",
+            "/docs/policy-updates/2021-08-09-catalogue-reporting-cordless-drill-driver-fam-power-tools-cordless-drill-driver-0021-x.md",
+        ],
+        "/docs/catalogue-addenda": [],
+        "/docs/clarifications": [],
+    }
+    res = complete_addenda_refs(
+        task_text=(
+            "How many catalogue products are Cordless Drill Driver? "
+            "Answer in exactly format \"<COUNT:%d>\" (no quotes)."
+        ),
+        refs=[],
+        run_tree=_fake_tree(files),
+    )
+    assert len(res.added) == 2
+    assert any("0016" in p for p in res.added)
+    assert any("0021" in p for p in res.added)
+
+
+def test_completer_matches_catalogue_addenda_prefix():
+    files = {
+        "/docs/ops-policy-notes": [],
+        "/docs/current-updates": [],
+        "/docs/policy-updates": [],
+        "/docs/catalogue-addenda": [
+            "/docs/catalogue-addenda/catalogue-addenda-anchors-plugs-fam-fasteners-anchors-plugs-0007.md",
+        ],
+        "/docs/clarifications": [],
+    }
+    res = complete_addenda_refs(
+        task_text="How many catalogue products are Anchors and Plugs?",
+        refs=[],
+        run_tree=_fake_tree(files),
+    )
+    assert len(res.added) == 1

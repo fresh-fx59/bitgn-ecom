@@ -125,10 +125,19 @@ def complete_addenda_refs(
             aborted = False
         for path in md_paths:
             name = path.lower()
-            # Must be a catalogue-count addendum.
+            # Must be a catalogue-counting-flavored addendum. The
+            # contest uses four observed filename prefixes:
+            #   catalogue-count-<category>-fam-...
+            #   catalogue-counting-<date>-<category>-fam-...
+            #   catalogue-reporting-<category>-fam-...
+            #   catalogue-addenda-<category>-...
+            # All four cover the "how many catalogue products are
+            # <X>?" task family.
             if not (
                 "catalogue-count" in name
                 or "catalogue-counting" in name
+                or "catalogue-reporting" in name
+                or "catalogue-addenda" in name
             ):
                 continue
             # Match the task token (or no-and variant).
