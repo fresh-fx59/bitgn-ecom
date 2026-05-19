@@ -243,7 +243,11 @@ def _run_one(
             roles=snap.roles,
         )
         traced = TracingEcomClient(runtime, writer=None)
-        adapter = EcomAdapter(runtime=traced, max_tool_result_bytes=64 * 1024)
+        # 16 KiB matches PROD default (config.py:45). The earlier 64 KiB
+        # value let local responses ship more data than PROD would
+        # truncate — root cause of the v0.1.93→v0.1.95 silent-fail
+        # family. Keep the local cap aligned with PROD.
+        adapter = EcomAdapter(runtime=traced, max_tool_result_bytes=16 * 1024)
 
         trace_path = log_dir / snap.name / f"run_{run_index}.jsonl"
         trace_path.parent.mkdir(parents=True, exist_ok=True)

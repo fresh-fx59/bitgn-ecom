@@ -285,6 +285,14 @@ class LocalEcomClient:
         root_path = getattr(req, "root", "") or "/"
         level = int(getattr(req, "level", 0) or 0)
         resolved = self._resolve(root_path)
+        # PROD returns an RPC error (classified as UNKNOWN) for tree
+        # against a missing path. Without this raise, local quietly
+        # returned a FILE entry — masking the v0.1.93 addenda_completer
+        # bug where /docs/<dir> dirs that don't exist in a draw look
+        # the same locally as dirs that exist with content. Aligning
+        # behavior closes that test gap.
+        if not resolved.exists():
+            raise FileNotFoundError(f"Path not found: {root_path}")
 
         def _walk(p: Path, depth: int) -> "ecom_pb2.TreeResponse.Entry":
             if p.is_dir():

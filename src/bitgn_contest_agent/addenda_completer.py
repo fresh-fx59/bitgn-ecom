@@ -185,12 +185,17 @@ def _find_md_files_by_name(
     body = out.strip()
     paths: list[str] = []
     # find response shape: MessageToJson of FindResponse with
-    #   {"matches": [{"path": "...", "kind": ...}, ...]}
+    #   {"paths": ["/x/y.md", "/x/z.md", ...]}
+    # (matches old "matches: [{path:...}]" shape from earlier proto
+    # versions; accept both.)
     if body.startswith("{"):
         try:
             obj = _json.loads(body)
+            for p in obj.get("paths", []) or []:
+                if isinstance(p, str) and p.endswith(".md"):
+                    paths.append(p)
             for match in obj.get("matches", []) or []:
-                p = match.get("path")
+                p = match.get("path") if isinstance(match, dict) else None
                 if p and p.endswith(".md"):
                     paths.append(p)
         except Exception:
