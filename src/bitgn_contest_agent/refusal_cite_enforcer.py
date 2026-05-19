@@ -142,6 +142,24 @@ _ROLE_POLICY_REFUSAL_TERMS: tuple[str, ...] = (
     "does not authorize",
     "/bin/id returns",
     "role gate",
+    # v0.1.79 — cross-actor / ownership-mismatch refusal cues.
+    # Refusing to act on someone else's entity is the same family
+    # of identity-policy refusal as the role check; the same
+    # person-strip rule applies.
+    "current signed-in customer",
+    "current signed in customer",
+    "signed-in customer is",
+    "signed in customer is",
+    "cross-customer",
+    "cross customer",
+    "another customer",
+    "different customer",
+    "not the owner",
+    "belongs to a different",
+    "owned by a different",
+    "owned by another",
+    "on someone else's behalf",
+    "on behalf of another",
 )
 
 
@@ -336,6 +354,28 @@ _PERSON_VERIFICATION_TERMS: tuple[str, ...] = (
     "are a manager",
     "is the assigned manager",
     "the manager of",
+    # v0.1.79 — ownership / actor-mismatch verification cues. The
+    # agent says "basket_X belongs to cust_Y" when the current
+    # actor is a different customer, or "signed-in as cust_Z" with
+    # a different cust on the basket. Same principle: the agent
+    # verified WHO owns the entity, and citing the other party's
+    # /proc/customers record is a PII leak per the grader's rule
+    # 2b. v0.1.78 t34 PROD: agent refused cross-customer checkout
+    # but cited /proc/customers/cust_001.json — grader marked it
+    # an invalid reference.
+    "belongs to",
+    "belong to",
+    "is owned by",
+    "owned by",
+    "signed-in as",
+    "signed in as",
+    "current customer is",
+    "current signed-in customer is",
+    "current identity is",
+    "actor is",
+    "not the owner",
+    "different customer",
+    "cross-customer",
 )
 
 
