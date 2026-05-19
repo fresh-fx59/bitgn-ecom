@@ -363,6 +363,29 @@ class AgentLoop:
             for content in bootstrap_content:
                 messages.append(Message(role="user", content=content))
 
+        # Extract actor identity from /bin/id output for use by the
+        # cross-actor cite enforcer. /bin/id prints lines like
+        # "actor=cust_017 roles=customer" — pull the cust_/emp_ token.
+        self._actor_id: Optional[str] = None
+        if bootstrap_content:
+            import re as _re_actor
+            for content in bootstrap_content:
+                m = _re_actor.search(
+                    r"\b(?:actor|identity|customer|employee)\s*[:=]?\s*"
+                    r"`?((?:cust|emp)_[A-Za-z0-9]+)`?",
+                    content,
+                )
+                if m:
+                    self._actor_id = m.group(1)
+                    break
+                m = _re_actor.search(
+                    r"\b((?:cust|emp)_[A-Za-z0-9]+)\b",
+                    content,
+                )
+                if m:
+                    self._actor_id = m.group(1)
+                    break
+
         self._writer.append_task(task_id=task_id, task_text=task_text)
 
         totals = _Totals()
@@ -1017,6 +1040,7 @@ class AgentLoop:
                 outcome=fn.outcome,
                 refs=fn.grounding_refs,
                 seen_refs=session.seen_refs,
+                actor_id=getattr(self, "_actor_id", None),
             )
             if cleaned.stripped:
                 emit_arch(

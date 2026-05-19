@@ -518,6 +518,7 @@ def _classify_ref(
     is_role_policy_refusal: bool,
     *,
     person_refs_count: int,
+    actor_id: str | None = None,
 ) -> tuple[bool, str]:
     """Decide whether to KEEP or STRIP a single ref.
 
@@ -569,17 +570,24 @@ def _classify_ref(
                 "refusal-strip: sole person record (likely "
                 "task-named-by-display-name)"
             )
-        # Multiple person refs: identify the actor from the message
-        # (the "current signed-in / runtime identity" id) and strip
-        # everything else. v0.1.79 t34 PROD: cited cust_001 (other
-        # customer named via display name in task) + cust_017 (actor
-        # named in agent's message). Grader rejected cust_001 only.
-        actor_id = _extract_actor_id_from_message(message, ns)
-        if actor_id and id_part != actor_id:
+        # Multiple person refs: identify the actor (preferring the
+        # pre-pass-provided id, falling back to message regex) and
+        # strip non-actor person refs. v0.1.79/v0.1.80 t34 PROD:
+        # cited cust_001 (other customer named via display name) +
+        # cust_017 / cust_018 (actor). Grader rejected the other only.
+        resolved_actor = actor_id or _extract_actor_id_from_message(message, ns)
+        # Re-validate the namespace prefix when the pre-pass id was
+        # provided unbounded (e.g. emp_X for an employees ref).
+        if resolved_actor and not resolved_actor.startswith(
+            expected_prefix + "_"
+        ):
+            resolved_actor = None
+        if resolved_actor and id_part != resolved_actor:
             return False, (
-                f"refusal-strip: non-actor {ns} ref (actor={actor_id})"
+                f"refusal-strip: non-actor {ns} ref "
+                f"(actor={resolved_actor})"
             )
-        if actor_id and id_part == actor_id:
+        if resolved_actor and id_part == resolved_actor:
             return True, f"refusal: keep actor's own {ns} record"
         # else: multiple person refs, no actor identifiable — keep
         return True, (
@@ -671,6 +679,7 @@ def clean_refusal_refs(
     outcome: str,
     refs: Iterable[str],
     seen_refs: set[str] | None = None,
+    actor_id: str | None = None,
 ) -> CleanResult:
     """Apply the cite-iff-checkable-claim rule to a refusal's
     grounding_refs.
@@ -726,6 +735,7 @@ def clean_refusal_refs(
         keep, why = _classify_ref(
             ref, task_text, message, is_pii, is_role_policy,
             person_refs_count=person_refs_count,
+            actor_id=actor_id,
         )
         if keep:
             kept.append(ref)
