@@ -621,6 +621,7 @@ def _find_family_skus(
     series: str,
     model: str,
     run_sql: Callable[[str], str | None],
+    name: str = "",
 ) -> list[str] | None:
     """Find every SKU in the brand+series(+model) family. Used by
     the yes_no_sku completer to enumerate candidates whose attributes
@@ -646,6 +647,17 @@ def _find_family_skus(
         ])
     if model:
         tries.append([base, f"p.model = '{_sql_quote(model)}'"])
+    # brand + name LIKE: when model doesn't exist (false claim),
+    # filter to the right product category via product name
+    # ("Wiring Device", "Nut Bolt and Washer", etc.) instead of
+    # over-citing every brand SKU across all categories. Closes
+    # v0.1.103 t05 PROD where the agent named Heco 3DW-64B (no
+    # such model) but the grader required FST-3SJKL8BF in the
+    # nuts_bolts_washers product line.
+    if name:
+        tries.append(
+            [base, f"p.name LIKE '%{_sql_quote(name)}%'"]
+        )
 
     for where_clauses in tries:
         sql = (
@@ -708,12 +720,13 @@ def complete_yes_no_sku_refs(
     brand = getattr(p, "brand", "") or ""
     series = getattr(p, "series", "") or ""
     model = getattr(p, "model", "") or ""
+    name = getattr(p, "name", "") or ""
     if not brand:
         return CompleterResult(
             refs=list(refs), added=[], reasons=[],
             aborted=True, abort_reason="brand missing",
         )
-    family = _find_family_skus(brand, series, model, run_sql)
+    family = _find_family_skus(brand, series, model, run_sql, name=name)
     if family is None:
         return CompleterResult(
             refs=list(refs), added=[], reasons=[],

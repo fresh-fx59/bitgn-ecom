@@ -193,6 +193,33 @@ def test_completer_matches_catalogue_reporting_with_date_prefix():
     assert any("0021" in p for p in res.added)
 
 
+def test_completer_handles_singular_plural_mismatch():
+    """v0.1.103 t12 PROD repro: task 'How many catalogue products
+    are Extension Cable?' (singular) → filename
+    'catalogue-counting-2021-08-09-extension-cables-fam-...md'
+    (plural). The fuzzy word-overlap matcher must normalize."""
+    files = {
+        "/docs/ops-policy-notes": [],
+        "/docs/current-updates": [
+            "/docs/current-updates/catalogue-counting-2021-08-09-extension-cables-fam-electrical-extension-cables-0011-egpmk207.md",
+            "/docs/current-updates/catalogue-counting-2021-08-09-extension-cables-fam-electrical-extension-cables-0013-3ef08z7b.md",
+        ],
+        "/docs/policy-updates": [],
+        "/docs/catalogue-addenda": [],
+        "/docs/clarifications": [],
+    }
+    res = complete_addenda_refs(
+        task_text="How many catalogue products are Extension Cable?",
+        refs=[
+            "/docs/current-updates/catalogue-counting-2021-08-09-extension-cables-fam-electrical-extension-cables-0011-egpmk207.md",
+        ],
+        run_tree=_fake_tree(files),
+    )
+    assert any("0013" in p for p in res.added), (
+        f"singular→plural mismatch not handled; added={res.added}"
+    )
+
+
 def test_completer_matches_date_prefix_reporting_only_variant():
     """v0.1.87 t12 PROD: filename uses bare 'reporting' not
     'catalogue-reporting', under /docs/catalogue-addenda/.

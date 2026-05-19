@@ -234,11 +234,22 @@ def complete_addenda_refs(
     # "Screwdriver and Hex Key Set" → {"screwdriver", "hex", "key",
     # "set"} — the filename slug "screwdriver-hex-sets" shares
     # {"screwdriver", "hex"} which is enough to confirm.
-    # Stopwords: "and", "or", "the".
+    # Normalize singular/plural by stripping trailing 's' (v0.1.104:
+    # task "Extension Cable" missed filename "extension-cables-...").
     _STOPWORDS = {"and", "or", "the", "a", "an", "of"}
+
+    def _normalize_word(w: str) -> str:
+        w = w.lower()
+        # Strip trailing 's' for crude singular/plural normalization.
+        # Don't strip if it would leave <=2 chars (avoids "ss" → "s").
+        if len(w) > 3 and w.endswith("s") and not w.endswith("ss"):
+            return w[:-1]
+        return w
+
     raw_words = re.split(r"[\s\-]+", tokens[0].replace("|", " "))
     cat_words: set[str] = {
-        w for w in raw_words if w and w not in _STOPWORDS and len(w) > 2
+        _normalize_word(w) for w in raw_words
+        if w and w not in _STOPWORDS and len(w) > 2
     }
 
     # First gather every .md path we can see across the candidate
@@ -285,7 +296,10 @@ def complete_addenda_refs(
         if any(t in name for t in tokens):
             pass  # exact match
         else:
-            file_words = set(re.split(r"[\s\-_\.]+", base))
+            file_words = {
+                _normalize_word(w)
+                for w in re.split(r"[\s\-_\.]+", base)
+            }
             overlap = cat_words & file_words
             if len(overlap) < 2:
                 continue
