@@ -379,6 +379,66 @@ _PERSON_VERIFICATION_TERMS: tuple[str, ...] = (
 )
 
 
+# v0.1.80 — extract the actor's entity id from the agent's message.
+# Used by the cross-actor refusal strip to KEEP the actor's own
+# /proc/customers/<id>.json or /proc/employees/<id>.json while
+# stripping refs to OTHER people the task named.
+#
+# Patterns the agent typically writes:
+#   "current signed-in customer is `cust_017`"
+#   "current runtime identity is emp_040"
+#   "current identity is `cust_077`"
+#   "/bin/id returns cust_092"
+#
+# The id_token is matched as ``(cust|emp)_<digits-or-letters>``.
+_ACTOR_ID_PATTERNS: tuple[re.Pattern, ...] = (
+    re.compile(
+        r"current\s+signed[-\s]?in\s+customer\s+is\s+`?([a-z]+_[\w]+)`?",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"current\s+runtime\s+identity\s+is\s+`?([a-z]+_[\w]+)`?",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"current\s+identity\s+is\s+`?([a-z]+_[\w]+)`?",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"/bin/id\s+returns\s+`?([a-z]+_[\w]+)`?",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"current\s+customer\s+is\s+`?([a-z]+_[\w]+)`?",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"actor\s+is\s+`?([a-z]+_[\w]+)`?",
+        re.IGNORECASE,
+    ),
+)
+
+
+def _extract_actor_id_from_message(message: str, ns: str) -> str | None:
+    """Try to pull the actor's entity-id from the agent's message.
+
+    Returns the id (e.g. "cust_017") if found and consistent with
+    the namespace (``customers``/``employees``); else None.
+    """
+    if not message:
+        return None
+    expected_prefix = _NS_TO_PREFIX.get(ns)
+    if expected_prefix is None:
+        return None
+    for pat in _ACTOR_ID_PATTERNS:
+        m = pat.search(message)
+        if m:
+            cand = m.group(1)
+            if cand.startswith(expected_prefix + "_"):
+                return cand
+    return None
+
+
 def _message_verifies_a_person(message: str) -> bool:
     """True iff the agent's `message` claims it verified a PERSON's
     role / identity. Used to gate the role-policy strip branch — we
@@ -509,7 +569,19 @@ def _classify_ref(
                 "refusal-strip: sole person record (likely "
                 "task-named-by-display-name)"
             )
-        # else: multiple person refs, this one isn't named — keep
+        # Multiple person refs: identify the actor from the message
+        # (the "current signed-in / runtime identity" id) and strip
+        # everything else. v0.1.79 t34 PROD: cited cust_001 (other
+        # customer named via display name in task) + cust_017 (actor
+        # named in agent's message). Grader rejected cust_001 only.
+        actor_id = _extract_actor_id_from_message(message, ns)
+        if actor_id and id_part != actor_id:
+            return False, (
+                f"refusal-strip: non-actor {ns} ref (actor={actor_id})"
+            )
+        if actor_id and id_part == actor_id:
+            return True, f"refusal: keep actor's own {ns} record"
+        # else: multiple person refs, no actor identifiable — keep
         return True, (
             "refusal but multiple person refs: keep non-task-named "
             "as collateral"
