@@ -466,20 +466,30 @@ def _find_qualifying_skus_relaxed(
     Returns None on SQL failure (caller should abstain).
     """
     brand_q = _sql_quote(brand)
-    series_clauses: list[str] = []
+
+    # The agent's emitted `series` is often the FULL task-spec line
+    # text (e.g. 'Philips Smart Ultra 1N3-S8K LED Bulb'), but the
+    # catalogue's `series` column holds only the series prefix
+    # ('Philips Smart Ultra' or similar). A LIKE on the full string
+    # would never match. Build a relaxation ladder:
+    #   1. strict: brand + series LIKE + model = + all attrs
+    #   2. brand + model = (drop series; drop attrs)
+    #   3. brand only (last-resort family enumeration)
+    tries: list[tuple[str, str, list[tuple[str, str]]]] = []
+    line_strict = ""
     if series:
-        series_clauses.append(f"p.series LIKE '%{_sql_quote(series)}%'")
+        line_strict += f" AND p.series LIKE '%{_sql_quote(series)}%'"
     if model:
-        series_clauses.append(f"p.model = '{_sql_quote(model)}'")
-    line_filter = " AND " + " AND ".join(series_clauses) if series_clauses else ""
-
-    # Try strict (all attributes), then relax incrementally.
-    tries: list[tuple[str, list[tuple[str, str]]]] = []
+        line_strict += f" AND p.model = '{_sql_quote(model)}'"
     if attributes:
-        tries.append(("strict (all attrs)", list(attributes.items())))
-    tries.append(("brand+model", []))
+        tries.append(("strict", line_strict, list(attributes.items())))
+    if model:
+        tries.append(
+            ("brand+model", f" AND p.model = '{_sql_quote(model)}'", [])
+        )
+    tries.append(("brand only", "", []))
 
-    for label, attr_pairs in tries:
+    for label, line_filter, attr_pairs in tries:
         attr_clause = ""
         for k, v in attr_pairs:
             v_q = _sql_quote(v)
@@ -493,7 +503,8 @@ def _find_qualifying_skus_relaxed(
             f"WHERE p.brand = '{brand_q}' COLLATE NOCASE"
             f"{line_filter}{attr_clause} "
             f"AND i.store_id = '{_sql_quote(store_id)}' "
-            f"AND i.available_today >= {int(threshold)};"
+            f"AND i.available_today >= {int(threshold)} "
+            "LIMIT 20;"
         )
         out = run_sql(sql)
         if out is None:
@@ -613,31 +624,48 @@ def _find_family_skus(
 ) -> list[str] | None:
     """Find every SKU in the brand+series(+model) family. Used by
     the yes_no_sku completer to enumerate candidates whose attributes
-    sku_verifier can then prune — leaving the grader-expected SKU
-    in grounding_refs."""
+    sku_verifier can then prune. Relaxes the line filter on zero
+    results — agent's emitted series text often includes brand and
+    model concatenated, which is too restrictive vs catalogue's
+    `series` column."""
     brand_q = _sql_quote(brand)
-    where = [f"p.brand = '{brand_q}' COLLATE NOCASE"]
-    if series:
-        where.append(f"p.series LIKE '%{_sql_quote(series)}%'")
+    tries: list[list[str]] = []
+    base = f"p.brand = '{brand_q}' COLLATE NOCASE"
+    if series and model:
+        tries.append([
+            base,
+            f"p.series LIKE '%{_sql_quote(series)}%'",
+            f"p.model = '{_sql_quote(model)}'",
+        ])
     if model:
-        where.append(f"p.model = '{_sql_quote(model)}'")
-    sql = (
-        "SELECT p.path FROM products p "
-        f"WHERE {' AND '.join(where)} LIMIT 20;"
-    )
-    out = run_sql(sql)
-    if out is None:
-        return None
-    body = _unwrap_sql(out)
-    paths: list[str] = []
-    for line in body.splitlines():
-        s = line.strip()
-        if not s or s.startswith("[") or s == "path" or s.startswith("path|"):
-            continue
-        cols = _csv_split(s)
-        if cols and cols[0].startswith("/proc/catalog/"):
-            paths.append(cols[0])
-    return paths
+        tries.append([base, f"p.model = '{_sql_quote(model)}'"])
+    tries.append([base])
+
+    for where_clauses in tries:
+        sql = (
+            "SELECT p.path FROM products p "
+            f"WHERE {' AND '.join(where_clauses)} LIMIT 20;"
+        )
+        out = run_sql(sql)
+        if out is None:
+            return None
+        body = _unwrap_sql(out)
+        paths: list[str] = []
+        for line in body.splitlines():
+            s = line.strip()
+            if (
+                not s
+                or s.startswith("[")
+                or s == "path"
+                or s.startswith("path|")
+            ):
+                continue
+            cols = _csv_split(s)
+            if cols and cols[0].startswith("/proc/catalog/"):
+                paths.append(cols[0])
+        if paths:
+            return paths
+    return []
 
 
 def complete_yes_no_sku_refs(
