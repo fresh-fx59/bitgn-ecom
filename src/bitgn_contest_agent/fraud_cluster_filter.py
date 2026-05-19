@@ -134,9 +134,13 @@ def _fetch_rows(
     # they are restricted to [\w\-] (see _PAY_PATH) — no SQL
     # injection risk, but quote anyway for SQLite's sake.
     quoted = ", ".join(f"'{pid}'" for pid in pay_ids)
+    # NOTE: the ECOM payments table primary key is `id`, not `pay_id`
+    # (see contest schema; verified via the agent's own SQL queries
+    # in t40 trace). The /proc/payments/<id>.json filename uses the
+    # full `id` value (e.g. "pay_20210428T143838Z_FJT4ktFYHA").
     sql = (
-        "SELECT pay_id, customer_id, store_id, created_at "
-        "FROM payments WHERE pay_id IN (" + quoted + ");"
+        "SELECT id, customer_id, store_id, created_at "
+        "FROM payments WHERE id IN (" + quoted + ");"
     )
     out = run_sql(sql)
     if out is None:
@@ -144,7 +148,10 @@ def _fetch_rows(
     rows: list[PaymentRow] = []
     for line in out.splitlines():
         s = line.strip()
-        if not s or s.startswith("[") or s.startswith("pay_id"):
+        if not s or s.startswith("["):
+            continue
+        # Skip a header row if present (column names).
+        if s.startswith("id|") or s.startswith("pay_id|"):
             continue
         parts = [p.strip() for p in s.split("|")]
         if len(parts) != 4:
