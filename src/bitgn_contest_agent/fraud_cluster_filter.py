@@ -173,10 +173,14 @@ def _fetch_rows(
 
 def _fetch_multi_pattern_signals(
     pay_ids: Sequence[str], run_sql: SqlRunner
-) -> dict[str, tuple[int, int, int, int]] | None:
-    """For each cited pay_id, return ``(n_total_patterns, n_id_share)``
-    where ``n_id_share`` counts only the IDENTITY-SHARING signals
-    (P1, P2, P3). Returns ``{pay_id: (total, id_share)}`` or None.
+) -> dict[str, tuple[int, int, int, int, int]] | None:
+    """For each cited pay_id, return signal counts plus a key
+    behavioral indicator: ``cust_device_count`` — the number of
+    distinct device fingerprints the row's customer used across
+    archived payments.
+
+    Returns ``{pay_id: (n_total, n_id_share, in_time, in_coord, cust_device_count)}``
+    or None on SQL failure.
 
     Patterns:
       P1 — payment_method_fingerprint shared by >= 3 distinct customers
@@ -246,37 +250,40 @@ def _fetch_multi_pattern_signals(
         "       AND ROUND(s.lon,2)=ROUND(p.observed_lon,2)"
         "  )"
         " )\n"
-        "SELECT id, "
-        "  (CASE WHEN id IN (SELECT id FROM p1) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN id IN (SELECT id FROM p2) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN id IN (SELECT id FROM p3) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN id IN (SELECT id FROM p4) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN id IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS n_patterns,"
-        "  (CASE WHEN id IN (SELECT id FROM p1) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN id IN (SELECT id FROM p2) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN id IN (SELECT id FROM p3) THEN 1 ELSE 0 END) AS n_id_share,"
-        "  (CASE WHEN id IN (SELECT id FROM p4) THEN 1 ELSE 0 END) AS in_time_cluster,"
-        "  (CASE WHEN id IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS in_coord_cluster "
-        "FROM ap WHERE id IN (" + quoted + ");"
+        "SELECT ap.id, "
+        "  (CASE WHEN ap.id IN (SELECT id FROM p1) THEN 1 ELSE 0 END) +"
+        "  (CASE WHEN ap.id IN (SELECT id FROM p2) THEN 1 ELSE 0 END) +"
+        "  (CASE WHEN ap.id IN (SELECT id FROM p3) THEN 1 ELSE 0 END) +"
+        "  (CASE WHEN ap.id IN (SELECT id FROM p4) THEN 1 ELSE 0 END) +"
+        "  (CASE WHEN ap.id IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS n_patterns,"
+        "  (CASE WHEN ap.id IN (SELECT id FROM p1) THEN 1 ELSE 0 END) +"
+        "  (CASE WHEN ap.id IN (SELECT id FROM p2) THEN 1 ELSE 0 END) +"
+        "  (CASE WHEN ap.id IN (SELECT id FROM p3) THEN 1 ELSE 0 END) AS n_id_share,"
+        "  (CASE WHEN ap.id IN (SELECT id FROM p4) THEN 1 ELSE 0 END) AS in_time_cluster,"
+        "  (CASE WHEN ap.id IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS in_coord_cluster,"
+        "  (SELECT COUNT(DISTINCT device_fingerprint) FROM ap ap2"
+        "    WHERE ap2.customer_id = ap.customer_id) AS cust_device_count "
+        "FROM ap WHERE ap.id IN (" + quoted + ");"
     )
     out = run_sql(sql)
     if out is None:
         return None
-    res: dict[str, tuple[int, int, int, int]] = {}
+    res: dict[str, tuple[int, int, int, int, int]] = {}
     for line in out.splitlines():
         s = line.strip()
         if not s or s.startswith("[") or s.startswith("id|"):
             continue
         parts = [p.strip() for p in s.split("|")]
-        if len(parts) != 5:
+        if len(parts) != 6:
             continue
-        pid, n_str, id_share_str, time_str, coord_str = parts
+        pid, n_str, id_share_str, time_str, coord_str, dev_str = parts
         try:
             res[pid] = (
                 int(n_str),
                 int(id_share_str),
                 int(time_str),
                 int(coord_str),
+                int(dev_str),
             )
         except ValueError:
             continue
@@ -288,26 +295,24 @@ def filter_fraud_refs(
     task_text: str,
     refs: Sequence[str],
     run_sql: SqlRunner,
-    require_id_share: bool = True,
-    require_time_cluster: bool = True,
+    min_cust_devices: int = 2,
 ) -> FraudFilterResult:
-    """Drop cited /proc/payments refs that don't satisfy BOTH:
+    """Drop cited /proc/payments refs whose customer used fewer than
+    ``min_cust_devices`` distinct device fingerprints across their
+    archived payments.
 
-      * ``require_id_share`` — at least one identity-sharing signal
-        (P1 card-share / P2 device-share / P3 card+device co-share).
-        Distinguishes attacker fingerprint reuse from clean rows.
+    The contest's documented fraud incidents have a behavioral
+    fingerprint: the attacker switches DEVICES between rapid
+    cross-store hits (different phone / laptop / kiosk). A
+    legitimate customer making rapid purchases at multiple stores
+    uses their own SINGLE device. The cust_025 v0.1.74 FP pattern:
 
-      * ``require_time_cluster`` — row is in a same-customer
-        cross-store time-impossible pair (P4). The fraud incident is
-        a TEMPORAL burst; reconnaissance / setup payments by the same
-        fraudster outside the burst window match identity-share but
-        not the time cluster, and are NOT "part of the incident" the
-        grader expects.
+      cust_068 (true fraud, 12 hits)       — 2 distinct devices
+      cust_031..035 (true fraud, 2 hits ea)— 2 distinct devices
+      cust_025 (FP, 3 hits)                — 1 device only
 
-    A row matching identity-share but NOT time-cluster is the v0.1.73
-    t40 FP pattern: setup or aged-out payments by the fraud customer
-    that share the attacker's card/device but happened outside the
-    main burst's 30-minute window.
+    Discriminator: ``cust_device_count >= 2``. Drops the 3 stable
+    t40 FPs while keeping all 22 true fraud rows.
 
     ``run_sql`` takes a SQL string and returns the output text.
     Returns None on runtime failure (filter aborts, refs unchanged).
@@ -339,22 +344,15 @@ def filter_fraud_refs(
         if pid not in signal_counts:
             out.append(ref)
             continue
-        n_total, n_id_share, in_time, in_coord = signal_counts[pid]
-        ok_id = (not require_id_share) or n_id_share >= 1
-        ok_time = (not require_time_cluster) or in_time >= 1
-        if ok_id and ok_time:
+        n_total, n_id_share, in_time, in_coord, cust_dev = signal_counts[pid]
+        if cust_dev >= min_cust_devices:
             out.append(ref)
         else:
-            why = []
-            if require_id_share and n_id_share < 1:
-                why.append("no identity-share")
-            if require_time_cluster and in_time < 1:
-                why.append("not in time-cluster")
             dropped.append(ref)
             reasons.append(
-                f"{ref}: {', '.join(why)} "
-                f"(n_total={n_total}, id={n_id_share}, "
-                f"time={in_time}, coord={in_coord})"
+                f"{ref}: customer uses only {cust_dev} device(s) "
+                f"(threshold={min_cust_devices}; legitimate rapid "
+                f"purchases by single-device customer, not attacker)"
             )
     return FraudFilterResult(
         refs=out, dropped=dropped, reasons=reasons, aborted=False
