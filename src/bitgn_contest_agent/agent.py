@@ -1030,6 +1030,43 @@ class AgentLoop:
                 )
                 fn = fn.model_copy(update={"grounding_refs": cleaned.refs})
 
+        # Step 1b: SKU-attribute verifier. Drops cited
+        # /proc/catalog/*.json refs whose ``properties`` contradict the
+        # task's attribute spec. Runs on OUTCOME_OK only (refusals are
+        # not graded on SKU attributes). See sku_verifier module.
+        if task_text and fn.outcome == "OUTCOME_OK" and fn.grounding_refs:
+            from bitgn_contest_agent.adapter.ecom import Req_Read
+            from bitgn_contest_agent.sku_verifier import filter_sku_refs
+
+            def _read_sku(path: str) -> str | None:
+                try:
+                    tr = self._adapter.dispatch(
+                        Req_Read(tool="read", path=path)
+                    )
+                    return tr.content if tr.ok else None
+                except Exception:
+                    return None
+
+            sku_filtered = filter_sku_refs(
+                task_text=task_text,
+                refs=fn.grounding_refs,
+                read_sku=_read_sku,
+            )
+            if sku_filtered.dropped:
+                emit_arch(
+                    category=ArchCategory.REFS_DROP,
+                    at_step=None,
+                    details=(
+                        f"sku_verifier stripped "
+                        f"{len(sku_filtered.dropped)} ref(s): "
+                        f"{sku_filtered.dropped} "
+                        f"reasons={sku_filtered.reasons}"
+                    ),
+                )
+                fn = fn.model_copy(
+                    update={"grounding_refs": sku_filtered.kept}
+                )
+
         # Step 2: per-model adapter hook (gpt-oss hallucinated-ref drop).
         adapter = self._model_adapter()
         if adapter is None:
