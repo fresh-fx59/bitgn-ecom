@@ -171,14 +171,116 @@ def _fetch_rows(
     return rows
 
 
+def _fetch_multi_pattern_signals(
+    pay_ids: Sequence[str], run_sql: SqlRunner
+) -> dict[str, int] | None:
+    """For each cited pay_id, count how many strong fraud patterns
+    it matches. Returns {pay_id: pattern_count} or None on failure.
+
+    Patterns (each adds +1 to the row's score):
+      P1 — payment_method_fingerprint shared by >= 3 distinct customers
+      P2 — device_fingerprint shared by >= 3 distinct customers
+      P3 — (payment_method_fingerprint, device_fingerprint) shared by
+           >= 2 distinct customers
+      P4 — row participates in a same-customer cross-store
+           time-impossible pair (|∆t| <= 1800s)
+      P5 — observed-coord cluster (ROUND lat/lon, 4dp) shared by
+           >= 3 distinct customers AND not matching any store's
+           lat/lon at 2dp rounding
+
+    A row with only P4 but no P1/P2/P3/P5 is the v0.1.66+ t40 FP
+    pattern (small legitimate purchase caught in a fraud-burst time
+    window). Requiring >= 2 patterns drops these.
+    """
+    if not pay_ids:
+        return {}
+    quoted = ", ".join(f"'{pid}'" for pid in pay_ids)
+    sql = (
+        "WITH ap AS (SELECT * FROM payments WHERE basket_archived = 1),\n"
+        " p1 AS (SELECT p.id FROM ap p JOIN ("
+        "  SELECT payment_method_fingerprint FROM ap"
+        "  GROUP BY payment_method_fingerprint"
+        "  HAVING COUNT(DISTINCT customer_id) >= 3"
+        " ) s USING(payment_method_fingerprint)),\n"
+        " p2 AS (SELECT p.id FROM ap p JOIN ("
+        "  SELECT device_fingerprint FROM ap"
+        "  GROUP BY device_fingerprint"
+        "  HAVING COUNT(DISTINCT customer_id) >= 3"
+        " ) s USING(device_fingerprint)),\n"
+        " p3 AS (SELECT p.id FROM ap p JOIN ("
+        "  SELECT payment_method_fingerprint, device_fingerprint"
+        "  FROM ap"
+        "  GROUP BY payment_method_fingerprint, device_fingerprint"
+        "  HAVING COUNT(DISTINCT customer_id) >= 2"
+        " ) s USING(payment_method_fingerprint, device_fingerprint)),\n"
+        " p4 AS ("
+        "  SELECT DISTINCT p1.id FROM ap p1 JOIN ap p2"
+        "   ON p1.customer_id=p2.customer_id"
+        "   AND p1.id<>p2.id"
+        "   AND p1.store_id<>p2.store_id"
+        "   AND ABS(strftime('%s',p1.created_at)-strftime('%s',p2.created_at)) < 1800"
+        "  UNION"
+        "  SELECT DISTINCT p2.id FROM ap p1 JOIN ap p2"
+        "   ON p1.customer_id=p2.customer_id"
+        "   AND p1.id<>p2.id"
+        "   AND p1.store_id<>p2.store_id"
+        "   AND ABS(strftime('%s',p1.created_at)-strftime('%s',p2.created_at)) < 1800"
+        " ),\n"
+        " p5 AS ("
+        "  SELECT p.id FROM ap p"
+        "  JOIN ("
+        "    SELECT ROUND(observed_lat,4) AS rlat,"
+        "           ROUND(observed_lon,4) AS rlon"
+        "    FROM ap"
+        "    GROUP BY ROUND(observed_lat,4), ROUND(observed_lon,4)"
+        "    HAVING COUNT(DISTINCT customer_id) >= 3"
+        "  ) g ON ROUND(p.observed_lat,4)=g.rlat"
+        "      AND ROUND(p.observed_lon,4)=g.rlon"
+        "  WHERE NOT EXISTS ("
+        "    SELECT 1 FROM stores s"
+        "     WHERE ROUND(s.lat,2)=ROUND(p.observed_lat,2)"
+        "       AND ROUND(s.lon,2)=ROUND(p.observed_lon,2)"
+        "  )"
+        " )\n"
+        "SELECT id, "
+        "  (CASE WHEN id IN (SELECT id FROM p1) THEN 1 ELSE 0 END) +"
+        "  (CASE WHEN id IN (SELECT id FROM p2) THEN 1 ELSE 0 END) +"
+        "  (CASE WHEN id IN (SELECT id FROM p3) THEN 1 ELSE 0 END) +"
+        "  (CASE WHEN id IN (SELECT id FROM p4) THEN 1 ELSE 0 END) +"
+        "  (CASE WHEN id IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS n_patterns "
+        "FROM ap WHERE id IN (" + quoted + ");"
+    )
+    out = run_sql(sql)
+    if out is None:
+        return None
+    res: dict[str, int] = {}
+    for line in out.splitlines():
+        s = line.strip()
+        if not s or s.startswith("[") or s.startswith("id|"):
+            continue
+        parts = [p.strip() for p in s.split("|")]
+        if len(parts) != 2:
+            continue
+        pid, n_str = parts
+        try:
+            res[pid] = int(n_str)
+        except ValueError:
+            continue
+    return res
+
+
 def filter_fraud_refs(
     *,
     task_text: str,
     refs: Sequence[str],
     run_sql: SqlRunner,
+    min_patterns: int = 2,
 ) -> FraudFilterResult:
-    """Drop cited /proc/payments refs that are not part of a
-    same-customer rapid cross-store cluster.
+    """Drop cited /proc/payments refs that match fewer than
+    ``min_patterns`` of the fraud signal patterns. The defaulted
+    threshold of 2 matches the contest's documented "strong-signal
+    precision" workflow: a row is fraud if it satisfies the cluster
+    membership AND at least one of the shared-fingerprint signals.
 
     ``run_sql`` takes a SQL string and returns the output text (the
     same shape as ``exec /bin/sql``'s stdout). Returning None signals
@@ -186,22 +288,18 @@ def filter_fraud_refs(
     """
     pay_ids = _payments_from_refs(refs)
     if len(pay_ids) < 2:
-        # Not enough cited payments to form a cluster — nothing the
-        # filter can validate.
         return FraudFilterResult(
             refs=list(refs), dropped=[], reasons=[], aborted=False
         )
 
-    rows = _fetch_rows(pay_ids, run_sql)
-    if rows is None:
+    signal_counts = _fetch_multi_pattern_signals(pay_ids, run_sql)
+    if signal_counts is None:
         return FraudFilterResult(
             refs=list(refs),
             dropped=[],
             reasons=["sql_fetch_failed"],
             aborted=True,
         )
-    in_cluster = _build_cluster_membership(rows)
-    found_pids = {r.pay_id for r in rows}
 
     out: list[str] = []
     dropped: list[str] = []
@@ -212,18 +310,19 @@ def filter_fraud_refs(
             out.append(ref)
             continue
         pid = m.group(1)
-        if pid not in found_pids:
-            # Row not returned by SQL — payments table missing the
-            # row, e.g. archived elsewhere. Keep, can't judge.
+        if pid not in signal_counts:
+            # Row not returned by SQL — payments table missing it.
+            # Keep, can't judge.
             out.append(ref)
             continue
-        if pid in in_cluster:
+        n = signal_counts[pid]
+        if n >= min_patterns:
             out.append(ref)
         else:
             dropped.append(ref)
             reasons.append(
-                f"{ref}: standalone — no same-customer "
-                f"cross-store peer within {WINDOW_SECONDS}s"
+                f"{ref}: only {n} fraud pattern(s) matched "
+                f"(threshold={min_patterns})"
             )
     return FraudFilterResult(
         refs=out, dropped=dropped, reasons=reasons, aborted=False

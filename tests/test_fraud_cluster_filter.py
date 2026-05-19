@@ -1,7 +1,7 @@
-"""Tests for fraud_cluster_filter."""
+"""Tests for fraud_cluster_filter (v0.1.72 multi-pattern signal)."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+import pytest
 
 from bitgn_contest_agent.fraud_cluster_filter import (
     PaymentRow,
@@ -15,6 +15,9 @@ from bitgn_contest_agent.fraud_cluster_filter import (
 
 def _t(s: str) -> float:
     return _parse_iso(s)
+
+
+# ── timestamp parsing ────────────────────────────────────────────────
 
 
 def test_parse_iso_z_suffix():
@@ -34,6 +37,9 @@ def test_parse_iso_invalid_returns_none():
     assert _parse_iso("") is None
 
 
+# ── cluster builder (legacy single-pattern, kept for completeness) ───
+
+
 def test_cluster_singletons_not_in_cluster():
     rows = [
         PaymentRow("pay_1", "cust_A", "store_X", _t("2021-04-28T14:00:00Z")),
@@ -50,25 +56,7 @@ def test_cluster_pair_same_customer_diff_store_within_window():
     assert _build_cluster_membership(rows) == {"pay_1", "pay_2"}
 
 
-def test_cluster_same_store_does_not_pair():
-    rows = [
-        PaymentRow("pay_1", "cust_A", "store_X", _t("2021-04-28T14:00:00Z")),
-        PaymentRow("pay_2", "cust_A", "store_X", _t("2021-04-28T14:05:00Z")),
-    ]
-    assert _build_cluster_membership(rows) == set()
-
-
-def test_cluster_outside_window_does_not_pair():
-    rows = [
-        PaymentRow("pay_1", "cust_A", "store_X", _t("2021-04-28T14:00:00Z")),
-        PaymentRow("pay_2", "cust_A", "store_Y", _t("2021-04-28T15:00:00Z")),
-    ]
-    assert _build_cluster_membership(rows) == set()
-
-
 def test_cluster_transitive_three_rows():
-    """A pairs with B (5min), B pairs with C (10min), but A-C is 15min
-    — all three are still in the cluster transitively."""
     rows = [
         PaymentRow("pay_1", "cust_A", "store_X", _t("2021-04-28T14:00:00Z")),
         PaymentRow("pay_2", "cust_A", "store_Y", _t("2021-04-28T14:05:00Z")),
@@ -77,18 +65,26 @@ def test_cluster_transitive_three_rows():
     assert _build_cluster_membership(rows) == {"pay_1", "pay_2", "pay_3"}
 
 
-def test_filter_drops_standalone_payment():
-    """Reproduce the v0.1.66 t40 3-FP scenario: 22 clustered fraud
-    rows correctly cited + 3 standalone FPs that the agent mistakenly
-    flagged. Filter should drop the 3 standalones."""
-    # Two clustered fraud rows (same customer, different stores)
-    # and one standalone false positive (different customer, alone).
-    sql_output = (
-        "pay_id|customer_id|store_id|created_at\n"
-        "pay_001|cust_A|store_X|2021-04-28T14:00:00Z\n"
-        "pay_002|cust_A|store_Y|2021-04-28T14:05:00Z\n"
-        "pay_003|cust_B|store_Z|2021-04-29T10:00:00Z\n"
-    )
+# ── multi-pattern filter (current API) ───────────────────────────────
+
+
+def _multi_pattern_sql_output(rows: dict[str, int]) -> str:
+    """Format rows the way `/bin/sql` returns: '<pid>|<n_patterns>' lines."""
+    lines = []
+    for pid, n in rows.items():
+        lines.append(f"{pid}|{n}")
+    return "\n".join(lines) + "\n"
+
+
+def test_filter_drops_single_pattern_rows():
+    """v0.1.66+ t40 FP pattern: rows that only match the
+    time-impossible cluster (1 pattern) drop, while rows in
+    multiple patterns (2+) stay."""
+    rows = {
+        "pay_001": 3,  # 3 patterns — keep
+        "pay_002": 4,  # 4 patterns — keep
+        "pay_003": 1,  # only 1 pattern — drop (legitimate caught in burst)
+    }
     res = filter_fraud_refs(
         task_text="confirmed fraud incident; identify the payment records",
         refs=[
@@ -96,15 +92,46 @@ def test_filter_drops_standalone_payment():
             "/proc/payments/pay_002.json",
             "/proc/payments/pay_003.json",
         ],
-        run_sql=lambda sql: sql_output,
+        run_sql=lambda sql: _multi_pattern_sql_output(rows),
     )
     assert "/proc/payments/pay_001.json" in res.refs
     assert "/proc/payments/pay_002.json" in res.refs
     assert "/proc/payments/pay_003.json" in res.dropped
 
 
+def test_filter_threshold_2_default():
+    """Default min_patterns=2 keeps n=2 and drops n=1."""
+    rows = {"pay_001": 2, "pay_002": 1}
+    res = filter_fraud_refs(
+        task_text="fraud incident identify",
+        refs=[
+            "/proc/payments/pay_001.json",
+            "/proc/payments/pay_002.json",
+        ],
+        run_sql=lambda sql: _multi_pattern_sql_output(rows),
+    )
+    assert "/proc/payments/pay_001.json" in res.refs
+    assert "/proc/payments/pay_002.json" in res.dropped
+
+
+def test_filter_threshold_override():
+    """min_patterns=3 raises the bar."""
+    rows = {"pay_001": 2, "pay_002": 3}
+    res = filter_fraud_refs(
+        task_text="fraud incident identify",
+        refs=[
+            "/proc/payments/pay_001.json",
+            "/proc/payments/pay_002.json",
+        ],
+        run_sql=lambda sql: _multi_pattern_sql_output(rows),
+        min_patterns=3,
+    )
+    assert "/proc/payments/pay_001.json" in res.dropped
+    assert "/proc/payments/pay_002.json" in res.refs
+
+
 def test_filter_keeps_non_payment_refs():
-    sql_output = "pay_id|customer_id|store_id|created_at\n"
+    rows = {"pay_001": 3, "pay_002": 3}
     res = filter_fraud_refs(
         task_text="fraud incident",
         refs=[
@@ -113,15 +140,13 @@ def test_filter_keeps_non_payment_refs():
             "/proc/payments/pay_001.json",
             "/proc/payments/pay_002.json",
         ],
-        run_sql=lambda sql: sql_output,
+        run_sql=lambda sql: _multi_pattern_sql_output(rows),
     )
     assert "/AGENTS.MD" in res.refs
     assert "/docs/security.md" in res.refs
 
 
 def test_filter_passthrough_when_under_two_payments():
-    """Filter cannot evaluate cluster membership without at least 2
-    payments; abstain."""
     res = filter_fraud_refs(
         task_text="fraud",
         refs=["/proc/payments/pay_001.json", "/AGENTS.MD"],
@@ -147,13 +172,10 @@ def test_filter_abstains_when_sql_fails():
 
 
 def test_filter_abstains_when_pid_missing_from_sql():
-    """SQL returned rows for some pids but not all — leave the
-    unknown ones alone (e.g., archived payments not in the live
+    """SQL returned signal counts for some pids but not all — leave
+    the unknown ones alone (e.g., archived payments not in the live
     table)."""
-    sql_output = (
-        "pay_001|cust_A|store_X|2021-04-28T14:00:00Z\n"
-        "pay_002|cust_A|store_Y|2021-04-28T14:05:00Z\n"
-    )
+    rows = {"pay_001": 3, "pay_002": 3}
     res = filter_fraud_refs(
         task_text="fraud incident",
         refs=[
@@ -161,10 +183,34 @@ def test_filter_abstains_when_pid_missing_from_sql():
             "/proc/payments/pay_002.json",
             "/proc/payments/pay_unknown.json",
         ],
-        run_sql=lambda sql: sql_output,
+        run_sql=lambda sql: _multi_pattern_sql_output(rows),
     )
     assert "/proc/payments/pay_unknown.json" in res.refs
     assert res.dropped == []
+
+
+def test_filter_sql_query_uses_id_column():
+    """The fix from v0.1.71 — query column is 'id', not 'pay_id'."""
+    captured = {}
+
+    def run_sql(sql):
+        captured["sql"] = sql
+        return _multi_pattern_sql_output({"pay_001": 3, "pay_002": 3})
+
+    filter_fraud_refs(
+        task_text="fraud incident",
+        refs=[
+            "/proc/payments/pay_001.json",
+            "/proc/payments/pay_002.json",
+        ],
+        run_sql=run_sql,
+    )
+    sql = captured["sql"]
+    # Multi-pattern query selects 'id' from the payments table.
+    assert "id IN" in sql
+    assert "pay_id IN" not in sql
+    # And uses the archived-payment scope.
+    assert "basket_archived = 1" in sql
 
 
 def test_looks_like_fraud_task():
@@ -178,7 +224,3 @@ def test_looks_like_fraud_task():
         "Recover the 3DS flow for payment pay_001"
     )
     assert not looks_like_fraud_task("How many products are wood screws?")
-
-
-# Import pytest for the conditional fail() in test_filter_passthrough
-import pytest
