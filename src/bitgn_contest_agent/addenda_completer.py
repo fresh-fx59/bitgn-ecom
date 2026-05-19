@@ -170,11 +170,43 @@ def _list_md_files(
     return list({m.group(1) for m in _PATH_RE.finditer(out)})
 
 
+def _find_md_files_by_name(
+    name_pattern: str,
+    run_find: Callable[[str, str, int], str | None] | None,
+) -> list[str]:
+    """Use the adapter's `find` operation to locate .md files
+    matching ``name_pattern`` anywhere under /docs. Returns
+    absolute paths."""
+    if run_find is None:
+        return []
+    out = run_find(name_pattern, "/docs", 20)
+    if not out:
+        return []
+    body = out.strip()
+    paths: list[str] = []
+    # find response shape: MessageToJson of FindResponse with
+    #   {"matches": [{"path": "...", "kind": ...}, ...]}
+    if body.startswith("{"):
+        try:
+            obj = _json.loads(body)
+            for match in obj.get("matches", []) or []:
+                p = match.get("path")
+                if p and p.endswith(".md"):
+                    paths.append(p)
+        except Exception:
+            pass
+    # Fallback: extract /docs/...md substrings.
+    if not paths:
+        paths = list({m.group(1) for m in _PATH_RE.finditer(body)})
+    return paths
+
+
 def complete_addenda_refs(
     *,
     task_text: str,
     refs: Sequence[str],
     run_tree: Callable[[str, int], str | None],
+    run_find: Callable[[str, str, int], str | None] | None = None,
 ) -> AddendaCompleterResult:
     """Augment ``refs`` with every matching catalogue-count addendum
     file. ``run_tree`` returns the text body of `tree root=<x>
@@ -204,45 +236,62 @@ def complete_addenda_refs(
         w for w in raw_words if w and w not in _STOPWORDS and len(w) > 2
     }
 
-    aborted = True  # flip to False if any tree call succeeds
+    # First gather every .md path we can see across the candidate
+    # dirs via tree. Then, as a safety net, query `find` with the
+    # most specific category word — covers files whose dir tree()
+    # didn't enumerate. Both are merged into one candidate set.
+    all_md_paths: set[str] = set()
+    aborted = True  # flip to False if any source succeeds
     for d in _CANDIDATE_DIRS:
         md_paths = _list_md_files(d, run_tree)
         if md_paths:
             aborted = False
-        for path in md_paths:
-            name = path.lower()
-            base = name.rsplit("/", 1)[-1]
-            confirming_tokens = (
-                "catalogue-count",
-                "catalogue-counting",
-                "catalogue-reporting",
-                "catalogue-addenda",
-                "-reporting-",
-                "-counting-",
-            )
-            if "fam-" not in base:
+            all_md_paths.update(md_paths)
+
+    if run_find is not None:
+        # Use the most specific (longest) category word as the
+        # find pattern. The 20-result cap limits coverage but
+        # filename uniqueness keeps recall high.
+        sorted_words = sorted(cat_words, key=len, reverse=True)
+        for w in sorted_words[:2]:
+            find_paths = _find_md_files_by_name(w, run_find)
+            if find_paths:
+                aborted = False
+                all_md_paths.update(find_paths)
+    confirming_tokens = (
+        "catalogue-count",
+        "catalogue-counting",
+        "catalogue-reporting",
+        "catalogue-addenda",
+        "-reporting-",
+        "-counting-",
+    )
+    for path in sorted(all_md_paths):
+        name = path.lower()
+        base = name.rsplit("/", 1)[-1]
+        if "fam-" not in base:
+            continue
+        if not any(t in base for t in confirming_tokens):
+            continue
+        # Match the task token (or no-and variant) — first try
+        # exact substring, fall back to ≥2-token overlap to
+        # handle the contest's irregular slug abbreviation
+        # ("Screwdriver and Hex Key Set" → "screwdriver-hex-sets").
+        if any(t in name for t in tokens):
+            pass  # exact match
+        else:
+            file_words = set(re.split(r"[\s\-_\.]+", base))
+            overlap = cat_words & file_words
+            if len(overlap) < 2:
                 continue
-            if not any(t in base for t in confirming_tokens):
-                continue
-            # Match the task token (or no-and variant) — first try
-            # exact substring, fall back to ≥2-token overlap to
-            # handle the contest's irregular slug abbreviation
-            # ("Screwdriver and Hex Key Set" → "screwdriver-hex-sets").
-            if any(t in name for t in tokens):
-                pass  # exact match
-            else:
-                file_words = set(re.split(r"[\s\-_\.]+", base))
-                overlap = cat_words & file_words
-                if len(overlap) < 2:
-                    continue
-            if path in have:
-                continue
-            out_refs.append(path)
-            have.add(path)
-            added.append(path)
-            reasons.append(
-                f"{path}: catalogue-count addendum matching '{tokens[0]}'"
-            )
+        if path in have:
+            continue
+        out_refs.append(path)
+        have.add(path)
+        added.append(path)
+        reasons.append(
+            f"{path}: catalogue-count addendum matching '{tokens[0]}'"
+        )
     return AddendaCompleterResult(
         refs=out_refs,
         added=added,

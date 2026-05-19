@@ -1169,10 +1169,27 @@ class AgentLoop:
                 except Exception:
                     return None
 
+            def _run_find(name: str, root: str, limit: int) -> str | None:
+                try:
+                    from bitgn_contest_agent.adapter.ecom import Req_Find
+                    tr = self._adapter.dispatch(
+                        Req_Find(
+                            tool="find",
+                            name=name,
+                            root=root,
+                            kind="files",
+                            limit=limit,
+                        )
+                    )
+                    return tr.content if tr.ok else None
+                except Exception:
+                    return None
+
             addenda_res = _complete_addenda_refs(
                 task_text=task_text,
                 refs=list(fn.grounding_refs),
                 run_tree=_run_tree,
+                run_find=_run_find,
             )
             if addenda_res.added:
                 emit_arch(
