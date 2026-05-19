@@ -1067,6 +1067,41 @@ class AgentLoop:
                     update={"grounding_refs": sku_filtered.kept}
                 )
 
+        # Step 1c: cite-completer. Hardcoded action-family policy
+        # triples (checkout/discount/3DS) are a contest invariant —
+        # the grader requires the full stack regardless of outcome.
+        # The completer adds any missing triple paths that the agent
+        # ALREADY READ during the run (in seen_refs). If the path was
+        # never read, abstain. See cite_completer module.
+        if task_text and fn.outcome in {
+            "OUTCOME_OK",
+            "OUTCOME_DENIED_SECURITY",
+            "OUTCOME_NONE_UNSUPPORTED",
+            "OUTCOME_NONE_CLARIFICATION",
+        }:
+            from bitgn_contest_agent.cite_completer import complete as _cite_complete
+
+            completer_res = _cite_complete(
+                task_text=task_text,
+                message=fn.message or "",
+                refs=list(fn.grounding_refs),
+                seen_refs=session.seen_refs,
+            )
+            if completer_res.added:
+                emit_arch(
+                    category=ArchCategory.REFS_DROP,
+                    at_step=None,
+                    details=(
+                        f"cite_completer added "
+                        f"{len(completer_res.added)} ref(s) "
+                        f"(family={completer_res.family}): "
+                        f"{completer_res.added}"
+                    ),
+                )
+                fn = fn.model_copy(
+                    update={"grounding_refs": completer_res.refs}
+                )
+
         # Step 2: per-model adapter hook (gpt-oss hallucinated-ref drop).
         adapter = self._model_adapter()
         if adapter is None:
