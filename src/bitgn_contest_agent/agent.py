@@ -1126,91 +1126,14 @@ class AgentLoop:
                     update={"grounding_refs": completer_res.refs}
                 )
 
-        # Step 1c1: addenda completer. For catalogue-count tasks
-        # ("How many catalogue products are <X>?"), list every
-        # candidate `/docs/<addenda>/` directory and add each
-        # catalogue-count addendum file matching the task category.
-        # Closes the v0.1.82 t12 multi-addenda variance.
-        if task_text and fn.outcome == "OUTCOME_OK":
-            from bitgn_contest_agent.adapter.ecom import Req_Tree
-            from bitgn_contest_agent.addenda_completer import (
-                complete_addenda_refs as _complete_addenda_refs,
-            )
-
-            def _run_tree(root: str, level: int) -> str | None:
-                try:
-                    tr = self._adapter.dispatch(
-                        Req_Tree(tool="tree", root=root, level=level)
-                    )
-                    return tr.content if tr.ok else None
-                except Exception:
-                    return None
-
-            addenda_res = _complete_addenda_refs(
-                task_text=task_text,
-                refs=list(fn.grounding_refs),
-                run_tree=_run_tree,
-            )
-            if addenda_res.added:
-                emit_arch(
-                    category=ArchCategory.REFS_DROP,
-                    at_step=None,
-                    details=(
-                        f"addenda_completer added "
-                        f"{len(addenda_res.added)} ref(s): "
-                        f"{addenda_res.added}"
-                    ),
-                )
-                fn = fn.model_copy(
-                    update={"grounding_refs": addenda_res.refs}
-                )
-
-        # Step 1c2: SKU completer. For multi-product count tasks
-        # ("How many of these products have at least N available at
-        # <store>: ..."), parse the task spec, find every
-        # qualifying SKU via SQL, and ADD it to grounding_refs if
-        # missing. Closes the t14/t15/t16-shape wrong-SKU-pick
-        # variance family where the agent searches the wrong
-        # catalogue partition. See sku_completer module.
-        if task_text and fn.outcome == "OUTCOME_OK":
-            from bitgn_contest_agent.adapter.ecom import Req_Exec
-            from bitgn_contest_agent.sku_completer import (
-                complete_sku_refs as _complete_sku_refs,
-            )
-
-            def _run_sql_skucomp(sql: str) -> str | None:
-                try:
-                    tr = self._adapter.dispatch(
-                        Req_Exec(
-                            tool="exec",
-                            path="/bin/sql",
-                            args=[],
-                            stdin=sql,
-                        )
-                    )
-                    return tr.content if tr.ok else None
-                except Exception:
-                    return None
-
-            sku_comp_res = _complete_sku_refs(
-                task_text=task_text,
-                refs=list(fn.grounding_refs),
-                run_sql=_run_sql_skucomp,
-            )
-            if sku_comp_res.added:
-                emit_arch(
-                    category=ArchCategory.REFS_DROP,
-                    at_step=None,
-                    details=(
-                        f"sku_completer added "
-                        f"{len(sku_comp_res.added)} ref(s): "
-                        f"{sku_comp_res.added} "
-                        f"reasons={sku_comp_res.reasons[:3]}"
-                    ),
-                )
-                fn = fn.model_copy(
-                    update={"grounding_refs": sku_comp_res.refs}
-                )
+        # Steps 1c1 (addenda completer) and 1c2 (SKU completer) were
+        # introduced in v0.1.82 / v0.1.83 but turned out net-negative
+        # in PROD: their parsers are too brittle on real task text,
+        # so they add SOME qualifying refs but miss others — leaving
+        # the same "missing required ref" failure mode while
+        # adding compute cost. Disabled in v0.1.84 pending a more
+        # robust task-spec parser. Modules and tests stay so they
+        # can be re-enabled once the parser is hardened.
 
         # Step 1d: fraud cluster filter. Drops cited
         # /proc/payments/*.json refs that are not part of a same-
