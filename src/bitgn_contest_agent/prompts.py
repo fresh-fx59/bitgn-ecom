@@ -535,6 +535,21 @@ Catalogue / SQL discipline (ECOM-specific):
        payment ids at the end; do NOT short-circuit after the first
        pattern returns hits.
 
+       FAVOUR RECALL OVER PRECISION at this stage. A
+       deterministic post-pass enforcer (``fraud_cluster_filter``)
+       runs after report_completion and PRUNES citations whose
+       customer used fewer than 2 distinct device fingerprints —
+       i.e., legitimate single-device customers caught in the
+       burst's time window. So a FP from a single-device customer
+       costs nothing (the post-pass removes it); a MISSED true
+       fraud row costs full recall. Cite EVERY time-impossible
+       cluster and EVERY fingerprint-shared row you find; do NOT
+       narrow to "the biggest cluster" or "the most confident hit".
+       v0.1.75 t40 PROD failure: agent zoomed in on cust_068's
+       12-row burst and missed the 2021-05-06 5-customer cluster
+       (10 rows) — recall 12/22, hybrid score 0.525. Broaden first;
+       the enforcer prunes.
+
        (a) Card sharing across customers: same
            `payment_method_fingerprint` appears with more than one
            `customer_id`. Cite every matching row.
