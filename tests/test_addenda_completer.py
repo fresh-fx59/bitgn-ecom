@@ -260,6 +260,49 @@ def test_fuzzy_slug_match_screwdriver_hex_sets():
     assert len(res.added) == 1
 
 
+def test_completer_handles_json_tree_response():
+    """v0.1.93 PROD t12 repro: real `tree` adapter returns
+    `MessageToJson` of the proto, not a text-rendered tree. The
+    completer must walk the JSON to extract .md absolute paths.
+    """
+    import json as _json
+    tree_json = _json.dumps({
+        "root": {
+            "name": "current-updates",
+            "kind": "NODE_KIND_DIR",
+            "children": [
+                {
+                    "name": "catalogue-counting-2021-08-09-safety-eyewear-fam-safety-gear-safety-eyewear-0005-2f7zzwhp.md",
+                    "kind": "NODE_KIND_FILE",
+                    "content_type": "text/markdown",
+                },
+                {
+                    "name": "catalogue-counting-2021-08-09-safety-eyewear-fam-safety-gear-safety-eyewear-0023-3pg2bnbx.md",
+                    "kind": "NODE_KIND_FILE",
+                    "content_type": "text/markdown",
+                },
+            ],
+        }
+    })
+
+    def fake_tree(root, level):
+        if root == "/docs/current-updates":
+            return tree_json
+        return None
+
+    res = complete_addenda_refs(
+        task_text=(
+            "How many Safety Eyewear products should I report today?"
+        ),
+        refs=[
+            "/docs/current-updates/catalogue-counting-2021-08-09-safety-eyewear-fam-safety-gear-safety-eyewear-0005-2f7zzwhp.md",
+        ],
+        run_tree=fake_tree,
+    )
+    assert res.aborted is False
+    assert any("0023" in p for p in res.added)
+
+
 def test_fuzzy_match_avoids_unrelated_categories():
     """Token overlap with stopwords stripped and 2+ threshold
     avoids false positives on unrelated catalogue addenda."""

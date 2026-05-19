@@ -30,6 +30,7 @@ Conservative: only ADDS, never DROPS. Abstains on tree failure.
 """
 from __future__ import annotations
 
+import json as _json
 import re
 from dataclasses import dataclass
 from typing import Callable, Sequence
@@ -116,15 +117,56 @@ def _is_catalogue_count_task(task_text: str) -> str | None:
 _PATH_RE = re.compile(r"(/docs/[\w\-/\.]+\.md)\b")
 
 
+def _walk_tree_json(node: dict, prefix: str) -> list[str]:
+    """Recursively walk a `tree` JSON response shape:
+        {"name": "X", "kind": "NODE_KIND_DIR|FILE", "children": [...]}
+    Returns absolute paths of .md files under ``prefix``.
+    """
+    paths: list[str] = []
+    if not isinstance(node, dict):
+        return paths
+    name = node.get("name") or ""
+    kind = node.get("kind") or ""
+    cur = (
+        prefix.rstrip("/") + "/" + name
+        if name and name != prefix.rstrip("/")
+        else prefix
+    )
+    if kind == "NODE_KIND_FILE" and name.endswith(".md"):
+        paths.append(cur)
+    for child in node.get("children", []) or []:
+        paths.extend(_walk_tree_json(child, cur))
+    return paths
+
+
 def _list_md_files(
     root: str, run_tree: Callable[[str, int], str | None]
 ) -> list[str]:
-    """Return /docs/.../X.md paths under ``root``. Uses the
-    callback's tree output verbatim."""
+    """Return /docs/.../X.md paths under ``root``.
+
+    Handles three response shapes:
+    1. JSON tree (real adapter output via MessageToJson).
+    2. Tree-of-strings text format (test mocks).
+    3. Empty / None on tree failure.
+    """
     out = run_tree(root, 3)
     if not out:
         return []
-    # Tree output lists paths; grep .md ones via regex.
+    # Try JSON parse first (real adapter output).
+    body = out.strip()
+    if body.startswith("{"):
+        try:
+            obj = _json.loads(body)
+            tree_root = obj.get("root") if isinstance(obj, dict) else None
+            if tree_root:
+                # The root.name doesn't include the parent dir, so
+                # rebuild the prefix from the request root.
+                # Strip the trailing root name; we'll re-prepend.
+                parent = root.rsplit("/", 1)[0] or "/"
+                return _walk_tree_json(tree_root, parent)
+        except Exception:
+            pass
+    # Fallback: regex-extract absolute paths from text.
     return list({m.group(1) for m in _PATH_RE.finditer(out)})
 
 
