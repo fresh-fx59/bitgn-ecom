@@ -44,13 +44,12 @@ class AddendaCompleterResult:
     abort_reason: str | None = None
 
 
-# Three observed phrasings for the catalogue-count question:
-#   "How many catalogue products are <X>?"
-#   "How many products are <X>?" + earlier mention of "catalogue
-#       count report" / "catalogue counting" / "catalogue reporting"
-#   (variants prepending "For the catalogue count report,")
-# Accept either: a "catalogue products" form, or a "products are X"
-# form gated by a separate catalogue-context regex.
+# Catalogue-count question phrasings (observed across PROD trials):
+#   "How many catalogue products are X?"
+#   "For the catalogue count report, how many products are X?"
+#   "How many X products should I report today?"
+#   "How many X products do we have?" / "do we stock?"
+# Three regex variants cover them; we accept the first match.
 _CATALOGUE_COUNT_DIRECT_RE = re.compile(
     r"how\s+many\s+catalogue\s+products\s+are\s+(?P<category>[A-Za-z\s\-/]+?)"
     r"\s*\??\s*(?:Answer|$)",
@@ -61,9 +60,16 @@ _CATALOGUE_COUNT_INDIRECT_RE = re.compile(
     r"\s*\??\s*(?:Answer|$)",
     re.IGNORECASE,
 )
+# "How many <CATEGORY> products should I report today?"
+_CATALOGUE_COUNT_REPORT_RE = re.compile(
+    r"how\s+many\s+(?P<category>[A-Za-z\s\-/]+?)\s+products?\s+"
+    r"(?:should\s+i\s+)?report",
+    re.IGNORECASE,
+)
 _CATALOGUE_CONTEXT_RE = re.compile(
     r"catalogue[\s\-](?:count|counting|reporting|addenda)\b"
-    r"|catalogue\s+report\b",
+    r"|catalogue\s+report\b"
+    r"|should\s+i\s+report\s+today\b",  # implicit catalogue-count signal
     re.IGNORECASE,
 )
 
@@ -84,11 +90,14 @@ def _is_catalogue_count_task(task_text: str) -> str | None:
     catalogue-count task, else None."""
     m = _CATALOGUE_COUNT_DIRECT_RE.search(task_text)
     if not m:
-        # Indirect phrasing requires an explicit catalogue context
-        # word to avoid firing on generic "how many products are X"
-        # tasks (count-per-store, etc.).
+        # Indirect "how many products are X?" requires an explicit
+        # catalogue context word.
         if _CATALOGUE_CONTEXT_RE.search(task_text):
             m = _CATALOGUE_COUNT_INDIRECT_RE.search(task_text)
+    if not m:
+        # "How many <CATEGORY> products [should I] report today?"
+        # The "report today" phrasing IS the catalogue-count signal.
+        m = _CATALOGUE_COUNT_REPORT_RE.search(task_text)
     if not m:
         return None
     raw = m.group("category").strip().rstrip("?")
@@ -141,6 +150,18 @@ def complete_addenda_refs(
     added: list[str] = []
     reasons: list[str] = []
 
+    # Word-token set from the category (used for fuzzy filename
+    # match when the contest's slug abbreviates the human form).
+    # "Screwdriver and Hex Key Set" → {"screwdriver", "hex", "key",
+    # "set"} — the filename slug "screwdriver-hex-sets" shares
+    # {"screwdriver", "hex"} which is enough to confirm.
+    # Stopwords: "and", "or", "the".
+    _STOPWORDS = {"and", "or", "the", "a", "an", "of"}
+    raw_words = re.split(r"[\s\-]+", tokens[0].replace("|", " "))
+    cat_words: set[str] = {
+        w for w in raw_words if w and w not in _STOPWORDS and len(w) > 2
+    }
+
     aborted = True  # flip to False if any tree call succeeds
     for d in _CANDIDATE_DIRS:
         md_paths = _list_md_files(d, run_tree)
@@ -148,19 +169,6 @@ def complete_addenda_refs(
             aborted = False
         for path in md_paths:
             name = path.lower()
-            # Must be a catalogue-counting-flavored addendum. The
-            # contest's filename patterns vary across draws — the
-            # confirming token can be any of:
-            #   catalogue-count       (most common)
-            #   catalogue-counting
-            #   catalogue-reporting
-            #   catalogue-addenda
-            #   reporting             (v0.1.87 PROD: under
-            #                          /docs/catalogue-addenda/
-            #                          filename is just
-            #                          '2021-08-09-reporting-X-...')
-            #   counting              (same lenience for symmetry)
-            # plus a "fam-" segment that anchors the category-id.
             base = name.rsplit("/", 1)[-1]
             confirming_tokens = (
                 "catalogue-count",
@@ -174,9 +182,17 @@ def complete_addenda_refs(
                 continue
             if not any(t in base for t in confirming_tokens):
                 continue
-            # Match the task token (or no-and variant).
-            if not any(t in name for t in tokens):
-                continue
+            # Match the task token (or no-and variant) — first try
+            # exact substring, fall back to ≥2-token overlap to
+            # handle the contest's irregular slug abbreviation
+            # ("Screwdriver and Hex Key Set" → "screwdriver-hex-sets").
+            if any(t in name for t in tokens):
+                pass  # exact match
+            else:
+                file_words = set(re.split(r"[\s\-_\.]+", base))
+                overlap = cat_words & file_words
+                if len(overlap) < 2:
+                    continue
             if path in have:
                 continue
             out_refs.append(path)

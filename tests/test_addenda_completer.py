@@ -234,6 +234,71 @@ def test_indirect_phrasing_for_catalogue_count_report():
     assert full == "cordless-drill-driver"
 
 
+def test_fuzzy_slug_match_screwdriver_hex_sets():
+    """v0.1.90 PROD t12 repro: task 'How many Screwdriver and Hex
+    Key Set products should I report today?' → filename slug
+    'screwdriver-hex-sets' (drops 'key', pluralizes 'set'). Exact
+    substring fails; token-overlap >=2 succeeds via
+    {'screwdriver', 'hex'}."""
+    files = {
+        "/docs/ops-policy-notes": [
+            "/docs/ops-policy-notes/catalogue-count-screwdriver-hex-sets-fam-hand-tools-screwdriver-hex-sets-0011-jyy8npep-2021-08-09.md",
+        ],
+        "/docs/current-updates": [],
+        "/docs/policy-updates": [],
+        "/docs/catalogue-addenda": [],
+        "/docs/clarifications": [],
+    }
+    res = complete_addenda_refs(
+        task_text=(
+            "How many Screwdriver and Hex Key Set products should I "
+            "report today? Answer in exactly format \"<COUNT:%d>\""
+        ),
+        refs=[],
+        run_tree=_fake_tree(files),
+    )
+    assert len(res.added) == 1
+
+
+def test_fuzzy_match_avoids_unrelated_categories():
+    """Token overlap with stopwords stripped and 2+ threshold
+    avoids false positives on unrelated catalogue addenda."""
+    files = {
+        "/docs/ops-policy-notes": [
+            # Unrelated category — only "tools" overlap
+            "/docs/ops-policy-notes/catalogue-count-cordless-power-tools-fam-power-tools-cordless-power-tools-0001.md",
+        ],
+        "/docs/current-updates": [],
+        "/docs/policy-updates": [],
+        "/docs/catalogue-addenda": [],
+        "/docs/clarifications": [],
+    }
+    res = complete_addenda_refs(
+        task_text=(
+            "How many Screwdriver and Hex Key Set products should I "
+            "report today?"
+        ),
+        refs=[],
+        run_tree=_fake_tree(files),
+    )
+    assert res.added == []
+
+
+def test_report_today_phrasing():
+    """v0.1.90 PROD t12: 'How many Screwdriver and Hex Key Set
+    products should I report today?' — different word order, no
+    'catalogue' keyword."""
+    s = (
+        "How many Screwdriver and Hex Key Set products should I "
+        "report today? Answer in exactly format \"<COUNT:%d>\""
+    )
+    tok = _is_catalogue_count_task(s)
+    assert tok is not None
+    full, no_and = tok.split("|")
+    assert full == "screwdriver-and-hex-key-set"
+    assert no_and == "screwdriver-hex-key-set"
+
+
 def test_indirect_phrasing_requires_catalogue_context():
     """Bare 'how many products are X' WITHOUT a catalogue context
     word must NOT trigger (avoid false positives on count-per-store
