@@ -385,6 +385,25 @@ Catalogue / SQL discipline (ECOM-specific):
                        inspect or restart a buyer's checkout flow.
                        Read the cart entities under the workspace tree
                        first to see what fields the binary expects.
+
+                       PRE-CHECKOUT INVENTORY GATE (mandatory before
+                       running `/bin/checkout <basket_id>`): for EVERY
+                       line in the basket, the line's quantity must
+                       be <= inventory.available_today at the basket's
+                       store_id. Run:
+                         SELECT sku, available_today FROM inventory
+                          WHERE store_id = '<basket.store_id>'
+                            AND sku IN (<line skus>);
+                       If ANY line.quantity > available_today, OR if
+                       any line's (store_id, sku) row is missing, do
+                       NOT call /bin/checkout. Refuse with
+                       OUTCOME_NONE_UNSUPPORTED and explain the line
+                       that lacks inventory. v0.1.66 t21 failure:
+                       agent ran checkout speculatively, then checked
+                       inventory after the mutation — grader rejected
+                       the run with "expected no file changes". The
+                       inventory check IS a precondition, not a post-
+                       hoc justification.
     Discover the table inventory by reading /AGENTS.MD — do NOT guess
     table or column names.
   - Prefer SQL over file-walking for any aggregation, count, sum,
