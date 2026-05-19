@@ -774,3 +774,48 @@ def clean_refusal_refs(
             if required not in kept:
                 kept.append(required)
     return CleanResult(refs=kept, stripped=stripped, reasons=reasons)
+
+
+# v0.1.87 (P5B) — refusal-message-body scrubber. The grader sometimes
+# rejects a refusal whose message text mentions ANOTHER person's id
+# verbatim, even when the corresponding /proc/<ns>/<id>.json ref was
+# correctly stripped by the enforcer. Detect cust_/emp_ ids in the
+# message that AREN'T the actor's, and replace them with a generic
+# phrase. Conservative: only fires on DENIED_SECURITY outcomes.
+_PERSON_ID_RE = re.compile(r"`?\b((?:cust|emp)_[\w]+)`?")
+
+
+def scrub_refusal_message(
+    *,
+    message: str,
+    outcome: str,
+    actor_id: str | None,
+) -> tuple[str, list[str]]:
+    """Replace non-actor person ids in a refusal message body with
+    a generic phrase. Returns ``(scrubbed_message, replaced_ids)``.
+
+    Only fires when ``outcome == "OUTCOME_DENIED_SECURITY"``. If
+    ``actor_id`` is None we have nothing to discriminate against, so
+    leave the message unchanged.
+    """
+    if outcome != "OUTCOME_DENIED_SECURITY":
+        return message, []
+    if not message:
+        return message, []
+    if actor_id is None:
+        return message, []
+    replaced: list[str] = []
+
+    def _sub(m: re.Match) -> str:
+        token = m.group(1)
+        if token == actor_id:
+            return m.group(0)
+        replaced.append(token)
+        if token.startswith("cust_"):
+            return "a different customer"
+        if token.startswith("emp_"):
+            return "another employee"
+        return m.group(0)
+
+    scrubbed = _PERSON_ID_RE.sub(_sub, message)
+    return scrubbed, replaced

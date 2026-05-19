@@ -1033,6 +1033,7 @@ class AgentLoop:
         if task_text and fn.outcome == "OUTCOME_DENIED_SECURITY":
             from bitgn_contest_agent.refusal_cite_enforcer import (
                 clean_refusal_refs,
+                scrub_refusal_message,
             )
             cleaned = clean_refusal_refs(
                 task_text=task_text,
@@ -1053,6 +1054,25 @@ class AgentLoop:
                     ),
                 )
                 fn = fn.model_copy(update={"grounding_refs": cleaned.refs})
+
+            # P5B — scrub non-actor person ids from the refusal
+            # message body. Defense-in-depth for the prompt rule.
+            scrubbed_msg, replaced = scrub_refusal_message(
+                message=fn.message,
+                outcome=fn.outcome,
+                actor_id=getattr(self, "_actor_id", None),
+            )
+            if replaced:
+                emit_arch(
+                    category=ArchCategory.REFS_DROP,
+                    at_step=None,
+                    details=(
+                        f"refusal_message_scrubber replaced "
+                        f"{len(replaced)} non-actor id(s) in message "
+                        f"body: {replaced}"
+                    ),
+                )
+                fn = fn.model_copy(update={"message": scrubbed_msg})
 
         # Step 1b: SKU-attribute verifier. Drops cited
         # /proc/catalog/*.json refs whose ``properties`` contradict the

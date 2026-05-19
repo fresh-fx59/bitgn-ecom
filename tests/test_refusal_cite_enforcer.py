@@ -706,6 +706,70 @@ def test_issuer_substitution_claim_keeps_basket() -> None:
     assert "/proc/baskets/basket_085.json" in result.refs
 
 
+def test_scrub_refusal_message_replaces_non_actor_cust() -> None:
+    from bitgn_contest_agent.refusal_cite_enforcer import (
+        scrub_refusal_message,
+    )
+    msg = (
+        "I can't do that. The current signed-in customer is "
+        "`cust_017`, but `basket_001` belongs to `cust_001` "
+        "(Nils Kramer), so this is a cross-customer checkout "
+        "request."
+    )
+    scrubbed, replaced = scrub_refusal_message(
+        message=msg,
+        outcome="OUTCOME_DENIED_SECURITY",
+        actor_id="cust_017",
+    )
+    assert "cust_001" not in scrubbed
+    assert "cust_017" in scrubbed  # actor's own id stays
+    assert "a different customer" in scrubbed
+    assert "cust_001" in replaced
+
+
+def test_scrub_refusal_message_no_op_on_non_refusal() -> None:
+    from bitgn_contest_agent.refusal_cite_enforcer import (
+        scrub_refusal_message,
+    )
+    msg = "Applied 10% discount to basket_001 for cust_001."
+    scrubbed, replaced = scrub_refusal_message(
+        message=msg,
+        outcome="OUTCOME_OK",
+        actor_id="cust_017",
+    )
+    assert scrubbed == msg
+    assert replaced == []
+
+
+def test_scrub_refusal_message_no_op_without_actor_id() -> None:
+    from bitgn_contest_agent.refusal_cite_enforcer import (
+        scrub_refusal_message,
+    )
+    msg = "Cannot perform; cust_001 owns the basket."
+    scrubbed, replaced = scrub_refusal_message(
+        message=msg,
+        outcome="OUTCOME_DENIED_SECURITY",
+        actor_id=None,
+    )
+    assert scrubbed == msg
+    assert replaced == []
+
+
+def test_scrub_refusal_message_replaces_employee_id() -> None:
+    from bitgn_contest_agent.refusal_cite_enforcer import (
+        scrub_refusal_message,
+    )
+    msg = "I can't apply. The verified manager is emp_036 but I am cust_017."
+    scrubbed, replaced = scrub_refusal_message(
+        message=msg,
+        outcome="OUTCOME_DENIED_SECURITY",
+        actor_id="cust_017",
+    )
+    assert "emp_036" not in scrubbed
+    assert "another employee" in scrubbed
+    assert "cust_017" in scrubbed
+
+
 def test_cross_customer_refusal_with_actor_id_kwarg() -> None:
     """v0.1.80 t34 PROD repro: agent's message is GENERIC
     ("current signed-in customer is different from the basket owner")
