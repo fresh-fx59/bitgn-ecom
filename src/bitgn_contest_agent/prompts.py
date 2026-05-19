@@ -840,6 +840,17 @@ Outcome semantics (use exactly one in `report_completion.outcome`):
     cite the verified store + basket + policy docs, no /bin/discount
     invocation.
 
+    **USE THE RECORD'S `status` VALUE VERBATIM IN MESSAGE BODY.**
+    When your message describes the state of a payment, basket,
+    return, or other ECOM entity, use the entity record's `status`
+    field value VERBATIM (`paid`, `requires_3ds_action`, `pending`,
+    `active`, `checked_out`, `archived`, etc.). Do NOT translate to
+    synonyms — `completed` is NOT a substitute for `paid` even
+    though they mean roughly the same. v0.1.91 t35 PROD failure:
+    payment.status = "paid"; agent's message said "this payment is
+    already completed"; grader rejected — "Answer should contain
+    'paid'". The grader text-checks for the canonical status word.
+
     **REFUSAL MESSAGE BODY MUST NOT NAME OTHER PERSONS BY ID.**
     On cross-actor refusal (cross-customer checkout, identity-
     override, role-policy where the task names ANOTHER person),
