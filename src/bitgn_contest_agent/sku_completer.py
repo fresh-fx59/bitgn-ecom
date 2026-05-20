@@ -524,6 +524,54 @@ def _find_qualifying_skus_relaxed(
     return []
 
 
+def compute_count_per_store(
+    *,
+    task_spec,
+    run_sql: Callable[[str], str | None],
+) -> int | None:
+    """Compute the canonical COUNT for a count_per_store task: the
+    number of distinct PRODUCTS (not SKUs) in `task_spec.products`
+    that have at least one qualifying SKU at the named store with
+    available_today >= threshold.
+
+    Returns None on parse/SQL failure (caller should not override).
+    """
+    if task_spec is None:
+        return None
+    if getattr(task_spec, "kind", "none") != "count_per_store":
+        return None
+    products = getattr(task_spec, "products", []) or []
+    if not products:
+        return None
+    store_descriptor = getattr(task_spec, "store_descriptor", "") or ""
+    threshold = int(getattr(task_spec, "threshold", 0) or 0)
+    store_id = resolve_store_id(store_descriptor, run_sql)
+    if store_id is None:
+        return None
+    n = 0
+    for p in products:
+        brand = getattr(p, "brand", "") or ""
+        series = getattr(p, "series", "") or ""
+        model = getattr(p, "model", "") or ""
+        attrs = dict(getattr(p, "attributes", {}) or {})
+        if not brand:
+            continue
+        skus = _find_qualifying_skus_relaxed(
+            brand=brand,
+            series=series,
+            model=model,
+            attributes=attrs,
+            store_id=store_id,
+            threshold=threshold,
+            run_sql=run_sql,
+        )
+        if skus is None:
+            return None  # SQL fail → don't override
+        if skus:
+            n += 1
+    return n
+
+
 def complete_sku_refs_from_spec(
     *,
     task_spec,  # TaskSpec (loose-typed to avoid pydantic cycle)

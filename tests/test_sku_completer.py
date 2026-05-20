@@ -359,6 +359,76 @@ def test_yes_no_sku_completer_falls_back_to_brand_plus_name(snapshot_db):
     assert all("/Acmetool/" in p for p in res.added), res.added
 
 
+def test_compute_count_per_store_returns_n_products_with_qualifying_skus(
+    snapshot_db, snapshot_metadata
+):
+    """compute_count_per_store returns the number of distinct
+    products in the spec that have ≥1 qualifying SKU at the store.
+    multi_sku_attr_line_hard has expected_answer=3."""
+    from bitgn_contest_agent.schemas import ProductFilter, TaskSpec
+    from bitgn_contest_agent.sku_completer import compute_count_per_store
+
+    spec = TaskSpec(
+        kind="count_per_store",
+        store_descriptor="Acmetown Central",
+        threshold=1,
+        products=[
+            # P1: Acmetool drill driver — has qualifying SKU
+            ProductFilter(
+                brand="Acmetool",
+                series="Acmetool Pro Z9",
+                model="Z9-DR1",
+                name="Cordless Drill Driver",
+                attributes={
+                    "voltage": "18 V",
+                    "battery_platform": "18v-system",
+                    "kit_contents": "case",
+                },
+            ),
+            # P2: Boltech nut bolt — wrong attrs, won't qualify
+            ProductFilter(
+                brand="Boltech",
+                series="Boltech Industrial PRO 4F1-IM",
+                model="PRO 4F1-IM-22",
+                name="Nut Bolt and Washer",
+                attributes={
+                    "fastener_type": "bolt",
+                    "diameter": "12 mm",
+                    "length": "40 mm",
+                    "pack_count": "100 pcs",
+                },
+            ),
+            # P3: Fastonix anchor — has qualifying SKU
+            ProductFilter(
+                brand="Fastonix",
+                series="Fastonix MaxFix MX2-A77",
+                model="MX2-A77",
+                name="Anchor and Wall Plug",
+                attributes={"anchor_type": "cavity fixing"},
+            ),
+        ],
+    )
+    n = compute_count_per_store(
+        task_spec=spec,
+        run_sql=_sql_runner(snapshot_db),
+    )
+    assert n is not None
+    # Snapshot's expected_answer is "3" — 3 of 6 listed products
+    # qualify. With my 3 products specified above (P1+P3 qualify,
+    # P2 doesn't), expected n=2 minimum.
+    assert n >= 2, f"expected >=2, got {n}"
+
+
+def test_compute_count_per_store_returns_none_on_kind_mismatch():
+    from bitgn_contest_agent.schemas import TaskSpec
+    from bitgn_contest_agent.sku_completer import compute_count_per_store
+    n = compute_count_per_store(
+        task_spec=TaskSpec(kind="none"),
+        run_sql=lambda sql: "",
+    )
+    assert n is None
+
+
 def test_spec_driven_completer_abstains_on_kind_none():
     from bitgn_contest_agent.schemas import TaskSpec
     from bitgn_contest_agent.sku_completer import (

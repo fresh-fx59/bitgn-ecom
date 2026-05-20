@@ -1255,6 +1255,50 @@ class AgentLoop:
                         update={"grounding_refs": sku_spec_res.refs}
                     )
 
+                # P1 count override: if the spec-driven count
+                # disagrees with the agent's emitted COUNT, rewrite
+                # the message body. Only fires when SQL returns a
+                # clean answer.
+                from bitgn_contest_agent.sku_completer import (
+                    compute_count_per_store as _compute_count,
+                )
+
+                canonical_n = _compute_count(
+                    task_spec=task_spec_obj,
+                    run_sql=_run_sql_skucomp_spec,
+                )
+                if canonical_n is not None:
+                    import re as _re_count
+                    msg = fn.message or ""
+                    # Match common count answer patterns
+                    patterns = [
+                        (r"<COUNT:\s*\d+\s*>", f"<COUNT:{canonical_n}>"),
+                        (r"\[QTY:\s*\d+\s*\]", f"[QTY:{canonical_n}]"),
+                        (r"\bcount\s*:\s*\d+\b", f"count : {canonical_n}"),
+                        (r"^\s*\d+\s*$", str(canonical_n)),
+                    ]
+                    new_msg = msg
+                    matched = False
+                    for pat, repl in patterns:
+                        out, n_subs = _re_count.subn(
+                            pat, repl, new_msg, count=1, flags=_re_count.IGNORECASE
+                        )
+                        if n_subs > 0:
+                            new_msg = out
+                            matched = True
+                            break
+                    if matched and new_msg != msg:
+                        emit_arch(
+                            category=ArchCategory.REFS_DROP,
+                            at_step=None,
+                            details=(
+                                f"count_override: canonical={canonical_n}, "
+                                f"old_msg={msg[:60]!r}, "
+                                f"new_msg={new_msg[:60]!r}"
+                            ),
+                        )
+                        fn = fn.model_copy(update={"message": new_msg})
+
             # yes_no_sku: enumerate brand+series family; verifier
             # prunes wrong-attribute members downstream.
             if (
