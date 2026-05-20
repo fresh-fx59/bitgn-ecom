@@ -1,19 +1,26 @@
 """SKU completer — post-pass enforcer that ensures every qualifying
 catalogue SKU is cited in grounding_refs on count tasks.
 
-v0.1.98 P1: re-enabled with a structured-input path. When the
-agent emits ``task_spec`` with kind=count_per_store, the completer
-uses the parsed product list directly instead of regex-parsing the
-natural-language task text. See ``complete_sku_refs_from_spec``.
+Active entry points (called from agent.py terminal post-process):
+  - ``complete_sku_refs_from_spec`` (P1, kind=count_per_store) —
+    structured-input path. Parses task_spec products, SQL-resolves
+    qualifying SKUs per product (relaxation ladder strict →
+    brand+model → brand only), and UNIONS missing into refs.
+  - ``complete_yes_no_sku_refs`` (P1, kind=yes_no_sku) — enumerates
+    brand+model family (+brand+name LIKE fallback, no brand-only).
+  - ``compute_count_per_store`` — exposed but NOT wired (the
+    v0.1.106 count-override broke correct LLM answers; reverted in
+    v0.1.107). Use only with explicit safety guards.
 
-The legacy regex-based ``complete_sku_refs`` is kept for callers
-without a task_spec (still disabled by default in agent.py).
+Legacy entry point:
+  - ``complete_sku_refs`` — regex-based natural-language parser,
+    disabled in agent.py since v0.1.84 because PROD measured it
+    net-negative on multi-product spec drift.
 
-
-Target failure family (v0.1.74 / v0.1.81 PROD):
-  t14: "How many of these products have at least N available …"
-  t15: same shape, different product list
-  t16: same shape, different brands
+Target failure family closed by the active path:
+  - t14/t15/t16-shape: agent's SQL over-constrains attribute
+    filters or normalizes units wrong → wrong/missing SKU cite.
+    Relaxation ladder + task_spec emission close this.
 
 The agent's SQL workflow occasionally searches the wrong catalogue
 partition for a multi-line product list and answers COUNT:K while
