@@ -1142,6 +1142,26 @@ Reliability rules:
     `battery platform`). Values use the spec value verbatim from the
     task (`"18 V"` not `"18V"`).
 
+    **PRE-SUBMIT COUNT SELF-CHECK** (mandatory for count_per_store):
+    Before emitting the COUNT in `message`, list each task_spec
+    product in `current_state` with its qualifying-SKU verdict:
+
+      "P1 Acmetool Pro Z9 Z9-DR1 voltage=18V kit_contents=case →
+       qualifies via PWR-P1RIGHT (avail=2 >= threshold)
+       P2 Boltech Industrial PRO 4F1-IM-22 → no SKU has
+       fastener_type=bolt + diameter=12mm + length=40mm in stock
+       at this store → does NOT qualify
+       ..."
+
+    Then COUNT = number of products with `qualifies` verdict.
+    This eliminates the v0.1.107 t13 wrong-count failure mode where
+    the agent's arithmetic skipped a qualifying product.
+
+    DO NOT short-circuit by counting the number of products in the
+    task list (that's just `len(products)`); count is the number
+    of products that HAVE at least one qualifying SKU at the
+    named store at the named availability threshold.
+
     Shape B — **catalogue_count**. Use when the task is:
       "How many catalogue products are <category>?", or
       "How many <category> products [should I] report today?", or
