@@ -1156,7 +1156,9 @@ Reliability rules:
     Shape C — **yes_no_sku**. Use when the task is:
       "A support note claims we stock the <name> from <brand> in
        the <series> <model> <name> line that has <attrs>. Check…"
-       (yes/no on whether the exact catalogue variant exists)
+       OR "Do you have the <name> from <brand> in the
+       <series> <model> ..." (yes/no on whether the exact
+       catalogue variant exists).
     Emit:
       task_spec = {
         "kind": "yes_no_sku",
@@ -1166,9 +1168,43 @@ Reliability rules:
             "attributes": {"<attr_key>": "<attr_val>", ...} },
         ]
       }
-    The post-pass enumerates ALL SKUs in the brand+series family and
-    the existing SKU verifier prunes wrong-attribute members — the
-    grader-expected SKU survives the union.
+
+    **MANDATORY ENUMERATION WORKFLOW** for yes_no_sku tasks (do
+    this BEFORE deciding YES vs NO):
+      1. Run SQL to enumerate the ENTIRE brand+model family.
+         Don't filter by series or attributes in this query — get
+         every SKU with the named brand+model:
+           SELECT sku, path, properties FROM products
+            WHERE brand = '<Brand>' AND model = '<Model>'
+            LIMIT 50;
+         If brand+model returns 0 rows, retry with
+           WHERE brand = '<Brand>' AND name LIKE '%<name>%'
+            LIMIT 50;
+      2. For EACH returned row, parse `properties` JSON and
+         compare against the task's named attributes one-by-one.
+         A row "matches" if every named attribute value in the
+         task is present in that row's properties (case- and
+         unit-insensitive; "230 V" matches "230V"; "1100 W"
+         matches "1100W").
+      3. ANSWER:
+           If any row matches ALL named attributes → `<YES>` + cite
+              that SKU's path.
+           If no row matches all → `<NO>` + cite the closest-miss
+              SKU (the one matching the most attributes), explain
+              which attribute differs.
+
+    Picking the first row you encounter without comparing it
+    against every other family member is the v0.1.104 t04 PROD
+    failure mode (agent said `<NO>` to a Metabo Silent BS 3UO-DAH
+    Compressor question where one of 7 family members actually
+    matched the 230V/1100W/compressor attributes the task named).
+
+    The post-pass enumerates the brand+series family and adds it
+    to grounding_refs (you don't need to cite every member
+    yourself), but you MUST do the attribute comparison to choose
+    YES vs NO and pick the right specific cite. The completer
+    gives you the candidate set; YES/NO and the headline cite are
+    yours.
 
     The post-pass uses `task_spec` to deterministically resolve
     qualifying SKUs (count_per_store) or matching addenda
