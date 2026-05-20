@@ -1255,49 +1255,23 @@ class AgentLoop:
                         update={"grounding_refs": sku_spec_res.refs}
                     )
 
-                # P1 count override: if the spec-driven count
-                # disagrees with the agent's emitted COUNT, rewrite
-                # the message body. Only fires when SQL returns a
-                # clean answer.
-                from bitgn_contest_agent.sku_completer import (
-                    compute_count_per_store as _compute_count,
-                )
-
-                canonical_n = _compute_count(
-                    task_spec=task_spec_obj,
-                    run_sql=_run_sql_skucomp_spec,
-                )
-                if canonical_n is not None:
-                    import re as _re_count
-                    msg = fn.message or ""
-                    # Match common count answer patterns
-                    patterns = [
-                        (r"<COUNT:\s*\d+\s*>", f"<COUNT:{canonical_n}>"),
-                        (r"\[QTY:\s*\d+\s*\]", f"[QTY:{canonical_n}]"),
-                        (r"\bcount\s*:\s*\d+\b", f"count : {canonical_n}"),
-                        (r"^\s*\d+\s*$", str(canonical_n)),
-                    ]
-                    new_msg = msg
-                    matched = False
-                    for pat, repl in patterns:
-                        out, n_subs = _re_count.subn(
-                            pat, repl, new_msg, count=1, flags=_re_count.IGNORECASE
-                        )
-                        if n_subs > 0:
-                            new_msg = out
-                            matched = True
-                            break
-                    if matched and new_msg != msg:
-                        emit_arch(
-                            category=ArchCategory.REFS_DROP,
-                            at_step=None,
-                            details=(
-                                f"count_override: canonical={canonical_n}, "
-                                f"old_msg={msg[:60]!r}, "
-                                f"new_msg={new_msg[:60]!r}"
-                            ),
-                        )
-                        fn = fn.model_copy(update={"message": new_msg})
+                # v0.1.106 count-override was REVERTED in v0.1.107.
+                # Two PROD failure modes proved it net-negative:
+                #   t15: task 'at least 4 items'; agent answered 0
+                #        (correct); my SQL computed n=6 because the
+                #        relaxation ladder dropped the attribute
+                #        filters AND the threshold context. Override
+                #        wrote 6 → grader wanted 0.
+                #   t19: task 'across every Vienna branch (any of
+                #        N stores)'; agent answered 3 (correct
+                #        aggregate); my SQL uses one store_id at
+                #        a time so canonical was 1 → broke a
+                #        correct answer.
+                # Lesson per the saved memory
+                # `feedback_enforcer_cannot_replace_adaptive_llm`:
+                # the LLM's per-task SQL is adaptive in ways the
+                # post-pass can't replicate. The completer should
+                # ADD refs, never rewrite the LLM's numeric answer.
 
             # yes_no_sku: enumerate brand+series family; verifier
             # prunes wrong-attribute members downstream.
