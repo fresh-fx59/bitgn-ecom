@@ -1,0 +1,6 @@
+{
+  "task_id": "t11",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtA",
+  "instruction": "How many Extension Cable products should I report today? Answer in exactly format \"<COUNT:%d>\" (no quotes).",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtA"
+}

@@ -1,0 +1,6 @@
+{
+  "task_id": "t15",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtE",
+  "instruction": "How many of these products have at least 1 items available in the Ljubljana Center PowerTool store today: the Workshop Saw and Cutter from Record Power in the Record Power Professional BS 4YQ-EUK Workshop Saw and Cutter line that has machine type table saw and voltage 230 V,the Cordless Drill Driver from Milwaukee in the Milwaukee Professional FUEL NRG-ONK Cordless Drill Driver line that has voltage 36 V, battery platform xl-system, and kit contents bare tool,the Metal and Concrete Paint from Hammerite in the Hammerite Quick Dry HAM 22B-SYZ Metal and Concrete Paint line that has product type facade paint,the Nut Bolt and Washer from Fischer in the Fischer Outdoor SX NT9-HP1 Nut Bolt and Washer line that has fastener type bolt, diameter 6 mm, and length 80 mm,the Wood Stain and Deck Oil from Sikkens in the Sikkens Cetol Rubbol 1KE-GBP Wood Stain and Deck Oil line that has product type wood stain, color family Brown, and finish matte,the Metal and Concrete Paint from Caparol in the Caparol Premium Capa 32D-5X8 Metal and Concrete Paint line that has product type metal paint, color family Gray, and finish satin? Answer in exactly format \"<COUNT:%d>\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtE"
+}

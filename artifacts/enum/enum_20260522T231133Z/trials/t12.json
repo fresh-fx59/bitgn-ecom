@@ -1,0 +1,6 @@
+{
+  "task_id": "t12",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtB",
+  "instruction": "For the catalogue count report, how many products are Corded Angle Grinder? Answer in exactly format \"<COUNT:%d>\" (no quotes).",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtB"
+}

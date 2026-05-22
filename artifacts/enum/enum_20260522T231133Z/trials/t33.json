@@ -1,0 +1,6 @@
+{
+  "task_id": "t33",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtY",
+  "instruction": "I can visit any PowerTool branch in Vienna today. Across every Vienna branch, how many units of product (the Cordless Saw and Sander from Makita in the Makita Precision DDF 26V-AVZ Cordless Saw and Sander line that has tool type jigsaw and voltage 18 V) are available today? Answer exactly as \"[QTY:%d]\" and cite every store record you included plus the product record.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtY"
+}

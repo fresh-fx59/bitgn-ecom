@@ -1,0 +1,6 @@
+{
+  "task_id": "t16",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtF",
+  "instruction": "How many of these products have at least 2 items available in the Jakomini PowerTool store in Graz today: the Anchor and Wall Plug from Rawlplug in the Rawlplug Universal R 3VO-1LN Anchor and Wall Plug line that has anchor type concrete anchor, diameter 6 mm, and length 120 mm,the LED Bulb from Philips in the Philips CorePro CorePro 2Z4-WXU LED Bulb line that has wattage 10 W and luminous flux 1055 lm,the Pliers and Wrenches from Gedore in the Gedore Classic RED 1SM-A8X Pliers and Wrenches line that has tool type adjustable wrench and length 450 mm,the Wall Paint from Dulux in the Dulux Premium Weathershield 2MM-LI2 Wall Paint line that has color family White and finish satin,the Corded Angle Grinder from Metabo in the Metabo Workshop W 1Z2-E2D Corded Angle Grinder line that has disc diameter 115 mm and power 2200 W,the Cleaning Machine from Nilfisk in the Nilfisk Workshop C 3QS-KKA Cleaning Machine line that has machine type floor cleaner and power 1000 W? Answer in exactly format \"count : %d\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtF"
+}

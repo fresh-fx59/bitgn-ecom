@@ -1,0 +1,6 @@
+{
+  "task_id": "t20",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtK",
+  "instruction": "I can visit any PowerTool branch in Vienna today. Across every Vienna branch, including branches with 0 availability, how many units of product (the Adhesive and Glue from Ceresit in the Ceresit CM CM 3W5-DSZ Adhesive and Glue line that has adhesive type threadlocker and color family Brown) are available today? Answer exactly as \"<COUNT:%d>\" and cite every city store record plus the product record.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtK"
+}

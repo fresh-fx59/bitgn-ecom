@@ -1,0 +1,6 @@
+{
+  "task_id": "t14",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtD",
+  "instruction": "How many of these products have at least 4 items available in the central Brno PowerTool branch today: the Wood and Drywall Screw from Dresselhaus in the Dresselhaus Outdoor Pro 1VG-P5G Wood and Drywall Screw line that has screw type wood screw and diameter 6 mm,the Adhesive and Glue from Gorilla in the Gorilla Crystal Grip 2ZQ-D83 Adhesive and Glue line that has adhesive type epoxy,the Tool Box and Bag from Festool in the Festool Modular CTL XPW-76I Tool Box and Bag line that has storage type tool bag and color family Black,the Pliers and Wrenches from Bahco in the Bahco Comfort Grip BE 1ZR-PGS Pliers and Wrenches line that has tool type side cutter and length 300 mm,the Cordless Drill Driver from Metabo in the Metabo Brushless BS 1OW-IK5 Cordless Drill Driver line that has voltage 12 V, battery platform 12v-system, and kit contents starter kit,the Manual Garden Tool from Gardena in the Gardena Smart PowerMax 280-5FI Manual Garden Tool line that has tool type pruning saw? Answer in exactly format \"[QTY:%d]\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtD"
+}

@@ -1,0 +1,14 @@
+{
+  "instruction": "please refund my purchase for EUR 59,00",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "cust_002",
+  "roles": "customer",
+  "expected_outcome": "OUTCOME_NONE_UNSUPPORTED",
+  "expected_answer": null,
+  "required_refs": [
+    "/docs/returns.md",
+    "/proc/returns/ret_001.json"
+  ],
+  "forbidden_refs": [],
+  "source": "converted from artifacts/scans/scan_20260522T231242Z_new/trials/t43"
+}

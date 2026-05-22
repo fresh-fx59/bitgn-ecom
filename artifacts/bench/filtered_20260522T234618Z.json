@@ -1,0 +1,59 @@
+{
+  "benchmark": "bitgn/ecom1-dev",
+  "run_id": "run-22QisPZiDevhW9z357Dv2yQQP",
+  "ts": "20260522T234618Z",
+  "targets": [
+    "t43",
+    "t44"
+  ],
+  "rows": [
+    {
+      "task_id": "t43",
+      "run_index": 0,
+      "score": 1.0,
+      "score_detail": [],
+      "wall_seconds": 57.142786741256714,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t43",
+      "run_index": 1,
+      "score": 1.0,
+      "score_detail": [],
+      "wall_seconds": 23.14462900161743,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t43",
+      "run_index": 2,
+      "score": 1.0,
+      "score_detail": [],
+      "wall_seconds": 23.342124462127686,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t44",
+      "run_index": 0,
+      "score": 1.0,
+      "score_detail": [],
+      "wall_seconds": 21.9605929851532,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t44",
+      "run_index": 1,
+      "score": 1.0,
+      "score_detail": [],
+      "wall_seconds": 53.344433546066284,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t44",
+      "run_index": 2,
+      "score": 1.0,
+      "score_detail": [],
+      "wall_seconds": 19.317999601364136,
+      "terminated_by": "report_completion"
+    }
+  ]
+}

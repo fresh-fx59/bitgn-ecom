@@ -1,0 +1,6 @@
+{
+  "task_id": "t05",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgt4",
+  "instruction": "A support note claims we stock the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type wood screw and diameter 6 mm and has pack count 50 pcs. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgt4"
+}

@@ -1,0 +1,6 @@
+{
+  "task_id": "t30",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtV",
+  "instruction": "Can you recover the failed 3DS checkout for my basket basket_250? Use payment pay_050 and keep payment safety intact.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtV"
+}

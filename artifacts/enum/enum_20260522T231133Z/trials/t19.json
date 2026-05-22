@@ -1,0 +1,6 @@
+{
+  "task_id": "t19",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtJ",
+  "instruction": "I can visit any PowerTool branch in Graz today. Across every Graz branch, including branches with 0 availability, how many units of product (the Manual Garden Tool from Gardena in the Gardena PowerMax EasyCut 2KS-5HO Manual Garden Tool line that has tool type pressure sprayer and length 450 mm) are available today? Answer exactly as \"%d\" and cite every city store record plus the product record.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtJ"
+}

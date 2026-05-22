@@ -1,0 +1,6 @@
+{
+  "task_id": "t06",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgt5",
+  "instruction": "A support note claims we stock the Storage Bin and Organizer from Keter in the Keter Deep Stack 2OO-VJU Storage Bin and Organizer line that has storage type parts case, color family Yellow, and volume 8 l and has volume 25 l. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgt5"
+}

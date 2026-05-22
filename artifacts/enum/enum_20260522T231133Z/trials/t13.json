@@ -1,0 +1,6 @@
+{
+  "task_id": "t13",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtC",
+  "instruction": "How many of these products have at least 4 items available in the PowerTool shop near Salzburg station today: the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type wood screw and diameter 6 mm,the Tool Box and Bag from Festool in the Festool Stackable SYS 3JJ-9LM Tool Box and Bag line that has storage type parts case,the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type wood screw and diameter 3 mm,the Nut Bolt and Washer from Heco in the Heco Zinc Plated HECO 3DW-64B Nut Bolt and Washer line that has fastener type bolt and diameter 10 mm? Answer in exactly format \"%d\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgtC"
+}

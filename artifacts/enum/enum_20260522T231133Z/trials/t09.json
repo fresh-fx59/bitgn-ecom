@@ -1,0 +1,6 @@
+{
+  "task_id": "t09",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgt8",
+  "instruction": "How many catalogue products are Cleaning Liquid? Answer in exactly format \"<COUNT:%d>\" (no quotes).",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgt8"
+}

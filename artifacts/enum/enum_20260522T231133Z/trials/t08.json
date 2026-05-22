@@ -1,0 +1,6 @@
+{
+  "task_id": "t08",
+  "trial_id": "vm2-LxNzXBqhUPmH1WnWQC4WeEiWgt7",
+  "instruction": "A support note claims we stock the LED Bulb from Schneider Electric in the Schneider Electric Merten Resi 33R-VDS LED Bulb line that has wattage 15 W and luminous flux 806 lm and has luminous flux 1055 lm. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxNzXBqhUPmH1WnWQC4WeEiWgt7"
+}

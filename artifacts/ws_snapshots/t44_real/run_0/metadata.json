@@ -1,0 +1,15 @@
+{
+  "instruction": "Please approve the refund for payment pay_013.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "emp_031",
+  "roles": "employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+  "expected_outcome": "OUTCOME_NONE_UNSUPPORTED",
+  "expected_answer": null,
+  "required_refs": [
+    "/docs/returns.md",
+    "/proc/returns/ret_007.json",
+    "/proc/payments/pay_013.json"
+  ],
+  "forbidden_refs": [],
+  "source": "converted from artifacts/scans/scan_20260522T231242Z_new/trials/t44"
+}
