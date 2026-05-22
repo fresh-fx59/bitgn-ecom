@@ -3,15 +3,19 @@
 ## Headline
 
 **42/42 mean 1.000 on two consecutive PROD runs at v0.1.108.**
-The deterministic floor is confirmed.
+The deterministic floor is confirmed. Two new tasks were added to the
+benchmark on 2026-05-23 (t43/t44 refund flow); both pass deterministically
+without any agent change (6/6 PROD verifications).
 
 | Run | Result |
 |---|---|
 | v0.1.108 PROD #1 | 42/42 mean 1.000 |
 | v0.1.108 PROD #2 (stability) | 42/42 mean 1.000 |
+| v0.1.108 PROD filtered t43+t44 (×1) | 2/2 mean 1.000 |
+| v0.1.108 PROD filtered t43+t44 (×3) | 6/6 mean 1.000 |
 
 Session arc: 30/31 (v0.1.44 baseline) → 42/42 deterministic
-(v0.1.108) across ~40 PROD iterations.
+(v0.1.108) → 44/44 capable (still v0.1.108, contest expanded).
 
 ## Locked-in stack (don't touch unless a fresh failure mode appears)
 
@@ -79,9 +83,26 @@ Session arc: 30/31 (v0.1.44 baseline) → 42/42 deterministic
   phrasings, JSON tree, fuzzy slug, sing/plural).
 - `tests/test_refusal_cite_enforcer.py` — 33 tests across all
   refusal-cite families.
+- `artifacts/ws_snapshots/t43_real/` + `t44_real/` — refund-flow
+  snapshots; full PROD workspace mirror (sans /proc/catalog).
 - Local harness aligned to PROD (v0.1.97): 16 KiB
   max_tool_result_bytes, tree() raises on missing path, find
   accepts `paths` and `matches` shapes.
+
+## Discovery + filtered-bench tooling (added 2026-05-23)
+
+- `scripts/enum_tasks.py` — open every trial just long enough to
+  capture task_id+instruction; close with NONE_CLARIFICATION. Use
+  this every time a PROD run looks different to confirm the task
+  list before burning a full bench.
+- `scripts/probe_new_tasks.py` — deep probe ONLY new task IDs
+  (`TARGET_TASKS=t43,t44`); other trials get instant close.
+- `scripts/scan_to_snapshot.py` — convert one scan trial dir into a
+  local `ws_snapshot`. Skips `/proc/catalog/*` by default (large).
+- `scripts/run_filtered_bench.py` — real PROD bench filtered to a
+  task subset; un-targeted trials are NONE_CLARIFICATION-closed
+  without LLM cost. Use for quick PROD validation of just the new
+  tasks instead of a full $15 bench.
 
 ## Cost
 
@@ -90,16 +111,36 @@ Session arc: 30/31 (v0.1.44 baseline) → 42/42 deterministic
 - v0.1.96 addenda find() fallback (closed t12 family)
 - v0.1.108 count self-check (closed t13 family)
 
+Per-call cost breakdown (v0.1.108 stability run):
+
+| Bucket | Tokens | Share |
+|---|--:|--:|
+| System prompt × 227 calls | ~3.8M | 74% |
+| Tool results + user turns | ~1.3M | 25% |
+| Reasoning | 19k | <1% |
+
+Optimisation lever rank: (1) proxy-side prompt caching would cut
+74% — the proxy currently reports `cached_tokens=0`, so this is
+upstream. (2) Prompt trimming is risky on the deterministic floor;
+do not pursue speculatively. (3) Step count is already minimal; the
+prepass does the 11 bootstrap reads in parallel.
+
 ## Next session entry
 
 The v0.1.108 stack is the new baseline. If a fresh PROD run drops
-below 42/42, trace the specific failing task and:
+below the expected score, trace the specific failing task and:
 1. Look for the agent's `task_spec` shape — did it classify
    correctly?
 2. Look for completer events in the trace
 3. If a deterministic root cause exists, ship a targeted fix
 4. If it's LLM-side reasoning, consider strengthening the
    relevant prompt rule
+
+When PROD looks different (different task list, new families),
+ALWAYS start with `scripts/enum_tasks.py` to confirm the task list
+before burning a full bench. Then `scripts/probe_new_tasks.py` for
+deep probes of just the new ones, and `scripts/scan_to_snapshot.py`
++ `scripts/local_bench.py` for cheap local iteration.
 
 Don't touch the stack speculatively. Each removal/loosening risks
 the deterministic floor.
