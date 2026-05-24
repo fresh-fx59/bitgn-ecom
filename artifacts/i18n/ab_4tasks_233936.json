@@ -1,0 +1,307 @@
+{
+  "ts": "20260524T213936Z",
+  "tasks": [
+    "t11",
+    "t21",
+    "t40",
+    "t43"
+  ],
+  "langs": [
+    "en",
+    "de",
+    "cs",
+    "hu",
+    "ja"
+  ],
+  "runs_per_cell": 1,
+  "results": {
+    "t11": {
+      "en": {
+        "snapshot": "artifacts/ws_snapshots/t11_en",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "None",
+            "steps": "4",
+            "wall": "416.0s",
+            "detail": "expected outcome OUTCOME_OK, got None"
+          }
+        ],
+        "stderr_tail": "  File \"/home/claude-developer/bitgn-ecom/src/bitgn_contest_agent/agent.py\", line 1498, in _do_retry_loop\n    result = self._backend.next_step(\n             ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/claude-developer/bitgn-ecom/src/bitgn_contest_agent/backend/openai_compat.py\", line 273, in next_step\n    for chunk in stream:\n  File \"/home/claude-developer/bitgn-ecom/.venv/lib/python3.12/site-packages/openai/_streaming.py\", line 49, in __iter__\n    for item in self._iterator:\n  File \"/home/claude-developer/bitgn-ecom/.venv/lib/python3.12/site-packages/openai/_streaming.py\", line 95, in __stream__\n    raise APIError(\nopenai.APIError: upstream_connection_error"
+      },
+      "de": {
+        "snapshot": "artifacts/ws_snapshots/t11_de",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "3",
+            "wall": "38.6s",
+            "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "cs": {
+        "snapshot": "artifacts/ws_snapshots/t11_cs",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "6",
+            "wall": "62.7s",
+            "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "hu": {
+        "snapshot": "artifacts/ws_snapshots/t11_hu",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "3",
+            "wall": "40.7s",
+            "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "ja": {
+        "snapshot": "artifacts/ws_snapshots/t11_ja",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "10",
+            "wall": "119.8s",
+            "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+          }
+        ],
+        "stderr_tail": ""
+      }
+    },
+    "t21": {
+      "en": {
+        "snapshot": "artifacts/ws_snapshots/t21_en",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "4",
+            "wall": "55.0s",
+            "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+          }
+        ],
+        "stderr_tail": "           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/claude-developer/bitgn-ecom/.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py\", line 1215, in create\n    return self._post(\n           ^^^^^^^^^^^\n  File \"/home/claude-developer/bitgn-ecom/.venv/lib/python3.12/site-packages/openai/_base_client.py\", line 1332, in post\n    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/claude-developer/bitgn-ecom/.venv/lib/python3.12/site-packages/openai/_base_client.py\", line 1055, in request\n    raise APITimeoutError(request=request) from err\nopenai.APITimeoutError: Request timed out."
+      },
+      "de": {
+        "snapshot": "artifacts/ws_snapshots/t21_de",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "4",
+            "wall": "61.7s",
+            "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+          }
+        ],
+        "stderr_tail": "classify attempt 1: JSON parse failed at char 0: Expecting value\nJSON fix attempt failed: Expecting value: line 1 column 1 (char 0)\nclassify attempt 2: JSON parse failed at char 0: Expecting value"
+      },
+      "cs": {
+        "snapshot": "artifacts/ws_snapshots/t21_cs",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "7",
+            "wall": "103.3s",
+            "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "hu": {
+        "snapshot": "artifacts/ws_snapshots/t21_hu",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "5",
+            "wall": "58.8s",
+            "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "ja": {
+        "snapshot": "artifacts/ws_snapshots/t21_ja",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "4",
+            "wall": "52.3s",
+            "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+          }
+        ],
+        "stderr_tail": ""
+      }
+    },
+    "t40": {
+      "en": {
+        "snapshot": "artifacts/ws_snapshots/t40_en",
+        "exit_code": 0,
+        "rows": [
+          {
+            "ok": true,
+            "outcome": "OUTCOME_OK",
+            "steps": "6",
+            "wall": "108.1s",
+            "detail": "passed all checks"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "de": {
+        "snapshot": "artifacts/ws_snapshots/t40_de",
+        "exit_code": 0,
+        "rows": [
+          {
+            "ok": true,
+            "outcome": "OUTCOME_OK",
+            "steps": "12",
+            "wall": "346.1s",
+            "detail": "passed all checks"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "cs": {
+        "snapshot": "artifacts/ws_snapshots/t40_cs",
+        "exit_code": 0,
+        "rows": [
+          {
+            "ok": true,
+            "outcome": "OUTCOME_OK",
+            "steps": "9",
+            "wall": "360.7s",
+            "detail": "passed all checks"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "hu": {
+        "snapshot": "artifacts/ws_snapshots/t40_hu",
+        "exit_code": 0,
+        "rows": [
+          {
+            "ok": true,
+            "outcome": "OUTCOME_OK",
+            "steps": "11",
+            "wall": "178.7s",
+            "detail": "passed all checks"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "ja": {
+        "snapshot": "artifacts/ws_snapshots/t40_ja",
+        "exit_code": 0,
+        "rows": [
+          {
+            "ok": true,
+            "outcome": "OUTCOME_OK",
+            "steps": "12",
+            "wall": "184.7s",
+            "detail": "passed all checks"
+          }
+        ],
+        "stderr_tail": ""
+      }
+    },
+    "t43": {
+      "en": {
+        "snapshot": "artifacts/ws_snapshots/t43_real",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "11",
+            "wall": "142.4s",
+            "detail": "answer missing required reference '/proc/returns/ret_001.json'"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "de": {
+        "snapshot": "artifacts/ws_snapshots/t43_de",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "9",
+            "wall": "97.2s",
+            "detail": "answer missing required reference '/proc/returns/ret_001.json'"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "cs": {
+        "snapshot": "artifacts/ws_snapshots/t43_cs",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "None",
+            "steps": "0",
+            "wall": "105.4s",
+            "detail": "expected outcome OUTCOME_NONE_UNSUPPORTED, got None"
+          }
+        ],
+        "stderr_tail": "  File \"/home/claude-developer/bitgn-ecom/src/bitgn_contest_agent/agent.py\", line 1542, in _do_retry_loop\n    result = self._backend.next_step(\n             ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/claude-developer/bitgn-ecom/src/bitgn_contest_agent/backend/openai_compat.py\", line 273, in next_step\n    for chunk in stream:\n  File \"/home/claude-developer/bitgn-ecom/.venv/lib/python3.12/site-packages/openai/_streaming.py\", line 49, in __iter__\n    for item in self._iterator:\n  File \"/home/claude-developer/bitgn-ecom/.venv/lib/python3.12/site-packages/openai/_streaming.py\", line 95, in __stream__\n    raise APIError(\nopenai.APIError: Upstream request failed"
+      },
+      "hu": {
+        "snapshot": "artifacts/ws_snapshots/t43_hu",
+        "exit_code": 0,
+        "rows": [
+          {
+            "ok": true,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "10",
+            "wall": "114.7s",
+            "detail": "passed all checks"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "ja": {
+        "snapshot": "artifacts/ws_snapshots/t43_ja",
+        "exit_code": 0,
+        "rows": [
+          {
+            "ok": true,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "12",
+            "wall": "183.2s",
+            "detail": "passed all checks"
+          }
+        ],
+        "stderr_tail": ""
+      }
+    }
+  }
+}

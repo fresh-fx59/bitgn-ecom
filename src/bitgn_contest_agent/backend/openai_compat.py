@@ -77,6 +77,13 @@ _TRANSIENT_MESSAGE_SUBSTRINGS: tuple[str, ...] = (
                             # surfaced as bare "APIError: unexpected EOF",
                             # crashing both trials and dropping pass rate
                             # from 29/31 to 27/31 on commit 6271d84.
+    # CloseRouter (2026-05-25): upstream OpenAI hiccups surface as bare
+    # APIError with these messages. Caused t13/t15/t19/t29 crashes on
+    # the v111 bench (3 of 3 failures were transient upstream errors —
+    # retrying recovers cleanly).
+    "upstream request failed",
+    "upstream_connection_error",
+    "upstream connection error",
 )
 
 
