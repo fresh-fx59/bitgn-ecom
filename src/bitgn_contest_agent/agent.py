@@ -1029,7 +1029,13 @@ class AgentLoop:
            cascades on hallucinated paths. Other models pass through.
         """
         # Step 1: universal refusal-citation enforcer.
-        task_text = getattr(self, "_current_task_text", "") or ""
+        # i18n note (v0.1.109): all enforcers below match English regex
+        # patterns against the task text. For non-English instructions
+        # we substitute session.task_text_en (canonicalized in prepass)
+        # so the matches keep firing. EN tasks are unaffected because
+        # session.task_text_en == task_text on the heuristic-EN path.
+        raw_task_text = getattr(self, "_current_task_text", "") or ""
+        task_text = getattr(session, "task_text_en", "") or raw_task_text
         if task_text and fn.outcome == "OUTCOME_DENIED_SECURITY":
             from bitgn_contest_agent.refusal_cite_enforcer import (
                 clean_refusal_refs,

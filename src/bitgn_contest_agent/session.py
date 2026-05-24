@@ -41,6 +41,15 @@ class Session:
     # skill identity rather than paths, e.g. R7_INBOX_CLEANUP demands at
     # least one delete when the inbox-processing skill was loaded.
     skills_loaded: set[str] = field(default_factory=set)
+    # i18n bootstrap — set by the prepass task-canonicalizer step.
+    # `instruction_language` is ISO-639-1 (e.g. "en", "de", "cs"). Defaults
+    # to "en" so existing English-only tasks see no behaviour change.
+    # `task_text_en` is the canonical English paraphrase. Enforcers that
+    # match English regex patterns consume it instead of the raw task_text.
+    # If canonicalization fails or preservation guards fail, both fields
+    # fall back to "en" / raw task_text (no regression vs. today).
+    instruction_language: str = "en"
+    task_text_en: str = ""
 
     def loop_nudge_needed(self, call: Tuple[str, ...]) -> bool:
         """Record a (tool, canonical_args) tuple; return True if the same

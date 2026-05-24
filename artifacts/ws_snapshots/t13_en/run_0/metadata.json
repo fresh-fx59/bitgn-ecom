@@ -1,0 +1,11 @@
+{
+  "instruction": "How many of these products have at least 3 items available in the Meidling PowerTool store today: the Nut Bolt and Washer from Heco in the Heco Zinc Plated HECO 3DW-64B Nut Bolt and Washer line that has fastener type threaded rod,the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type drywall screw,the Tool Box and Bag from Festool in the Festool Stackable SYS 3JJ-9LM Tool Box and Bag line that has storage type tool bag,the Tool Box and Bag from Festool in the Festool Stackable SYS 3JJ-9LM Tool Box and Bag line that has storage type parts case,the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type drywall screw,the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type wood screw and diameter 6 mm? Answer in exactly format \"<COUNT:%d>\" (no quotes)",
+  "context_date": "2025-06-22T09:13:19Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "converted from artifacts/scans/scan_20260518T132127Z_v156_run1/trials/t13"
+}

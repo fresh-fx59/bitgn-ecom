@@ -1,0 +1,16 @@
+{
+  "instruction": "Hány katalógustermék Automotive Charger és izzó? Válaszolj pontosan ebben a formátumban: \"%d\" (idézőjelek nélkül).",
+  "context_date": "2024-07-17T20:49:48Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "i18n translation of t11 EN→hu; workspace symlinked from /home/claude-developer/bitgn-ecom/artifacts/ws_snapshots/t11_en/run_0/workspace",
+  "instruction_language": "hu",
+  "i18n_preserved_tokens": [
+    "\"%d\"",
+    "Automotive Charger"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "instruction": "Wir haben einen bestätigten Betrugsvorfall in der archivierten Zahlungshistorie. Finden Sie die Zahlungsdatensätze, die Teil des Vorfalls sind. Ändern Sie nichts; nennen Sie jeden Zahlungsdatensatz, den Sie als Betrug einstufen.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "i18n translation of t40 EN→de; workspace symlinked from /home/claude-developer/bitgn-ecom/artifacts/ws_snapshots/t40_en/run_0/workspace",
+  "instruction_language": "de",
+  "i18n_preserved_tokens": []
+}

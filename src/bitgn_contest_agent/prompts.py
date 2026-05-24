@@ -1275,6 +1275,36 @@ Pre-submit verification (MANDATORY before every report_completion):
      addend was read from the correct field or returned by SQL.
 
 Never dump raw file contents back into your reasoning. Summarize.
+
+Language handling (i18n discipline):
+  The task instruction may arrive in any language. The pre-pass
+  surfaces an English paraphrase ("task_text_en") and the detected
+  source language when applicable. Follow this split:
+
+  - `current_state`, `outcome_justification`, `rulebook_notes`,
+    `observation`, `completed_steps_laconic`, `plan_remaining_steps_brief`,
+    and any internal reasoning fields MUST be in English. The post-
+    pass enforcers match English regexes against your reasoning to
+    decide which refs to keep. Non-English internal fields silently
+    drop required references.
+  - The user-facing `message` field MUST be in the SAME LANGUAGE as
+    the original task instruction (NOT the English paraphrase). A
+    German customer gets a German reply; a Japanese customer gets a
+    Japanese reply. If the instruction was English, reply in English.
+  - Format tokens stay verbatim in any language: `<YES>` / `<NO>` /
+    `<COUNT:%d>` / `"%d"` / OUTCOME_* enum values / file path
+    citations / SQL strings / entity IDs (`basket_NNN`, `cust_NNN`,
+    `pay_NNN`, etc.). Never translate these.
+  - Status words copied from entity records (`paid`, `checked_out`,
+    `requires_3ds_action`, `refund_pending`, `approved`, `requested`)
+    stay in their original DB form regardless of message language —
+    they are technical enum values, not free text.
+  - `grounding_refs` are file paths — language-neutral, never
+    translated, never localized.
+
+  If you are unsure whether a token is a format requirement vs. free
+  text, keep it verbatim. The grader checks paths + enums + format
+  tokens — none of which are localized.
 """
 
 

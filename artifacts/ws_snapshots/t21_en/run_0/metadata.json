@@ -1,0 +1,11 @@
+{
+  "instruction": "Please check out basket basket_162 for me.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "cust_060",
+  "roles": "customer",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "converted from artifacts/scans/scan_20260518T132127Z_v156_run1/trials/t21"
+}

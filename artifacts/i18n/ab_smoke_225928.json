@@ -1,0 +1,88 @@
+{
+  "ts": "20260524T205928Z",
+  "tasks": [
+    "t43"
+  ],
+  "langs": [
+    "en",
+    "de",
+    "cs",
+    "hu",
+    "ja"
+  ],
+  "runs_per_cell": 1,
+  "results": {
+    "t43": {
+      "en": {
+        "snapshot": "artifacts/ws_snapshots/t43_real",
+        "exit_code": 0,
+        "rows": [
+          {
+            "ok": true,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "10",
+            "wall": "113.9s",
+            "detail": "passed all checks"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "de": {
+        "snapshot": "artifacts/ws_snapshots/t43_de",
+        "exit_code": 0,
+        "rows": [
+          {
+            "ok": true,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "9",
+            "wall": "117.9s",
+            "detail": "passed all checks"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "cs": {
+        "snapshot": "artifacts/ws_snapshots/t43_cs",
+        "exit_code": 0,
+        "rows": [
+          {
+            "ok": true,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "10",
+            "wall": "142.4s",
+            "detail": "passed all checks"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "hu": {
+        "snapshot": "artifacts/ws_snapshots/t43_hu",
+        "exit_code": 0,
+        "rows": [
+          {
+            "ok": true,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "11",
+            "wall": "131.4s",
+            "detail": "passed all checks"
+          }
+        ],
+        "stderr_tail": ""
+      },
+      "ja": {
+        "snapshot": "artifacts/ws_snapshots/t43_ja",
+        "exit_code": 1,
+        "rows": [
+          {
+            "ok": false,
+            "outcome": "OUTCOME_NONE_UNSUPPORTED",
+            "steps": "9",
+            "wall": "112.8s",
+            "detail": "answer missing required reference '/proc/returns/ret_001.json'"
+          }
+        ],
+        "stderr_tail": ""
+      }
+    }
+  }
+}

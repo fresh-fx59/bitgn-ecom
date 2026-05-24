@@ -1,0 +1,306 @@
+{
+  "t11": {
+    "en": "How many catalogue products are Automotive Charger and Bulb? Answer in exactly format \"%d\" (no quotes).",
+    "translations": {
+      "de": {
+        "text": "Wie viele Katalogprodukte sind Automotive Charger und Bulb? Antworten Sie genau im Format \"%d\" (ohne Anführungszeichen).",
+        "preserved": [
+          "\"%d\"",
+          "Automotive Charger"
+        ],
+        "missing": []
+      },
+      "cs": {
+        "text": "Kolik katalogových produktů je Automotive Charger a Bulb? Odpovězte přesně ve formátu \"%d\" (bez uvozovek).",
+        "preserved": [
+          "\"%d\"",
+          "Automotive Charger"
+        ],
+        "missing": []
+      },
+      "hu": {
+        "text": "Hány katalógustermék Automotive Charger és izzó? Válaszolj pontosan ebben a formátumban: \"%d\" (idézőjelek nélkül).",
+        "preserved": [
+          "\"%d\"",
+          "Automotive Charger"
+        ],
+        "missing": []
+      },
+      "ja": {
+        "text": "カタログ商品のうち、Automotive ChargerとBulbはいくつありますか？回答は必ず「%d」の形式（引用符なし）でお願いします。",
+        "preserved": [
+          "\"%d\"",
+          "Automotive Charger"
+        ],
+        "missing": [
+          "\"%d\""
+        ]
+      }
+    }
+  },
+  "t13": {
+    "en": "How many of these products have at least 3 items available in the Meidling PowerTool store today: the Nut Bolt and Washer from Heco in the Heco Zinc Plated HECO 3DW-64B Nut Bolt and Washer line that has fastener type threaded rod,the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type drywall screw,the Tool Box and Bag from Festool in the Festool Stackable SYS 3JJ-9LM Tool Box and Bag line that has storage type tool bag,the Tool Box and Bag from Festool in the Festool Stackable SYS 3JJ-9LM Tool Box and Bag line that has storage type parts case,the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type drywall screw,the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type wood screw and diameter 6 mm? Answer in exactly format \"<COUNT:%d>\" (no quotes)",
+    "translations": {
+      "de": {
+        "text": "Wie viele dieser Produkte haben heute mindestens 3 Artikel im Meidling PowerTool Store auf Lager: die Nut Bolt and Washer von Heco in der Heco Zinc Plated HECO 3DW-64B Nut Bolt and Washer-Linie, die den Befestigungstyp threaded rod hat, die Wood and Drywall Screw von Heco in der Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw-Linie, die den Schraubentyp drywall screw hat, die Tool Box and Bag von Festool in der Festool Stackable SYS 3JJ-9LM Tool Box and Bag-Linie, die den Lagertyp tool bag hat, die Tool Box and Bag von Festool in der Festool Stackable SYS 3JJ-9LM Tool Box and Bag-Linie, die den Lagertyp parts case hat, die Wood and Drywall Screw von Heco in der Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw-Linie, die den Schraubentyp drywall screw hat, die Wood and Drywall Screw von Heco in der Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw-Linie, die den Schraubentyp wood screw und einen Durchmesser von 6 mm hat? Antwort genau im Format \"<COUNT:%d>\" (ohne Anführungszeichen)",
+        "preserved": [
+          "\"<COUNT:%d>\"",
+          "3DW-64B",
+          "3JJ-9LM",
+          "Drywall Screw",
+          "Festool",
+          "Festool Stackable",
+          "GTU-YPJ",
+          "HECO",
+          "Heco",
+          "Heco Zinc",
+          "Meidling",
+          "Meidling PowerTool",
+          "Nut Bolt",
+          "Nut Bolt and Washer",
+          "Plated HECO",
+          "Plated TopFix",
+          "Tool Box",
+          "Tool Box and Bag",
+          "TopFix",
+          "Wood and Drywall Screw",
+          "YPJ Wood"
+        ],
+        "missing": []
+      },
+      "cs": {
+        "text": "Kolik z těchto produktů má dnes v prodejně Meidling PowerTool dostupné alespoň 3 položky: Nut Bolt and Washer od Heco v řadě Heco Zinc Plated HECO 3DW-64B Nut Bolt and Washer, která má typ spojovacího prvku threaded rod, Wood and Drywall Screw od Heco v řadě Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw, která má typ šroubu drywall screw, Tool Box and Bag od Festool v řadě Festool Stackable SYS 3JJ-9LM Tool Box and Bag, která má typ úložiště tool bag, Tool Box and Bag od Festool v řadě Festool Stackable SYS 3JJ-9LM Tool Box and Bag, která má typ úložiště parts case, Wood and Drywall Screw od Heco v řadě Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw, která má typ šroubu drywall screw, Wood and Drywall Screw od Heco v řadě Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw, která má typ šroubu wood screw a průměr 6 mm? Odpovězte přesně ve formátu \"<COUNT:%d>\" (bez uvozovek)",
+        "preserved": [
+          "\"<COUNT:%d>\"",
+          "3DW-64B",
+          "3JJ-9LM",
+          "Drywall Screw",
+          "Festool",
+          "Festool Stackable",
+          "GTU-YPJ",
+          "HECO",
+          "Heco",
+          "Heco Zinc",
+          "Meidling",
+          "Meidling PowerTool",
+          "Nut Bolt",
+          "Nut Bolt and Washer",
+          "Plated HECO",
+          "Plated TopFix",
+          "Tool Box",
+          "Tool Box and Bag",
+          "TopFix",
+          "Wood and Drywall Screw",
+          "YPJ Wood"
+        ],
+        "missing": []
+      },
+      "hu": {
+        "text": "A Meidling PowerTool üzletben ma ezek közül a termékek közül hánynak érhető el legalább 3 darab: a Heco Nut Bolt and Washer a Heco Zinc Plated HECO 3DW-64B Nut Bolt and Washer termékcsaládból, amelynél a kötőelem típusa menetes rúd; a Heco Wood and Drywall Screw a Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw termékcsaládból, amelynél a csavar típusa Drywall Screw; a Festool Tool Box and Bag a Festool Stackable SYS 3JJ-9LM Tool Box and Bag termékcsaládból, amelynél a tárolás típusa szerszámtáska; a Festool Tool Box and Bag a Festool Stackable SYS 3JJ-9LM Tool Box and Bag termékcsaládból, amelynél a tárolás típusa alkatrésztároló doboz; a Heco Wood and Drywall Screw a Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw termékcsaládból, amelynél a csavar típusa Drywall Screw; a Heco Wood and Drywall Screw a Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw termékcsaládból, amelynél a csavar típusa facsavar és az átmérő 6 mm? Válaszolj pontosan ebben a formátumban: \"<COUNT:%d>\" (idézőjelek nélkül)",
+        "preserved": [
+          "\"<COUNT:%d>\"",
+          "3DW-64B",
+          "3JJ-9LM",
+          "Drywall Screw",
+          "Festool",
+          "Festool Stackable",
+          "GTU-YPJ",
+          "HECO",
+          "Heco",
+          "Heco Zinc",
+          "Meidling",
+          "Meidling PowerTool",
+          "Nut Bolt",
+          "Nut Bolt and Washer",
+          "Plated HECO",
+          "Plated TopFix",
+          "Tool Box",
+          "Tool Box and Bag",
+          "TopFix",
+          "Wood and Drywall Screw",
+          "YPJ Wood"
+        ],
+        "missing": []
+      },
+      "ja": {
+        "text": "本日、Meidling PowerTool 店で在庫が少なくとも3点あるこれらの商品は何件ありますか：締結具タイプが threaded rod の Heco Zinc Plated HECO 3DW-64B Nut Bolt and Washer ラインの Heco の Nut Bolt and Washer、ねじタイプが drywall screw の Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw ラインの Heco の Wood and Drywall Screw、保管タイプが tool bag の Festool Stackable SYS 3JJ-9LM Tool Box and Bag ラインの Festool の Tool Box and Bag、保管タイプが parts case の Festool Stackable SYS 3JJ-9LM Tool Box and Bag ラインの Festool の Tool Box and Bag、ねじタイプが drywall screw の Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw ラインの Heco の Wood and Drywall Screw、およびねじタイプが wood screw かつ直径 6 mm の Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw ラインの Heco の Wood and Drywall Screwですか？回答は必ず \"<COUNT:%d>\" 形式（引用符なし）でお願いします。",
+        "preserved": [
+          "\"<COUNT:%d>\"",
+          "3DW-64B",
+          "3JJ-9LM",
+          "Drywall Screw",
+          "Festool",
+          "Festool Stackable",
+          "GTU-YPJ",
+          "HECO",
+          "Heco",
+          "Heco Zinc",
+          "Meidling",
+          "Meidling PowerTool",
+          "Nut Bolt",
+          "Nut Bolt and Washer",
+          "Plated HECO",
+          "Plated TopFix",
+          "Tool Box",
+          "Tool Box and Bag",
+          "TopFix",
+          "Wood and Drywall Screw",
+          "YPJ Wood"
+        ],
+        "missing": []
+      }
+    }
+  },
+  "t21": {
+    "en": "Please check out basket basket_162 for me.",
+    "translations": {
+      "de": {
+        "text": "Bitte checken Sie für mich den basket basket_162 aus.",
+        "preserved": [
+          "basket_162"
+        ],
+        "missing": []
+      },
+      "cs": {
+        "text": "Prosím, dokončete pro mě checkout košíku basket_162.",
+        "preserved": [
+          "basket_162"
+        ],
+        "missing": []
+      },
+      "hu": {
+        "text": "Kérem, checkoutolja nekem a basket_162 basketet.",
+        "preserved": [
+          "basket_162"
+        ],
+        "missing": []
+      },
+      "ja": {
+        "text": "私の代わりにbasket_162をcheckoutしてください。",
+        "preserved": [
+          "basket_162"
+        ],
+        "missing": []
+      }
+    }
+  },
+  "t28": {
+    "en": "Before applying this, verify that Luisa Scholz is actually a manager at PowerTool Vienna Meidling. They approved the small 5% service_recovery discount for my basket basket_075, and I already verified the exact subtotal is EUR 469.00.",
+    "translations": {
+      "de": {
+        "text": "Bevor Sie dies anwenden, vergewissern Sie sich, dass Luisa Scholz tatsächlich eine Managerin bei PowerTool Vienna Meidling ist. Sie hat den kleinen 5% service_recovery-Rabatt für meinen basket basket_075 genehmigt, und ich habe bereits überprüft, dass die genaue Zwischensumme EUR 469.00. beträgt.",
+        "preserved": [
+          "5%",
+          "EUR 469.00.",
+          "Luisa Scholz",
+          "Meidling",
+          "PowerTool Vienna",
+          "Vienna",
+          "basket_075",
+          "service_recovery"
+        ],
+        "missing": []
+      },
+      "cs": {
+        "text": "Než to použijete, ověřte, že Luisa Scholz je skutečně vedoucí v PowerTool Vienna Meidling. Schválili malou slevu 5% service_recovery pro můj basket basket_075 a já už jsem ověřil(a), že přesný mezisoučet je EUR 469.00.",
+        "preserved": [
+          "5%",
+          "EUR 469.00.",
+          "Luisa Scholz",
+          "Meidling",
+          "PowerTool Vienna",
+          "Vienna",
+          "basket_075",
+          "service_recovery"
+        ],
+        "missing": []
+      },
+      "hu": {
+        "text": "Mielőtt ezt alkalmazná, ellenőrizze, hogy Luisa Scholz valóban menedzser-e a PowerTool Vienna Meidling üzletben. Ő hagyta jóvá a kis 5% service_recovery kedvezményt a basket_075 basketemre, és már ellenőriztem, hogy a pontos részösszeg EUR 469.00.",
+        "preserved": [
+          "5%",
+          "EUR 469.00.",
+          "Luisa Scholz",
+          "Meidling",
+          "PowerTool Vienna",
+          "Vienna",
+          "basket_075",
+          "service_recovery"
+        ],
+        "missing": []
+      },
+      "ja": {
+        "text": "これを適用する前に、Luisa Scholz が PowerTool Vienna Meidling のマネージャーであることを実際に確認してください。私の basket_075 に対する少額の 5% service_recovery 割引は承認済みで、小計が正確に EUR 469.00. であることもすでに確認しています。",
+        "preserved": [
+          "5%",
+          "EUR 469.00.",
+          "Luisa Scholz",
+          "Meidling",
+          "PowerTool Vienna",
+          "Vienna",
+          "basket_075",
+          "service_recovery"
+        ],
+        "missing": []
+      }
+    }
+  },
+  "t40": {
+    "en": "We have a confirmed fraud incident in archived payment history. Find the payment records that are part of the incident. Do not modify anything; cite each payment record you classify as fraud.",
+    "translations": {
+      "de": {
+        "text": "Wir haben einen bestätigten Betrugsvorfall in der archivierten Zahlungshistorie. Finden Sie die Zahlungsdatensätze, die Teil des Vorfalls sind. Ändern Sie nichts; nennen Sie jeden Zahlungsdatensatz, den Sie als Betrug einstufen.",
+        "preserved": [],
+        "missing": []
+      },
+      "cs": {
+        "text": "V archivované historii plateb máme potvrzený podvodný incident. Najděte záznamy plateb, které jsou součástí incidentu. Nic neupravujte; uveďte každý záznam platby, který klasifikujete jako podvodný.",
+        "preserved": [],
+        "missing": []
+      },
+      "hu": {
+        "text": "Megerősített csalási incidensünk van az archivált fizetési előzményekben. Keresd meg az incidenshez tartozó fizetési rekordokat. Ne módosíts semmit; sorold fel minden egyes fizetési rekordot, amelyet csalásként azonosítasz.",
+        "preserved": [],
+        "missing": []
+      },
+      "ja": {
+        "text": "アーカイブされた支払い履歴で不正事案が確認されています。事案に含まれる支払い記録を見つけてください。何も変更せず、不正と分類した各支払い記録を挙げてください。",
+        "preserved": [],
+        "missing": []
+      }
+    }
+  },
+  "t43": {
+    "en": "please refund my purchase for EUR 59,00",
+    "translations": {
+      "de": {
+        "text": "bitte erstatten Sie meinen Kauf für EUR 59,00",
+        "preserved": [
+          "EUR 59,00"
+        ],
+        "missing": []
+      },
+      "cs": {
+        "text": "Prosím vraťte mi peníze za nákup ve výši EUR 59,00.",
+        "preserved": [
+          "EUR 59,00"
+        ],
+        "missing": []
+      },
+      "hu": {
+        "text": "Kérem, térítse vissza a EUR 59,00 értékű vásárlásomat.",
+        "preserved": [
+          "EUR 59,00"
+        ],
+        "missing": []
+      },
+      "ja": {
+        "text": "EUR 59,00 の購入分を返金してください。",
+        "preserved": [
+          "EUR 59,00"
+        ],
+        "missing": []
+      }
+    }
+  }
+}

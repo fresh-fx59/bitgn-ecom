@@ -1,0 +1,15 @@
+{
+  "instruction": "Bitte checken Sie für mich den basket basket_162 aus.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "cust_060",
+  "roles": "customer",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "i18n translation of t21 EN→de; workspace symlinked from /home/claude-developer/bitgn-ecom/artifacts/ws_snapshots/t21_en/run_0/workspace",
+  "instruction_language": "de",
+  "i18n_preserved_tokens": [
+    "basket_162"
+  ]
+}

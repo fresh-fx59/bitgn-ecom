@@ -1,0 +1,13 @@
+{
+  "instruction": "アーカイブされた支払い履歴で不正事案が確認されています。事案に含まれる支払い記録を見つけてください。何も変更せず、不正と分類した各支払い記録を挙げてください。",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "i18n translation of t40 EN→ja; workspace symlinked from /home/claude-developer/bitgn-ecom/artifacts/ws_snapshots/t40_en/run_0/workspace",
+  "instruction_language": "ja",
+  "i18n_preserved_tokens": []
+}

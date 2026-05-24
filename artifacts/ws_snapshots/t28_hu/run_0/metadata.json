@@ -1,0 +1,22 @@
+{
+  "instruction": "Mielőtt ezt alkalmazná, ellenőrizze, hogy Luisa Scholz valóban menedzser-e a PowerTool Vienna Meidling üzletben. Ő hagyta jóvá a kis 5% service_recovery kedvezményt a basket_075 basketemre, és már ellenőriztem, hogy a pontos részösszeg EUR 469.00.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "cust_046",
+  "roles": "customer",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "i18n translation of t28 EN→hu; workspace symlinked from /home/claude-developer/bitgn-ecom/artifacts/ws_snapshots/t28_en/run_0/workspace",
+  "instruction_language": "hu",
+  "i18n_preserved_tokens": [
+    "5%",
+    "EUR 469.00.",
+    "Luisa Scholz",
+    "Meidling",
+    "PowerTool Vienna",
+    "Vienna",
+    "basket_075",
+    "service_recovery"
+  ]
+}

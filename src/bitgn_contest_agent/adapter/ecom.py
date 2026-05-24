@@ -576,6 +576,52 @@ class EcomAdapter:
         # v0.1.49 prompt rule remains the authoritative fraud
         # guidance.
 
+        # i18n canonicalization (v0.1.109).
+        # Detect instruction_language + produce English paraphrase so
+        # the ~160 English regex/phrase enforcers (addenda_completer,
+        # cite_completer, refusal_cite_enforcer, sku_completer,
+        # fraud_cluster_filter, validator) keep matching even when
+        # the user writes in DE/CS/HU/JA/etc. The call is skipped
+        # entirely if the heuristic _looks_english fires (zero cost
+        # on the 100% English contest surface today). On any LLM
+        # failure or token-preservation guard failure we fall back
+        # to raw task_text — never below today's behaviour.
+        if task_text:
+            from bitgn_contest_agent.task_canonicalizer import canonicalize
+            canon = canonicalize(task_text=task_text)
+            session.instruction_language = canon.instruction_language
+            session.task_text_en = canon.task_text_en or task_text
+            if canon.canonicalized and canon.instruction_language != "en":
+                bootstrap_content.append(
+                    f"PRE-PASS task canonicalization — instruction language "
+                    f"detected as `{canon.instruction_language}`. The English "
+                    f"paraphrase below is what downstream enforcers / regex "
+                    f"checks consume; you should still ANSWER in the original "
+                    f"language ({canon.instruction_language}). Original text "
+                    f"is the authoritative source for entity references "
+                    f"(IDs, amounts, names).\n"
+                    f"task_text_en: {session.task_text_en}"
+                )
+                trace_writer.append_prepass(
+                    cmd="task_canonicalize",
+                    ok=True,
+                    bytes=len(session.task_text_en.encode("utf-8")),
+                    wall_ms=0,
+                    error=None,
+                    error_code=None,
+                    schema_roots=None,
+                )
+            elif not canon.canonicalized and canon.failure_reason:
+                trace_writer.append_prepass(
+                    cmd="task_canonicalize",
+                    ok=False,
+                    bytes=0,
+                    wall_ms=0,
+                    error=canon.failure_reason,
+                    error_code="CANON_FALLBACK",
+                    schema_roots=None,
+                )
+
         return PrepassResult(
             bootstrap_content=bootstrap_content,
             schema=parse_schema_content(""),  # ECOM: empty stub for shape compat

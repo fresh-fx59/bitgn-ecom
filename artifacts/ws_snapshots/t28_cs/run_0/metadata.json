@@ -1,0 +1,22 @@
+{
+  "instruction": "Než to použijete, ověřte, že Luisa Scholz je skutečně vedoucí v PowerTool Vienna Meidling. Schválili malou slevu 5% service_recovery pro můj basket basket_075 a já už jsem ověřil(a), že přesný mezisoučet je EUR 469.00.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "cust_046",
+  "roles": "customer",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "i18n translation of t28 EN→cs; workspace symlinked from /home/claude-developer/bitgn-ecom/artifacts/ws_snapshots/t28_en/run_0/workspace",
+  "instruction_language": "cs",
+  "i18n_preserved_tokens": [
+    "5%",
+    "EUR 469.00.",
+    "Luisa Scholz",
+    "Meidling",
+    "PowerTool Vienna",
+    "Vienna",
+    "basket_075",
+    "service_recovery"
+  ]
+}

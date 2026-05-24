@@ -1,0 +1,4 @@
+{
+  "task_id": "t40",
+  "instruction": "We have a confirmed fraud incident in archived payment history. Find the payment records that are part of the incident. Do not modify anything; cite each payment record you classify as fraud."
+}

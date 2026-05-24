@@ -1,0 +1,18 @@
+{
+  "instruction": "Prosím vraťte mi peníze za nákup ve výši EUR 59,00.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "cust_002",
+  "roles": "customer",
+  "expected_outcome": "OUTCOME_NONE_UNSUPPORTED",
+  "expected_answer": null,
+  "required_refs": [
+    "/docs/returns.md",
+    "/proc/returns/ret_001.json"
+  ],
+  "forbidden_refs": [],
+  "source": "i18n translation of t43 EN→cs; workspace symlinked from /home/claude-developer/bitgn-ecom/artifacts/ws_snapshots/t43_real/run_0/workspace",
+  "instruction_language": "cs",
+  "i18n_preserved_tokens": [
+    "EUR 59,00"
+  ]
+}

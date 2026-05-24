@@ -248,6 +248,33 @@ def _llm_call(client: Any, **kwargs: Any) -> Any:
     return client.chat.completions.create(**kwargs)
 
 
+def raw_completion(*, prompt: str, system: str | None = None,
+                   timeout: float | None = None) -> str:
+    """Single-shot completion that returns the text body, no JSON parsing.
+
+    Used by task_canonicalizer for the prepass language-detection +
+    English-paraphrase call. Bypasses the classify() retry loop because
+    the caller (canonicalizer) has its own fallback path.
+
+    Raises on transport failure; never raises on empty body (returns "").
+    """
+    client = _get_openai_client()
+    model = router_config.classifier_model()
+    messages: list[dict[str, str]] = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
+    resp = _llm_call(
+        client,
+        model=model,
+        messages=messages,
+        temperature=0.0,
+        timeout=timeout or _classifier_timeout_sec(),
+    )
+    content = resp.choices[0].message.content
+    return content or ""
+
+
 _FENCE_RE = _re.compile(r"```(?:json)?\s*\n?(.*?)\n?\s*```", _re.DOTALL)
 
 

@@ -1,0 +1,13 @@
+{
+  "instruction": "Megerősített csalási incidensünk van az archivált fizetési előzményekben. Keresd meg az incidenshez tartozó fizetési rekordokat. Ne módosíts semmit; sorold fel minden egyes fizetési rekordot, amelyet csalásként azonosítasz.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "i18n translation of t40 EN→hu; workspace symlinked from /home/claude-developer/bitgn-ecom/artifacts/ws_snapshots/t40_en/run_0/workspace",
+  "instruction_language": "hu",
+  "i18n_preserved_tokens": []
+}
