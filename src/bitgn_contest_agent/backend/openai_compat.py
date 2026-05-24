@@ -210,7 +210,18 @@ class OpenAIChatBackend(Backend):
                     messages=payload,
                     response_format=response_schema,
                     timeout=timeout_sec,
-                    extra_body={"reasoning": {"effort": self._reasoning_effort}},
+                    extra_body={
+                    # Two-shape compatibility:
+                    # - nested `reasoning.effort` is the OpenAI SDK + OpenRouter
+                    #   convention (cliproxyapi honored it)
+                    # - flat `reasoning_effort` is what CloseRouter actually
+                    #   honors (verified empirically 2026-05-24: nested form
+                    #   yielded reasoning_tokens=0 on gpt-5.4; flat form
+                    #   scales cleanly minimal→0, low→103, medium→491, high→2092)
+                    # Sending both is harmless on every proxy tested.
+                    "reasoning": {"effort": self._reasoning_effort},
+                    "reasoning_effort": self._reasoning_effort,
+                },
                 )
                 parsed = completion.choices[0].message.parsed
                 if parsed is None:
@@ -244,7 +255,18 @@ class OpenAIChatBackend(Backend):
                 stream=True,
                 stream_options={"include_usage": True},
                 timeout=timeout_sec,
-                extra_body={"reasoning": {"effort": self._reasoning_effort}},
+                extra_body={
+                    # Two-shape compatibility:
+                    # - nested `reasoning.effort` is the OpenAI SDK + OpenRouter
+                    #   convention (cliproxyapi honored it)
+                    # - flat `reasoning_effort` is what CloseRouter actually
+                    #   honors (verified empirically 2026-05-24: nested form
+                    #   yielded reasoning_tokens=0 on gpt-5.4; flat form
+                    #   scales cleanly minimal→0, low→103, medium→491, high→2092)
+                    # Sending both is harmless on every proxy tested.
+                    "reasoning": {"effort": self._reasoning_effort},
+                    "reasoning_effort": self._reasoning_effort,
+                },
             )
             parts: list[str] = []
             last_usage = None
@@ -300,7 +322,18 @@ class OpenAIChatBackend(Backend):
                     messages=payload,
                     response_format=response_schema,
                     timeout=timeout_sec,
-                    extra_body={"reasoning": {"effort": self._reasoning_effort}},
+                    extra_body={
+                    # Two-shape compatibility:
+                    # - nested `reasoning.effort` is the OpenAI SDK + OpenRouter
+                    #   convention (cliproxyapi honored it)
+                    # - flat `reasoning_effort` is what CloseRouter actually
+                    #   honors (verified empirically 2026-05-24: nested form
+                    #   yielded reasoning_tokens=0 on gpt-5.4; flat form
+                    #   scales cleanly minimal→0, low→103, medium→491, high→2092)
+                    # Sending both is harmless on every proxy tested.
+                    "reasoning": {"effort": self._reasoning_effort},
+                    "reasoning_effort": self._reasoning_effort,
+                },
                 )
                 parsed = completion.choices[0].message.parsed
                 if parsed is None:
@@ -315,7 +348,18 @@ class OpenAIChatBackend(Backend):
                 stream=True,
                 stream_options={"include_usage": True},
                 timeout=timeout_sec,
-                extra_body={"reasoning": {"effort": self._reasoning_effort}},
+                extra_body={
+                    # Two-shape compatibility:
+                    # - nested `reasoning.effort` is the OpenAI SDK + OpenRouter
+                    #   convention (cliproxyapi honored it)
+                    # - flat `reasoning_effort` is what CloseRouter actually
+                    #   honors (verified empirically 2026-05-24: nested form
+                    #   yielded reasoning_tokens=0 on gpt-5.4; flat form
+                    #   scales cleanly minimal→0, low→103, medium→491, high→2092)
+                    # Sending both is harmless on every proxy tested.
+                    "reasoning": {"effort": self._reasoning_effort},
+                    "reasoning_effort": self._reasoning_effort,
+                },
             )
             parts: list[str] = []
             for chunk in stream:
