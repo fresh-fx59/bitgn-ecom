@@ -79,7 +79,7 @@ Backend + adapter:
 | File | Role |
 |---|---|
 | `backend/base.py` | Abstract LLM backend. |
-| `backend/openai_compat.py` | OpenAI-compatible client (used for `gpt-5.3-codex` via cliproxyapi). |
+| `backend/openai_compat.py` | OpenAI-compatible client (used for `gpt-5.3-codex` via cliproxyapi or CloseRouter; sends `reasoning_effort` in both flat + nested shapes for provider compatibility; treats `upstream request failed` / `unexpected eof` / connection-reset as transient and retries with backoff). |
 | `adapter/pcm.py` | Persistent Content Manager — workspace tool surface (`tree`, `read`, `write`, `delete`, `move`, `context`). |
 | `adapter/pcm_tracing.py` | PCM call tracing for trace JSONL. |
 

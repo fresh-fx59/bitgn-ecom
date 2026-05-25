@@ -106,13 +106,14 @@ CLIPROXY_BASE_URL=http://127.0.0.1:8317   # or your proxy endpoint
 CLIPROXY_API_KEY=<cliproxy-key>
 ```
 
-### 3. Start the LLM proxy
+### 3. Start (or point to) the LLM proxy
 
-The agent talks to an OpenAI-compatible endpoint via [`cliproxyapi`](https://github.com/router-for-me/CLIProxyAPI) (default) or any OpenAI-compat backend. Start it locally:
+The agent talks to an OpenAI-compatible endpoint via the `CLIPROXY_BASE_URL` / `CLIPROXY_API_KEY` env vars. Validated providers:
 
-```bash
-cliproxyapi --bind 127.0.0.1:8317 &
-```
+- [`cliproxyapi`](https://github.com/router-for-me/CLIProxyAPI) — start locally with `cliproxyapi --bind 127.0.0.1:8317 &`, then set `CLIPROXY_BASE_URL=http://127.0.0.1:8317/v1`. Historical baseline (42/42 era).
+- [CloseRouter](https://closerouter.dev) — managed gateway, no local install. Set `CLIPROXY_BASE_URL=https://api.closerouter.dev/v1` + `CLIPROXY_API_KEY=closerouter_...` and `BITGN_CLASSIFIER_MODEL=anthropic/claude-haiku-4.5` (provider-prefixed name). Validated 44/44 at v0.1.111.
+
+The variable names retain the historical `CLIPROXY_*` prefix but accept any OpenAI-compat URL.
 
 ### 4. Run the full benchmark
 
