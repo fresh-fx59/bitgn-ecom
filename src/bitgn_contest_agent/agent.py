@@ -496,7 +496,7 @@ class AgentLoop:
                 #      (Yan et al., ICML 2025);
                 #  (2) per-model adapter hook — gpt-oss drops never-read
                 #      grounding_refs to avoid R1 rejection cascades.
-                fn = self._post_process_terminal(fn, session)
+                fn = self._post_process_terminal(fn, session, read_cache=read_cache)
                 if fn is not step_obj.function:
                     step_obj = step_obj.model_copy(update={"function": fn})
                 verdict = self._validator.check_terminal(session, step_obj, step_idx)
@@ -603,7 +603,7 @@ class AgentLoop:
                     if isinstance(retry_fn, ReportTaskCompletion):
                         # Same per-model post-processing on the retry's
                         # terminal so the retry benefits from ref filtering.
-                        retry_fn = self._post_process_terminal(retry_fn, session)
+                        retry_fn = self._post_process_terminal(retry_fn, session, read_cache=read_cache)
                         if retry_fn is not retry_step.function:
                             retry_step = retry_step.model_copy(
                                 update={"function": retry_fn}
@@ -1015,9 +1015,16 @@ class AgentLoop:
         self,
         fn: "ReportTaskCompletion",
         session: Session,
+        *,
+        read_cache: dict[str, str] | None = None,
     ) -> "ReportTaskCompletion":
         """Mutate a terminal ``report_completion`` before
         ``StepValidator.check_terminal`` runs.
+
+        ``read_cache`` is the in-loop path→content cache populated by
+        the main read path. Enforcers that need file content (notably
+        ``sku_verifier``) consult it first to avoid re-issuing reads
+        the agent already paid for during the run.
 
         Two layers, in order:
 
@@ -1093,11 +1100,32 @@ class AgentLoop:
             from bitgn_contest_agent.sku_verifier import filter_sku_refs
 
             def _read_sku(path: str) -> str | None:
+                # Cache check: the main loop already populated read_cache
+                # with the JSON-extracted inner file body (agent.py
+                # ~line 738). sku_verifier expects exactly that shape
+                # (json.loads(content) → access SKU record fields), so
+                # cache hits avoid a fresh RPC.
+                if read_cache is not None:
+                    cached = read_cache.get(path)
+                    if cached is not None:
+                        return cached
                 try:
                     tr = self._adapter.dispatch(
                         Req_Read(tool="read", path=path)
                     )
-                    return tr.content if tr.ok else None
+                    if not tr.ok or not tr.content:
+                        return None
+                    # Mirror the main-loop populate: extract inner body
+                    # and stash so a later post-pass step (same task)
+                    # doesn't refetch.
+                    try:
+                        parsed = _json.loads(tr.content)
+                        body = parsed.get("content", "") if isinstance(parsed, dict) else ""
+                    except (ValueError, AttributeError):
+                        body = ""
+                    if body and read_cache is not None:
+                        read_cache[path] = body
+                    return body if body else tr.content
                 except Exception:
                     return None
 
