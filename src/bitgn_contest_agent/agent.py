@@ -439,6 +439,7 @@ class AgentLoop:
                 totals.prompt_tokens += maybe_step.prompt_tokens
                 totals.completion_tokens += maybe_step.completion_tokens
                 totals.reasoning_tokens += maybe_step.reasoning_tokens
+                totals.cached_tokens += maybe_step.cached_tokens
                 step_obj = maybe_step.parsed
             except ValidationError as exc:
                 self._writer.append_event(
@@ -469,6 +470,7 @@ class AgentLoop:
                     totals.prompt_tokens += maybe_retry.prompt_tokens
                     totals.completion_tokens += maybe_retry.completion_tokens
                     totals.reasoning_tokens += maybe_retry.reasoning_tokens
+                    totals.cached_tokens += maybe_retry.cached_tokens
                     step_obj = maybe_retry.parsed
                 except ValidationError as exc2:
                     return self._finish_error(
@@ -545,6 +547,7 @@ class AgentLoop:
                             totals.prompt_tokens += verify_result.prompt_tokens
                             totals.completion_tokens += verify_result.completion_tokens
                             totals.reasoning_tokens += verify_result.reasoning_tokens
+                            totals.cached_tokens += verify_result.cached_tokens
                             totals.llm_calls += 1
                             v_step = verify_result.parsed
                             v_fn = v_step.function
@@ -591,6 +594,7 @@ class AgentLoop:
                             totals.prompt_tokens += maybe_retry_step.prompt_tokens
                             totals.completion_tokens += maybe_retry_step.completion_tokens
                             totals.reasoning_tokens += maybe_retry_step.reasoning_tokens
+                            totals.cached_tokens += maybe_retry_step.cached_tokens
                             retry_step = maybe_retry_step.parsed
                             totals.llm_calls += 1
                     except ValidationError:

@@ -27,11 +27,18 @@ class Message:
 
 @dataclass(frozen=True, slots=True)
 class NextStepResult:
-    """Wraps a parsed NextStep with token accounting from the provider."""
+    """Wraps a parsed NextStep with token accounting from the provider.
+
+    ``cached_tokens`` is the portion of ``prompt_tokens`` that the
+    provider served from its prompt cache (OpenAI-style; typically
+    billed at ~25-50% of the full input rate). Defaults to 0 when
+    the provider does not report cache details.
+    """
     parsed: "NextStep"  # type: ignore[name-defined]
     prompt_tokens: int
     completion_tokens: int
     reasoning_tokens: int
+    cached_tokens: int = 0
     reasoning: str | None = None
     tool_calls: list[dict] | None = None
 

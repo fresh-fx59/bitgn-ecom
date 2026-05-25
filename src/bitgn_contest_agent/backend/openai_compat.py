@@ -84,6 +84,16 @@ _TRANSIENT_MESSAGE_SUBSTRINGS: tuple[str, ...] = (
     "upstream request failed",
     "upstream_connection_error",
     "upstream connection error",
+    # CloseRouter (2026-05-26): the upstream litellm router intermittently
+    # reports the model as missing for a few seconds at a time before
+    # recovering. Bare `openai.APIError` carries
+    # "litellm.NotFoundError: NotFoundError: OpenAIException - ...
+    #  The model `gpt-5.3-codex` does not exist or you do not have access".
+    # Verified the same model is reachable seconds before/after via direct
+    # curl, so this is a routing hiccup, not a real config error. Retrying
+    # recovers cleanly.
+    "litellm.notfounderror",
+    "does not exist or you do not have access",
 )
 
 
@@ -242,11 +252,14 @@ class OpenAIChatBackend(Backend):
                 completion_tokens = getattr(usage, "completion_tokens", 0) or 0
                 details = getattr(usage, "completion_tokens_details", None)
                 reasoning_tokens = getattr(details, "reasoning_tokens", 0) or 0
+                prompt_details = getattr(usage, "prompt_tokens_details", None)
+                cached_tokens = getattr(prompt_details, "cached_tokens", 0) or 0
                 return NextStepResult(
                     parsed=parsed,
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
                     reasoning_tokens=reasoning_tokens,
+                    cached_tokens=cached_tokens,
                 )
             # T24 live-run observation: cliproxyapi drops message content on
             # the non-streaming chat-completions path (returns content: null
@@ -293,11 +306,14 @@ class OpenAIChatBackend(Backend):
             completion_tokens = getattr(last_usage, "completion_tokens", 0) or 0
             details = getattr(last_usage, "completion_tokens_details", None)
             reasoning_tokens = getattr(details, "reasoning_tokens", 0) or 0
+            prompt_details = getattr(last_usage, "prompt_tokens_details", None)
+            cached_tokens = getattr(prompt_details, "cached_tokens", 0) or 0
             return NextStepResult(
                 parsed=parsed,
                 prompt_tokens=prompt_tokens,
                 completion_tokens=completion_tokens,
                 reasoning_tokens=reasoning_tokens,
+                cached_tokens=cached_tokens,
             )
         except _TRANSIENT_EXCEPTIONS as exc:
             raise TransientBackendError(str(exc)) from exc
