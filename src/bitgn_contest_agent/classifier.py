@@ -284,13 +284,35 @@ def _strip_markdown_fences(text: str) -> str:
     return m.group(1).strip() if m else text.strip()
 
 
+_OPENAI_CLIENT_CACHE: dict[tuple[str, str], Any] = {}
+_OPENAI_CLIENT_CACHE_LOCK = threading.Lock()
+
+
 def _get_openai_client():  # pragma: no cover — thin factory, tested via patching
+    """Return a process-cached OpenAI client.
+
+    Each call to `OpenAI(...)` spawns a fresh `httpx.Client` with its own
+    connection pool — across the bench's 100+ classifier calls per task,
+    that's hundreds of TCP/TLS handshakes against the gateway. Cache the
+    client by (base_url, api_key) so the same connection pool is reused.
+
+    Thread-safe via lock; safe to call from parallel worker threads.
+    """
     from openai import OpenAI
-    # max_retries=0: an httpx timeout here should fail the classifier and
-    # degrade to UNKNOWN, not silently retry. SDK retries on local-LLM
-    # timeouts just queue another generation on LM Studio's busy slot.
-    return OpenAI(
-        base_url=os.environ.get("CLIPROXY_BASE_URL") or os.environ.get("OPENAI_BASE_URL"),
-        api_key=os.environ.get("CLIPROXY_API_KEY") or os.environ.get("OPENAI_API_KEY", "sk-proxy"),
-        max_retries=0,
-    )
+    base = os.environ.get("CLIPROXY_BASE_URL") or os.environ.get("OPENAI_BASE_URL") or ""
+    key = os.environ.get("CLIPROXY_API_KEY") or os.environ.get("OPENAI_API_KEY", "sk-proxy")
+    cache_key = (base, key)
+    with _OPENAI_CLIENT_CACHE_LOCK:
+        client = _OPENAI_CLIENT_CACHE.get(cache_key)
+        if client is not None:
+            return client
+        # max_retries=0: an httpx timeout here should fail the classifier and
+        # degrade to UNKNOWN, not silently retry. SDK retries on local-LLM
+        # timeouts just queue another generation on LM Studio's busy slot.
+        client = OpenAI(
+            base_url=base or None,
+            api_key=key,
+            max_retries=0,
+        )
+        _OPENAI_CLIENT_CACHE[cache_key] = client
+        return client
