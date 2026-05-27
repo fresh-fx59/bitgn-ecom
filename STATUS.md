@@ -267,3 +267,14 @@ PROD spend.
 
 Don't touch the stack speculatively. Each removal/loosening risks
 the deterministic floor.
+
+## Overfitting audit (parked)
+
+A v0.1.112 overfitting audit lives at `docs/OVERFITTING_AUDIT.md`.
+~35-40% of the stack is contest-specific (city→store map, action-
+family policy paths, addenda directory layout, 21-brand preserve
+list, namespace shape). The audit lists the top-10 contest-specific
+elements by file:line, top-5 hidden assumptions that would break
+on a similar contest, and a concrete `contest_profile.py` refactor
+spec. **Parked until a second contest lands** — refactoring without
+a target risks the 40-44/44 floor for no concrete benefit.
