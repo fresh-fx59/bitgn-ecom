@@ -62,7 +62,14 @@ from bitgn_contest_agent.verify import VerifyReason, WriteOp
 
 _LOG = logging.getLogger(__name__)
 _MAX_NUDGES = 2
-_DEFAULT_BACKOFF_MS: tuple[int, ...] = (500, 1500, 4000, 10000)
+# Backoff schedule extended 2026-05-27 after a 0/50 PROD wipe when
+# the entire CloseRouter upstream (OpenAI + Anthropic) was 502'ing
+# for 60+ seconds. The previous 4-step schedule (max 16s wait) gave
+# up before the outage cleared. New 6-step schedule rides through
+# up to ~106s of provider downtime per LLM call.
+_DEFAULT_BACKOFF_MS: tuple[int, ...] = (
+    500, 1500, 4000, 10000, 30000, 60000,
+)
 
 # After the watchdog force-unloads a model, LM Studio needs to cold-reload
 # the weights before the retried request can succeed. Observed ~9s for

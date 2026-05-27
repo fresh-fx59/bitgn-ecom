@@ -94,6 +94,18 @@ _TRANSIENT_MESSAGE_SUBSTRINGS: tuple[str, ...] = (
     # recovers cleanly.
     "litellm.notfounderror",
     "does not exist or you do not have access",
+    # CloseRouter (2026-05-27): OpenAI upstream connect_timeout — the
+    # response body's failure_reason is `upstream_connect_timeout`, which
+    # surfaces as `openai.APIError` with this substring. Different from
+    # the existing "upstream request failed" pattern because the proxy's
+    # human-readable summary is "Upstream request failed" but the
+    # machine-readable failure_reason is "upstream_connect_timeout".
+    # Both must be in the retry list — caused 0/50 PROD wipe at 14:48 UTC
+    # when an OpenAI hiccup outlasted the default 4-attempt backoff budget.
+    "upstream_connect_timeout",
+    "upstream connect timeout",
+    "upstream_connection_refused",
+    "upstream connection refused",
 )
 
 
