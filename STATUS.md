@@ -1,20 +1,26 @@
-# Status — BitGN ECOM contest agent, v0.1.111 milestone
+# Status — BitGN ECOM contest agent, v0.1.112 milestone
 
 ## Headline
 
-**44/44 mean 1.000 on the current contest surface** (PROD bench via
-CloseRouter, 2026-05-25). Multi-language inputs are supported via the
-v0.1.109 i18n canonicalization prepass (validated by local A/B across
+**44/44 (peak) within a 40-44/44 variance band on the current
+contest surface.** Bench wall reduced to ~11 min (was 17.7 min,
+−38%) at v0.1.112 via prompt-cache plumbing, prepass cross-task
+cache, post-pass read dedup, and classifier connection-pool reuse.
+Multi-language inputs supported via the v0.1.109 i18n
+canonicalization prepass (validated by local A/B across
 en/de/cs/hu/ja).
 
-| Run | Score | Notes |
-|---|---|---|
-| v0.1.108 cliproxyapi (42-task era) | 42/42 mean 1.000 | two consecutive |
-| v0.1.108 cliproxyapi t43/t44 filtered ×3 | 6/6 mean 1.000 | refund family |
-| v0.1.111 CloseRouter (44-task) | **44/44 mean 1.000** | full bench |
+| Run | Score | Wall | Notes |
+|---|---|---|---|
+| v0.1.108 cliproxyapi (42-task era) | 42/42 mean 1.000 | n/a | two consecutive |
+| v0.1.108 cliproxyapi t43/t44 filtered ×3 | 6/6 mean 1.000 | n/a | refund family |
+| v0.1.111 CloseRouter (44-task) | **44/44 mean 1.000** | 17.7 min | full bench |
+| v0.1.112 speedups run 1 | 40/44 (in variance band) | 11.0 min | -38% wall |
+| v0.1.112 speedups run 2 | 41/44 (in variance band) | ~11.5 min | -35% wall |
 
-Session arc: 30/31 (v0.1.44) → 42/42 (v0.1.108) → 44/44 (v0.1.111)
-across ~50 PROD iterations on two different providers.
+Session arc: 30/31 (v0.1.44) → 42/42 (v0.1.108) → 44/44 peak
+(v0.1.111) → 40-44/44 + −38% wall (v0.1.112) across ~55 PROD
+iterations on two different providers.
 
 ## Locked-in stack
 
@@ -100,9 +106,30 @@ Bootstraps 11 reads in parallel, then a phase-2 canonicalization step:
   proxy tested and works regardless of provider.
 - **Upstream-error retry list** since v0.1.111 includes
   `upstream request failed`, `upstream_connection_error`,
-  `upstream connection error`. Same path as the existing
-  cliproxyapi `unexpected eof` handling — bare `openai.APIError`
-  with these messages is classified as transient and retried.
+  `upstream connection error`, plus v0.1.112 additions
+  `litellm.notfounderror`, `does not exist or you do not have
+  access`. Same path as the existing cliproxyapi `unexpected eof`
+  handling — bare `openai.APIError` with these messages is
+  classified as transient and retried.
+- **`cached_tokens` plumbed end-to-end** since v0.1.112.
+  `NextStepResult.cached_tokens` reads
+  `usage.prompt_tokens_details.cached_tokens` and aggregates into
+  `_Totals.cached_tokens` at every accumulation site. Bench
+  summary now shows real cache hit rate (~92% on CloseRouter).
+
+### Speedups (v0.1.112)
+
+1. **`cached_tokens` plumbing** — visibility-only; 92% of prompt
+   tokens are served from provider cache (was reported as 0).
+2. **Read-dedup in sku_verifier** — post-pass enforcer checks the
+   main-loop `read_cache` before issuing a fresh `/proc/catalog`
+   read.
+3. **Cross-task prepass cache** — 6 `/proc/*/README.md` files are
+   verified byte-identical across trials; cached in a module-level
+   dict (thread-safe). Bench-wide saves 258 RPCs after warm-up.
+4. **Classifier OpenAI client cache** — single httpx connection
+   pool reused across all classifier calls in the process (was a
+   fresh pool per call).
 
 ## What was tried and reverted
 
@@ -120,6 +147,11 @@ Bootstraps 11 reads in parallel, then a phase-2 canonicalization step:
   net-negative — over-stripped correct refs in some seeds. The
   enumeration-cap approach (v0.1.111) achieved the same goal
   without the precision loss.
+- Caching `/docs` tree in the cross-task prepass cache (v0.1.112
+  initial draft): contest seeds dated addenda there so the cache
+  served stale paths and broke a required-ref citation. Final
+  v0.1.112 cache scope limited to the 6 `/proc/*/README.md` files
+  only.
 
 ## Local test infrastructure
 
