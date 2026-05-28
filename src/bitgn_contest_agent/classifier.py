@@ -78,19 +78,18 @@ def classify(*, system: str, user: str) -> Any:
 
     for attempt in range(max_attempts):
         # --- Phase 1: fresh classification ---
+        content = ""
         try:
-            resp = _llm_call(
+            content = _stream_call_content(
                 client,
                 model=model,
                 messages=[
                     {"role": "system", "content": system},
                     {"role": "user", "content": user},
                 ],
-                temperature=0.0,
                 timeout=_classifier_timeout_sec(),
             )
-            content = resp.choices[0].message.content
-            if content is None:
+            if not content:
                 last_error = ValueError("classifier returned empty content (None)")
                 _LOG.warning("classify attempt %d: empty content, retrying", attempt + 1)
                 continue
@@ -127,15 +126,13 @@ def _try_fix_json(
         f"Return ONLY the corrected JSON object, no markdown fences, no explanation."
     )
     try:
-        resp = _llm_call(
+        fix_content = _stream_call_content(
             client,
             model=model,
             messages=[{"role": "user", "content": fix_prompt}],
-            temperature=0.0,
             timeout=_classifier_timeout_sec(),
         )
-        fix_content = resp.choices[0].message.content
-        if fix_content is None:
+        if not fix_content:
             return None
         return _json.loads(_strip_markdown_fences(fix_content))
     except Exception as exc:  # noqa: BLE001
@@ -248,6 +245,59 @@ def _llm_call(client: Any, **kwargs: Any) -> Any:
     return client.chat.completions.create(**kwargs)
 
 
+def _stream_call_content(
+    client: Any,
+    *,
+    model: str,
+    messages: list[dict],
+    timeout: float,
+    extra_body: dict | None = None,
+) -> str:
+    """Stream-mode chat completion helper that returns the concatenated
+    content. Mandatory for cliproxyapi: its non-streaming chat.completions
+    path drops `message.content` (returns null) for every reasoning model
+    in its catalog. Streaming concatenates deltas correctly.
+
+    Always sends reasoning_effort in both shapes (flat + nested) — see
+    backend/openai_compat.py for the dual-shape rationale.
+
+    Falls back to message.content read if the mock/test classifier
+    returns a non-iterable (e.g. a completion object).
+    """
+    effort = os.environ.get("BITGN_CLASSIFIER_REASONING_EFFORT", "low").strip() or "low"
+    body = dict(extra_body or {})
+    body.setdefault("reasoning", {"effort": effort})
+    body.setdefault("reasoning_effort", effort)
+    kwargs = dict(
+        model=model,
+        messages=messages,
+        temperature=0.0,
+        timeout=timeout,
+        stream=True,
+        stream_options={"include_usage": True},
+        extra_body=body,
+    )
+    stream = _llm_call(client, **kwargs)
+    parts: list[str] = []
+    try:
+        for chunk in stream:
+            choices = getattr(chunk, "choices", None) or []
+            if not choices:
+                continue
+            delta = getattr(choices[0], "delta", None)
+            piece = getattr(delta, "content", None) if delta else None
+            if piece:
+                parts.append(piece)
+    except TypeError:
+        # Test-only path: mock returned a chat completion object.
+        choices = getattr(stream, "choices", None) or []
+        if choices:
+            content = getattr(getattr(choices[0], "message", None), "content", None)
+            if content:
+                parts.append(content)
+    return "".join(parts)
+
+
 def raw_completion(*, prompt: str, system: str | None = None,
                    timeout: float | None = None) -> str:
     """Single-shot completion that returns the text body, no JSON parsing.
@@ -268,40 +318,12 @@ def raw_completion(*, prompt: str, system: str | None = None,
     if system:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
-    effort = os.environ.get("BITGN_CLASSIFIER_REASONING_EFFORT", "low").strip() or "low"
-    kwargs: dict[str, Any] = dict(
+    return _stream_call_content(
+        client,
         model=model,
         messages=messages,
-        temperature=0.0,
         timeout=timeout or _classifier_timeout_sec(),
-        stream=True,
-        stream_options={"include_usage": True},
-        extra_body={
-            # Both shapes — see backend/openai_compat.py for rationale.
-            "reasoning": {"effort": effort},
-            "reasoning_effort": effort,
-        },
     )
-    stream = _llm_call(client, **kwargs)
-    parts: list[str] = []
-    try:
-        for chunk in stream:
-            choices = getattr(chunk, "choices", None) or []
-            if not choices:
-                continue
-            delta = getattr(choices[0], "delta", None)
-            piece = getattr(delta, "content", None) if delta else None
-            if piece:
-                parts.append(piece)
-    except TypeError:
-        # Test/mocked client returned a non-iterable (e.g. a chat completion
-        # object). Fall back to reading message.content directly.
-        choices = getattr(stream, "choices", None) or []
-        if choices:
-            content = getattr(getattr(choices[0], "message", None), "content", None)
-            if content:
-                parts.append(content)
-    return "".join(parts)
 
 
 _FENCE_RE = _re.compile(r"```(?:json)?\s*\n?(.*?)\n?\s*```", _re.DOTALL)

@@ -1243,6 +1243,73 @@ class AgentLoop:
                     update={"grounding_refs": completer_res.refs}
                 )
 
+            # Step 1c-ter (v0.1.117-pre): store back-completer.
+            # When the task references store-specific availability AND
+            # the agent cited an employee record, derive the actor's
+            # home-store ref from the employee's `store_id` field and
+            # add /proc/stores/<store_id>.json to grounding_refs.
+            # Mitigates the t47 PROD failure mode (run-22Rhf9Y..., 2026-05-28):
+            # agent emitted the correct row table, cited the matched
+            # SKUs + emp_036.json, but NEVER read the store JSON.
+            # See store_back_completer module. Env-gated default-off.
+            from bitgn_contest_agent.store_back_completer import (
+                complete_store_back_refs as _complete_store_back,
+                enabled as _store_back_enabled,
+            )
+            if _store_back_enabled():
+                sbr = _complete_store_back(
+                    task_text=task_text,
+                    refs=list(fn.grounding_refs),
+                    read_cache=read_cache,
+                )
+                if sbr.added:
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP,
+                        at_step=None,
+                        details=(
+                            f"store_back_completer added "
+                            f"{len(sbr.added)} ref(s): {sbr.added}"
+                        ),
+                    )
+                    fn = fn.model_copy(
+                        update={"grounding_refs": sbr.refs}
+                    )
+
+            # Step 1c-bis (v0.1.117-pre): refund payment back-completer.
+            # When the task is refund family and the agent cited a
+            # /proc/returns/ret_NNN.json, chain to the linked
+            # /proc/payments/pay_NNN.json via the return's payment_id.
+            # Mitigates the t44 PROD failure mode (run-22Rhf9Y..., 2026-05-28):
+            # agent refused with NONE_UNSUPPORTED and cited ret_007.json
+            # but NOT pay_013.json. The cite_completer can't help —
+            # seen_refs gate fails because the agent never read pay_013.
+            # See refund_payment_completer module.
+            # Env-gated default-off (mirror of judge / checked_sku pattern).
+            from bitgn_contest_agent.refund_payment_completer import (
+                complete_refund_payment_refs as _complete_refund_pay,
+                enabled as _refund_pay_enabled,
+            )
+            if _refund_pay_enabled():
+                _ts_kind = getattr(getattr(fn, "task_spec", None), "kind", "none") or "none"
+                rpr = _complete_refund_pay(
+                    task_text=task_text,
+                    kind=_ts_kind,
+                    refs=list(fn.grounding_refs),
+                    read_cache=read_cache,
+                )
+                if rpr.added:
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP,
+                        at_step=None,
+                        details=(
+                            f"refund_payment_completer added "
+                            f"{len(rpr.added)} ref(s): {rpr.added}"
+                        ),
+                    )
+                    fn = fn.model_copy(
+                        update={"grounding_refs": rpr.refs}
+                    )
+
         # Step 1c1 (addenda completer) — re-enabled in v0.1.85 with
         # a broader filename-prefix recognizer covering all four
         # observed addendum prefixes (catalogue-count / counting /
