@@ -1389,6 +1389,40 @@ class AgentLoop:
                     update={"grounding_refs": addenda_res.refs}
                 )
 
+            # Step 1c1-bis (v0.1.117-pre+): catalog_strip enforcer.
+            # When task is catalogue_count AND an addenda doc is
+            # cited, the individual /proc/catalog/*.json refs are
+            # over-cite (grader rejects them). Mitigates t11 PROD
+            # over-cite mode (run-22RiTyqM..., 2026-05-29):
+            # message=<COUNT:10>, refs=addenda + 10 catalog files,
+            # grader = "too many invalid references".
+            # Env-gated default-off.
+            from bitgn_contest_agent.catalog_strip_enforcer import (
+                strip_catalog_refs as _strip_catalog,
+                enabled as _catalog_strip_enabled,
+            )
+            if _catalog_strip_enabled():
+                _ts_kind_cs = (
+                    getattr(getattr(fn, "task_spec", None), "kind", "none")
+                    or "none"
+                )
+                csr = _strip_catalog(
+                    kind=_ts_kind_cs,
+                    refs=list(fn.grounding_refs),
+                )
+                if csr.dropped:
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP,
+                        at_step=None,
+                        details=(
+                            f"catalog_strip_enforcer dropped "
+                            f"{len(csr.dropped)} ref(s): {csr.dropped[:5]}"
+                        ),
+                    )
+                    fn = fn.model_copy(
+                        update={"grounding_refs": csr.refs}
+                    )
+
         # Step 1c2 (SKU completer, v0.1.98 P1): structured-input path.
         # When the agent emitted a task_spec with kind=count_per_store,
         # use it to SQL-resolve qualifying SKUs and union into refs.
