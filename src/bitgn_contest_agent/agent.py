@@ -1527,6 +1527,38 @@ class AgentLoop:
                             update={"grounding_refs": post_filtered.kept}
                         )
 
+                # Last-resort Checked-SKU back-completer (v0.1.117):
+                # if the legacy SQL-driven completer didn't fire and
+                # grounding_refs is still empty (or AGENTS.MD-only),
+                # scan the agent's own message for `Checked SKU: <X>`
+                # and add the matching path from seen_refs. Mitigates
+                # the recall gap in
+                # project_yes_no_sku_recall_gap.md (rule E under-cite).
+                # Env-gated, default-off; safe to ship dark first.
+                from bitgn_contest_agent.checked_sku_completer import (
+                    complete_checked_sku_refs as _complete_checked_sku,
+                    enabled as _checked_sku_enabled,
+                )
+                if _checked_sku_enabled():
+                    csr = _complete_checked_sku(
+                        kind="yes_no_sku",
+                        message=fn.message or "",
+                        refs=list(fn.grounding_refs),
+                        seen_refs=session.seen_refs,
+                    )
+                    if csr.fired:
+                        emit_arch(
+                            category=ArchCategory.REFS_DROP,
+                            at_step=None,
+                            details=(
+                                f"checked_sku_completer added 1 ref "
+                                f"(SKU={csr.sku_found}): {csr.added[0]}"
+                            ),
+                        )
+                        fn = fn.model_copy(
+                            update={"grounding_refs": csr.refs}
+                        )
+
         # Step 1c3: fraud recall completer. ADDS canonical fraud
         # rows the agent under-called. Symmetric to the cluster
         # filter (DROPS singletons). The pair makes t40
