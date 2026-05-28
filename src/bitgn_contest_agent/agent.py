@@ -1054,6 +1054,58 @@ class AgentLoop:
         # session.task_text_en == task_text on the heuristic-EN path.
         raw_task_text = getattr(self, "_current_task_text", "") or ""
         task_text = getattr(session, "task_text_en", "") or raw_task_text
+
+        # Step 0 (v0.1.116, env-gated): LLM-as-judge replacement for
+        # the legacy 9-enforcer chain. Runs before the legacy
+        # enforcers; if it returns a high-confidence verdict (≥ 0.5),
+        # it applies the changes and SKIPS the legacy chain. Below
+        # threshold or on transport/parse failure, the legacy chain
+        # runs unchanged. Gated by BITGN_USE_LLM_JUDGE=1 so we can
+        # A/B against the legacy stack safely.
+        # Design: docs/GENERIC_VERIFIER_DESIGN.md.
+        if (os.environ.get("BITGN_USE_LLM_JUDGE", "").strip().lower()
+                in ("1", "true", "yes")):
+            try:
+                from bitgn_contest_agent.judge_enforcer import (
+                    JudgeInput, apply as _judge_apply, judge as _judge,
+                )
+                _ts = getattr(fn, "task_spec", None)
+                _jinp = JudgeInput(
+                    task_text=raw_task_text,
+                    task_text_en=task_text,
+                    task_spec_kind=getattr(_ts, "kind", "none") if _ts else "none",
+                    outcome=fn.outcome,
+                    message=fn.message or "",
+                    cited_refs=list(fn.grounding_refs),
+                    seen_refs=frozenset(session.seen_refs),
+                    actor_id=getattr(self, "_actor_id", None),
+                    actor_roles=getattr(self, "_actor_roles", None),
+                )
+                _verdict = _judge(_jinp)
+                if _verdict is not None:
+                    _res = _judge_apply(input_=_jinp, verdict=_verdict)
+                    if _res.applied and (_res.added or _res.dropped):
+                        emit_arch(
+                            category=ArchCategory.REFS_DROP,
+                            at_step=None,
+                            details=(
+                                f"judge_enforcer applied: "
+                                f"kept={len(_res.final_refs)} "
+                                f"dropped={len(_res.dropped)} "
+                                f"added={len(_res.added)} "
+                                f"conf={_res.confidence:.2f} "
+                                f"reasons={_res.reasons[:3]}"
+                            ),
+                        )
+                        fn = fn.model_copy(
+                            update={"grounding_refs": _res.final_refs}
+                        )
+                        # Judge took the call — short-circuit the
+                        # legacy chain to avoid double-filtering.
+                        return fn
+            except Exception as _exc:
+                _LOG.info("judge_enforcer crashed; falling back: %s", _exc)
+
         if task_text and fn.outcome == "OUTCOME_DENIED_SECURITY":
             from bitgn_contest_agent.refusal_cite_enforcer import (
                 clean_refusal_refs,
