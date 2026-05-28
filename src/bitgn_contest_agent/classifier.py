@@ -252,9 +252,13 @@ def raw_completion(*, prompt: str, system: str | None = None,
                    timeout: float | None = None) -> str:
     """Single-shot completion that returns the text body, no JSON parsing.
 
-    Used by task_canonicalizer for the prepass language-detection +
-    English-paraphrase call. Bypasses the classify() retry loop because
-    the caller (canonicalizer) has its own fallback path.
+    Used by task_canonicalizer + judge_enforcer. Bypasses the classify()
+    retry loop because callers handle fallback themselves.
+
+    Uses streaming mode: cliproxyapi's non-streaming chat.completions path
+    drops `message.content` (returns null) for every reasoning model
+    tested; streaming concatenates deltas correctly. Same pattern the
+    agent's openai_compat backend uses.
 
     Raises on transport failure; never raises on empty body (returns "").
     """
@@ -264,15 +268,40 @@ def raw_completion(*, prompt: str, system: str | None = None,
     if system:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
-    resp = _llm_call(
-        client,
+    effort = os.environ.get("BITGN_CLASSIFIER_REASONING_EFFORT", "low").strip() or "low"
+    kwargs: dict[str, Any] = dict(
         model=model,
         messages=messages,
         temperature=0.0,
         timeout=timeout or _classifier_timeout_sec(),
+        stream=True,
+        stream_options={"include_usage": True},
+        extra_body={
+            # Both shapes — see backend/openai_compat.py for rationale.
+            "reasoning": {"effort": effort},
+            "reasoning_effort": effort,
+        },
     )
-    content = resp.choices[0].message.content
-    return content or ""
+    stream = _llm_call(client, **kwargs)
+    parts: list[str] = []
+    try:
+        for chunk in stream:
+            choices = getattr(chunk, "choices", None) or []
+            if not choices:
+                continue
+            delta = getattr(choices[0], "delta", None)
+            piece = getattr(delta, "content", None) if delta else None
+            if piece:
+                parts.append(piece)
+    except TypeError:
+        # Test/mocked client returned a non-iterable (e.g. a chat completion
+        # object). Fall back to reading message.content directly.
+        choices = getattr(stream, "choices", None) or []
+        if choices:
+            content = getattr(getattr(choices[0], "message", None), "content", None)
+            if content:
+                parts.append(content)
+    return "".join(parts)
 
 
 _FENCE_RE = _re.compile(r"```(?:json)?\s*\n?(.*?)\n?\s*```", _re.DOTALL)
