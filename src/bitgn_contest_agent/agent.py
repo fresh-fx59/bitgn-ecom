@@ -1102,20 +1102,7 @@ class AgentLoop:
         # /proc/catalog/*.json refs whose ``properties`` contradict the
         # task's attribute spec. Runs on OUTCOME_OK only (refusals are
         # not graded on SKU attributes). See sku_verifier module.
-        #
-        # v0.1.114 gate: skip on yes_no_sku tasks. For yes/no questions
-        # the attribute MISMATCH is the answer ("NO, closest miss is X")
-        # — the agent's cited SKU is the family member that doesn't
-        # match the asked-for attribute, and the grader requires that
-        # SKU cited. Pre-completer verifier was over-stripping these
-        # (t08 v0.1.114 PROD: stripped SFE-337BCJ5E.json which was the
-        # required ref). count_per_store still uses this pass because
-        # there the verifier's drop-on-contradiction is the correct
-        # signal (we want only the qualifying SKUs).
-        _ts = getattr(fn, "task_spec", None)
-        _is_yes_no = (_ts is not None and getattr(_ts, "kind", "none") == "yes_no_sku")
-        if (task_text and fn.outcome == "OUTCOME_OK"
-                and fn.grounding_refs and not _is_yes_no):
+        if task_text and fn.outcome == "OUTCOME_OK" and fn.grounding_refs:
             from bitgn_contest_agent.adapter.ecom import Req_Read
             from bitgn_contest_agent.sku_verifier import filter_sku_refs
 
@@ -1428,17 +1415,65 @@ class AgentLoop:
                         update={"grounding_refs": yn_res.refs}
                     )
 
-                    # v0.1.115: do NOT verifier-filter the yes_no_sku
-                    # family enumeration. For yes/no questions,
-                    # attribute MISMATCH is the answer ("NO, closest
-                    # miss is X"). The grader's required ref is
-                    # precisely the SKU that doesn't match the
-                    # asked-for attributes. v0.1.114 PROD t08
-                    # evidence: the verifier stripped
-                    # SFE-337BCJ5E.json (the required ref) because
-                    # color_family didn't match. Leaving the full
-                    # enumeration in lets the grader find the right
-                    # SKU among the family siblings.
+                    # v0.1.114: 2nd sku_verifier pass over the
+                    # completer's adds. The family enumeration
+                    # (typically 5-50 SKUs) often includes wrong-
+                    # attribute siblings — they're in the same
+                    # brand+series+model bucket but have different
+                    # values for the attributes the task names.
+                    # sku_verifier.sku_mismatches_task drops them
+                    # on EXPLICIT contradiction only (skips properties
+                    # the task doesn't mention), so it doesn't drop
+                    # ambiguous-but-correct SKUs.
+                    # Read-cache plumbing (Feature 2, v0.1.112)
+                    # ensures the verifier sees the inner file body,
+                    # not the JSON wrapper that broke the v0.1.110
+                    # attempt. Inline this AFTER the completer fires
+                    # so the verifier sees the full family enumeration,
+                    # not just the agent-cited subset that Step 1b
+                    # filters.
+                    from bitgn_contest_agent.adapter.ecom import Req_Read
+                    from bitgn_contest_agent.sku_verifier import filter_sku_refs
+                    def _read_sku_post(path: str) -> str | None:
+                        if read_cache is not None:
+                            cached = read_cache.get(path)
+                            if cached is not None:
+                                return cached
+                        try:
+                            tr = self._adapter.dispatch(
+                                Req_Read(tool="read", path=path)
+                            )
+                            if not tr.ok or not tr.content:
+                                return None
+                            try:
+                                parsed = _json.loads(tr.content)
+                                body = parsed.get("content", "") if isinstance(parsed, dict) else ""
+                            except (ValueError, AttributeError):
+                                body = ""
+                            if body and read_cache is not None:
+                                read_cache[path] = body
+                            return body if body else tr.content
+                        except Exception:
+                            return None
+                    post_filtered = filter_sku_refs(
+                        task_text=task_text,
+                        refs=fn.grounding_refs,
+                        read_sku=_read_sku_post,
+                    )
+                    if post_filtered.dropped:
+                        emit_arch(
+                            category=ArchCategory.REFS_DROP,
+                            at_step=None,
+                            details=(
+                                f"sku_verifier (post-yes-no) stripped "
+                                f"{len(post_filtered.dropped)} ref(s): "
+                                f"{post_filtered.dropped[:5]} "
+                                f"reasons={post_filtered.reasons[:3]}"
+                            ),
+                        )
+                        fn = fn.model_copy(
+                            update={"grounding_refs": post_filtered.kept}
+                        )
 
         # Step 1c3: fraud recall completer. ADDS canonical fraud
         # rows the agent under-called. Symmetric to the cluster
