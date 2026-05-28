@@ -370,8 +370,16 @@ ECOM grounding_refs discipline (PROD-grader rules):
 
   F. ANSWER TOKENS (from /AGENTS.MD). Yes/no questions REQUIRE
      `<YES>` or `<NO>` literally in `message`. Counting questions
-     require `<COUNT:n>` (digit, not a word) exactly per the task
-     instruction.
+     require a count token with the EXACT capitalization, brackets,
+     separator, and spacing the task instruction specifies. The
+     default form is `<COUNT:n>` (digit, not a word), but the task
+     may specify a different form — `<count:n>`, `<count: N>`,
+     `[QTY:n]`, `qty=N` — and the grader's literal-match check
+     compares verbatim. Mirror the task's case (UPPER/lower),
+     brackets (`<>` / `[]` / none), separator (`:` / `=` / space),
+     and any surrounding whitespace exactly. If the task quotes the
+     desired form with backticks or quotes, strip the quoting and
+     emit only the token itself.
 
 Catalogue / SQL discipline (ECOM-specific):
   - The runtime ships an `exec` interface to small executables in /bin.
