@@ -1257,10 +1257,30 @@ class AgentLoop:
                 enabled as _store_back_enabled,
             )
             if _store_back_enabled():
+                from bitgn_contest_agent.adapter.ecom import Req_Read as _Req_Read_SB
+                def _read_emp(path: str) -> str | None:
+                    if read_cache is not None and path in read_cache:
+                        return read_cache[path]
+                    try:
+                        tr = self._adapter.dispatch(_Req_Read_SB(tool="read", path=path))
+                        if tr.ok and tr.content:
+                            try:
+                                parsed = _json.loads(tr.content)
+                                body = parsed.get("content", "") if isinstance(parsed, dict) else ""
+                            except (ValueError, AttributeError):
+                                body = ""
+                            if body and read_cache is not None:
+                                read_cache[path] = body
+                            return body or tr.content
+                    except Exception:
+                        return None
+                    return None
                 sbr = _complete_store_back(
                     task_text=task_text,
                     refs=list(fn.grounding_refs),
                     read_cache=read_cache,
+                    read=_read_emp,
+                    actor_id=getattr(self, "_actor_id", None),
                 )
                 if sbr.added:
                     emit_arch(

@@ -111,3 +111,54 @@ class TestSafety:
         for p in ("/AGENTS.MD", "/proc/employees/emp_036.json",
                   "/proc/catalog/Bondex/PNT-2RHJYR74.json"):
             assert p in r.refs
+
+
+class TestActorIdFallback:
+    def test_actor_id_used_when_no_emp_ref(self):
+        def fake_read(path):
+            assert path == "/proc/employees/emp_036.json"
+            return EMP_036_BODY
+        r = complete_store_back_refs(
+            task_text="Check my store's same-day availability.",
+            refs=["/AGENTS.MD"],
+            read_cache={},
+            read=fake_read,
+            actor_id="emp_036",
+        )
+        assert r.added == ["/proc/stores/store_bratislava_stare_mesto.json"]
+
+    def test_actor_id_ignored_when_cust(self):
+        r = complete_store_back_refs(
+            task_text="Check my store's same-day availability.",
+            refs=["/AGENTS.MD"],
+            read_cache={},
+            read=lambda p: None,
+            actor_id="cust_017",
+        )
+        assert r.aborted
+        assert r.abort_reason == "no_employee_ref"
+
+    def test_actor_id_ignored_when_no_read_callback(self):
+        # cache empty, no read callback → can't fetch
+        r = complete_store_back_refs(
+            task_text="Check my store's same-day availability.",
+            refs=["/AGENTS.MD"],
+            read_cache={},
+            read=None,
+            actor_id="emp_036",
+        )
+        # Falls through to no_store_id (body never fetched)
+        assert not r.aborted
+        assert r.added == []
+
+    def test_emp_ref_in_refs_overrides_actor_id(self):
+        def fake_read(path):
+            assert False, "should not call read; emp body already in cache"
+        r = complete_store_back_refs(
+            task_text="Check my store's same-day availability.",
+            refs=["/AGENTS.MD", "/proc/employees/emp_036.json"],
+            read_cache={"/proc/employees/emp_036.json": EMP_036_BODY},
+            read=fake_read,
+            actor_id="emp_099",  # ignored — emp_036 already in refs
+        )
+        assert r.added == ["/proc/stores/store_bratislava_stare_mesto.json"]

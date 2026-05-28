@@ -112,16 +112,24 @@ def complete_store_back_refs(
     refs: list[str],
     read_cache: Mapping[str, str] | None,
     read: Callable[[str], str | None] | None = None,
+    actor_id: str | None = None,
 ) -> StoreBackResult:
-    """Add the actor's home-store ref when grounding chain
-    contains an employee record AND the task names store-specific
-    availability."""
+    """Add the actor's home-store ref when the task names
+    store-specific availability AND we can resolve an employee
+    record (either already cited, or via the prepass actor identity).
+    """
     if not _is_store_availability_task(task_text):
         return StoreBackResult(
             refs=list(refs), aborted=True,
             abort_reason="not_store_availability_task",
         )
     emp_refs = [r for r in refs if _EMP_REF_RE.match(r)]
+    # v0.1.117-pre+: fall back to prepass actor identity (e.g. emp_036
+    # from /bin/id) when the agent took a SQL-only path and never
+    # cited the employee record. The completer reads emp_<actor>.json
+    # via the read callback below to extract store_id.
+    if not emp_refs and actor_id and actor_id.startswith("emp_"):
+        emp_refs = [f"/proc/employees/{actor_id}.json"]
     if not emp_refs:
         return StoreBackResult(
             refs=list(refs), aborted=True,
