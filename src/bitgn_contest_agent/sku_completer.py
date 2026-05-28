@@ -45,9 +45,25 @@ SKU verifier handles overcitation drops.
 from __future__ import annotations
 
 import json as _json
+import os
 import re
 from dataclasses import dataclass, field
 from typing import Callable, Iterable, Sequence
+
+
+def _closerouter_caps_enabled() -> bool:
+    """True when the SKU completer should apply CloseRouter-style
+    enumeration caps (yes_no=5, count_per_store=1/product).
+
+    Driven by the single env var BITGN_PROVIDER_PROFILE:
+      - unset / cliproxyapi / anything else → False (default)
+      - closerouter → True
+
+    Set via .env (`scripts/use_provider.sh closerouter` flips it on).
+    See sku_completer call sites for the failure modes each gate
+    addresses, and docs/PROD_CONTEST_PLAYBOOK.md for the provider
+    quirk catalogue."""
+    return os.environ.get("BITGN_PROVIDER_PROFILE", "").strip().lower() == "closerouter"
 
 
 @dataclass
@@ -653,17 +669,20 @@ def complete_sku_refs_from_spec(
                 aborted=True,
                 abort_reason=f"sql failed for product {brand}",
             )
-        # v0.1.110: cap to at most 1 qualifying SKU per product. The
-        # task asks "how many PRODUCTS have stock" — citing 1 SKU per
-        # product is sufficient to ground the count. Adding every
-        # SKU per product (LIMIT 50 in the relaxation ladder × N
-        # products = up to 200 refs) triggers PROD grader's "answer
-        # contains too many invalid references" rejection when the
-        # brand-only fallback enumerates an unrelated subset of the
-        # brand's catalogue (e.g. t16 added 76 unrelated SKUs).
-        # Bench v109 evidence: t11/t13/t16 catalogue/count tasks
-        # failed for this reason on the CloseRouter routing path.
-        for path in skus[:1]:
+        # v0.1.111 capped this to `skus[:1]` (1 SKU per product) to
+        # dodge CloseRouter's "too many invalid references" grader
+        # rejection. v0.1.113-pre cliproxyapi baseline (2026-05-27)
+        # showed the OPPOSITE: the cliproxyapi grader REQUIRES all
+        # qualifying SKUs cited per product, so the cap caused 5
+        # fresh failures (t11/t15/t17/t33/t45 — missing required
+        # ref). v0.1.113 gates the cap behind BITGN_PROVIDER_PROFILE:
+        # default cliproxyapi → no cap; closerouter → cap=1.
+        # scripts/use_provider.sh flips the env var in .env.
+        # Evidence (t15): v108-era completer added 16 refs → grader
+        # accepted; v111-era completer added 4 refs (cap) → grader
+        # said missing required ref.
+        skus_to_add = skus[:1] if _closerouter_caps_enabled() else skus
+        for path in skus_to_add:
             if path not in have:
                 out_refs.append(path)
                 have.add(path)
@@ -801,15 +820,14 @@ def complete_yes_no_sku_refs(
     out_refs = list(refs)
     added: list[str] = []
     reasons: list[str] = []
-    # v0.1.110: cap family enumeration to 5 to avoid the PROD grader's
-    # "answer contains too many invalid references" rejection. The
-    # verifier downstream would in principle drop wrong-attribute
-    # family members, but it runs only on refs the agent itself cited
-    # (not on completer-added refs), so the full LIMIT-50 family flood
-    # makes it through to the grader. Capping to 5 keeps a small set
-    # of close candidates that the agent's own message + sku_verifier
-    # can validate, and bounds the over-citation surface.
-    for path in family[:5]:
+    # v0.1.111 capped this to family[:5] to dodge CloseRouter's
+    # "too many invalid references" rejection. cliproxyapi grader
+    # REQUIRES qualifying SKUs cited, so the cap caused fresh
+    # failures (t08/t11/t17/t33/t45 — missing required ref).
+    # v0.1.113 gates the cap behind BITGN_PROVIDER_PROFILE: default
+    # cliproxyapi → no cap; closerouter → cap=5.
+    family_to_add = family[:5] if _closerouter_caps_enabled() else family
+    for path in family_to_add:
         if path not in have:
             out_refs.append(path)
             have.add(path)

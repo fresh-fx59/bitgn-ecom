@@ -59,8 +59,6 @@ src = open(path).read()
 # Three keys per block: CLIPROXY_BASE_URL, CLIPROXY_API_KEY,
 # BITGN_CLASSIFIER_MODEL. We flip the comment state per-line so the
 # target block ends up active and the other commented.
-CR_KEYS  = {"closerouter":  ("api.closerouter.dev",    "closerouter_",        "anthropic/claude-haiku-4.5")}
-CLP_KEYS = {"cliproxyapi":  ("127.0.0.1:8317",         "e7a6d7b34d",          "claude-haiku-4-5-20251001")}
 
 def is_in_block(line: str, block: str) -> bool:
     if block == "closerouter":
@@ -74,9 +72,16 @@ def is_in_block(line: str, block: str) -> bool:
     return False
 
 out = []
+saw_profile_var = False
 for line in src.splitlines():
     stripped = line.lstrip("# ").rstrip()
-    # Look for one of the three known keys
+    # The single provider-profile flag — exists only when a profile
+    # is explicitly chosen. We rewrite it on every switch.
+    if stripped.startswith("BITGN_PROVIDER_PROFILE="):
+        saw_profile_var = True
+        out.append(f"BITGN_PROVIDER_PROFILE={target}")
+        continue
+    # Provider-specific env blocks
     if any(stripped.startswith(k) for k in
            ("CLIPROXY_BASE_URL=", "CLIPROXY_API_KEY=", "BITGN_CLASSIFIER_MODEL=")):
         if is_in_block(stripped, target):
@@ -89,6 +94,12 @@ for line in src.splitlines():
             out.append(line)
     else:
         out.append(line)
+
+# If the file didn't carry the profile var yet, append it. Single
+# source of truth that downstream code reads via os.environ.
+if not saw_profile_var:
+    out.append(f"BITGN_PROVIDER_PROFILE={target}")
+
 open(path, "w").write("\n".join(out) + "\n")
 PY
   echo "switched: $current → $target"
