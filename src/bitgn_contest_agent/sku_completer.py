@@ -620,19 +620,29 @@ def complete_sku_refs_from_spec(
             aborted=True, abort_reason="no task_spec",
         )
     kind = getattr(task_spec, "kind", "none")
-    if kind != "count_per_store":
+    products = getattr(task_spec, "products", []) or []
+    store_descriptor = getattr(task_spec, "store_descriptor", "") or ""
+    threshold = int(getattr(task_spec, "threshold", 0) or 0)
+
+    # v0.1.117-pre+: salvage path when LLM misclassified task_spec.kind
+    # but the structural fields (products + store_descriptor + threshold)
+    # ARE populated. PROD t13 (run-22Rhf9Y..., 2026-05-28) emitted
+    # kind="none" on a clear count_per_store question; the strict gate
+    # below aborted the completer and the qualifying SKU never landed
+    # in grounding_refs. The salvage is GATED behind structural
+    # evidence — products+store+threshold all present — so it never
+    # fires on tasks that genuinely aren't count_per_store.
+    structural_fit = bool(products and store_descriptor and threshold > 0)
+    if kind != "count_per_store" and not structural_fit:
         return CompleterResult(
             refs=list(refs), added=[], reasons=[],
             aborted=True, abort_reason=f"task_spec.kind={kind!r}",
         )
-    products = getattr(task_spec, "products", []) or []
     if not products:
         return CompleterResult(
             refs=list(refs), added=[], reasons=[],
             aborted=True, abort_reason="task_spec.products empty",
         )
-    store_descriptor = getattr(task_spec, "store_descriptor", "") or ""
-    threshold = int(getattr(task_spec, "threshold", 0) or 0)
 
     store_id = resolve_store_id(store_descriptor, run_sql)
     if store_id is None:
