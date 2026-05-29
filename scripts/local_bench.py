@@ -172,6 +172,24 @@ def _grade(
         if snap.expected_answer.strip().lower() not in (message or "").lower():
             return False, f"expected answer fragment not found: {snap.expected_answer!r}"
 
+    # No constraint was actually checked → this is a VACUOUS pass. A local
+    # "pass" here is MEANINGLESS (it only confirms the agent emitted *some*
+    # OUTCOME_OK answer, not a correct one). Surface it loudly so it can
+    # never be mistaken for real local-1.0 validation. Discovered when t47
+    # (whose snapshot metadata has no expected_answer) false-passed while
+    # its answer was wrong on 3/5 rows — see memory project_ecom_t47_tsv_oracle.
+    if not (
+        snap.expected_outcome
+        or snap.required_refs
+        or snap.forbidden_refs
+        or snap.expected_answer
+    ):
+        return True, (
+            "UNGRADED: snapshot metadata has no expected_outcome/"
+            "expected_answer/required_refs/forbidden_refs — local PASS is "
+            "MEANINGLESS, validate against an oracle before trusting it"
+        )
+
     return True, "passed all checks"
 
 
@@ -435,7 +453,8 @@ def main(argv: list[str] | None = None) -> int:
                 max_steps=args.max_steps,
                 llm_http_timeout_sec=args.llm_timeout_sec,
             )
-            mark = "PASS" if r.passed else "FAIL"
+            mark = "WARN" if r.detail.startswith("UNGRADED") else (
+                "PASS" if r.passed else "FAIL")
             print(f"  [{mark}] {snap.name}#{i}  outcome={r.outcome}  steps={r.steps}  "
                   f"wall={r.wall_sec:.1f}s  detail={r.detail[:140]}")
             results.append(r)
@@ -449,6 +468,19 @@ def main(argv: list[str] | None = None) -> int:
             print(f"      ↳ {d[:140]}")
     totals = summary["totals"]
     print(f"\n# total: {totals['passed']}/{totals['runs']} ({totals['rate']*100:.1f}%)")
+
+    ungraded = sorted({
+        r.snapshot for r in results if r.detail.startswith("UNGRADED")
+    })
+    if ungraded:
+        print(
+            f"\n# ⚠️  WARNING: {len(ungraded)} snapshot(s) had NO grading "
+            f"constraints — their 'pass' is MEANINGLESS (only confirms an "
+            f"OUTCOME_OK answer, not a correct one):"
+        )
+        for name in ungraded:
+            print(f"      - {name}: add expected_answer/required_refs or "
+                  f"grade against an oracle")
 
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
