@@ -1459,6 +1459,7 @@ class AgentLoop:
                     task_spec=task_spec_obj,
                     refs=list(fn.grounding_refs),
                     run_sql=_run_sql_skucomp_spec,
+                    task_text=task_text or "",
                 )
                 if sku_spec_res.added:
                     emit_arch(

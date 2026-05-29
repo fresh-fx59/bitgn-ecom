@@ -146,17 +146,23 @@ def fetch_known_property_keys(
 ) -> set[str] | None:
     """Enumerate distinct attribute names defined in products.properties
     via SQLite's json_each. Returns None on SQL failure."""
-    out = run_sql(
-        "SELECT DISTINCT je.key FROM products p, "
-        "json_each(p.properties) je;"
-    )
+    sch = _detect_schema(run_sql)
+    if sch and not sch["props_inline"]:
+        out = run_sql(
+            f"SELECT DISTINCT {sch['props_key']} FROM {sch['props_tbl']};"
+        )
+    else:
+        out = run_sql(
+            "SELECT DISTINCT je.key FROM products p, "
+            "json_each(p.properties) je;"
+        )
     if out is None:
         return None
     body = _unwrap_sql(out)
     keys: set[str] = set()
     for line in body.splitlines():
         s = line.strip()
-        if not s or s.startswith("[") or s in {"key", "key|"}:
+        if not s or s.startswith("[") or s in {"key", "key|", "property_key", "property_key|"}:
             continue
         cols = _csv_split(s)
         if cols and cols[0]:
@@ -301,24 +307,37 @@ def resolve_store_id(
     if not candidates:
         candidates = [norm.replace(" ", "_").replace("-", "_")]
 
-    out = run_sql(
-        "SELECT id FROM stores WHERE "
-        + " OR ".join(
-            f"id LIKE '%{tok}%'" for tok in candidates
+    sch = _detect_schema(run_sql)
+    idcol = sch["stores_id"] if sch else "id"
+    # Token-AND match: every token in the (stripped) descriptor must
+    # appear in the store id, so "Veveri ... Brno" → store_brno_veveri
+    # without needing a hand-maintained city map. Fall back to the
+    # legacy candidate tokens if the descriptor yields none.
+    desc_tokens = [t for t in re.split(r"[^a-z0-9]+", norm) if len(t) >= 3
+                   and t not in {"the", "shop", "store", "branch", "today", "near"}]
+    where_clauses = []
+    if desc_tokens:
+        where_clauses.append(
+            "(" + " AND ".join(f"{idcol} LIKE '%{t}%'" for t in desc_tokens) + ")"
         )
+    for tok in candidates:
+        where_clauses.append(f"{idcol} LIKE '%{tok}%'")
+    out = run_sql(
+        f"SELECT {idcol} FROM stores WHERE " + " OR ".join(where_clauses)
     )
     if not out:
         return None
     body = _unwrap_sql(out)
+    sids = []
     for line in body.splitlines():
         s = line.strip()
-        if not s or s.startswith("[") or s == "id" or s.startswith("id|"):
+        if not s or s.startswith("[") or s in {"id", "id|", "store_id", "store_id|"}:
             continue
-        # Could be CSV or pipe.
         sid = s.split(",")[0].split("|")[0].strip()
         if sid.startswith("store_"):
-            return sid
-    return None
+            sids.append(sid)
+    # Only return a confident single resolution; ambiguity → abstain.
+    return sids[0] if len(sids) == 1 else None
 
 
 # ── SQL helpers ──────────────────────────────────────────────────────
@@ -348,6 +367,82 @@ def _csv_split(s: str) -> list[str]:
 
 def _sql_quote(s: str) -> str:
     return s.replace("'", "''")
+
+
+# ── schema adaptivity (PROD product_variants vs legacy products) ──────
+# The live ECOM schema is product_variants / product_variant_properties
+# (separate table) / store_inventory(store_id, product_sku,
+# available_today_quantity) / stores(store_id). Legacy synthetic test
+# fixtures use products(sku,path,properties-json) / inventory / stores(id).
+# All completer SQL was written for the legacy names and is SILENTLY DEAD
+# on PROD. Detect the schema and build against whichever exists.
+# See memory project_ecom_count_completer_dead_in_prod.
+
+_SKU_CAP_PER_PRODUCT = 8  # abstain (return []) above this — under-spec flood guard
+
+
+def _detect_schema(run_sql: Callable[[str], str | None]) -> dict | None:
+    out = run_sql("SELECT name FROM sqlite_master WHERE type='table';")
+    if out is None:
+        return None
+    names = set()
+    for line in _unwrap_sql(out).splitlines():
+        s = line.strip()
+        if not s or s.startswith("[") or s in {"name", "name|"}:
+            continue
+        names.add(_csv_split(s)[0])
+    if "product_variants" in names:
+        return {
+            "kind": "prod", "tbl": "product_variants", "sku": "product_sku",
+            "path": "record_path", "name": "product_name",
+            "props_inline": False, "props_tbl": "product_variant_properties",
+            "props_sku": "product_sku", "props_key": "property_key",
+            "props_val": "property_value_text",
+            "inv_tbl": "store_inventory", "inv_sku": "product_sku",
+            "inv_store": "store_id", "inv_avail": "available_today_quantity",
+            "stores_id": "store_id",
+        }
+    if "products" in names:
+        return {
+            "kind": "legacy", "tbl": "products", "sku": "sku", "path": "path",
+            "name": "name", "props_inline": True, "props_col": "properties",
+            "inv_tbl": "inventory", "inv_sku": "sku", "inv_store": "store_id",
+            "inv_avail": "available_today", "stores_id": "id",
+        }
+    return None
+
+
+def _attr_filter(sch: dict, k: str, v: str) -> str:
+    """Match attribute value via the property store OR the display name
+    (some variant attributes — wiper-blade/cable length, fastener size —
+    live only in product_name). Space-insensitive, case-insensitive."""
+    v_ns = _sql_quote(v.replace(" ", ""))
+    name_like = f"replace(p.\"{sch['name']}\",' ','') LIKE '%{v_ns}%' COLLATE NOCASE"
+    if sch["props_inline"]:
+        prop = (
+            f"replace(lower(json_extract(p.\"{sch['props_col']}\",'$.{k}')),' ','')"
+            f" = lower('{v_ns}')"
+        )
+    else:
+        prop = (
+            f"EXISTS (SELECT 1 FROM {sch['props_tbl']} pp WHERE "
+            f"pp.{sch['props_sku']} = p.\"{sch['sku']}\" AND "
+            f"pp.{sch['props_key']} = '{_sql_quote(k)}' AND "
+            f"replace(lower(pp.{sch['props_val']}),' ','') = lower('{v_ns}'))"
+        )
+    return f" AND ({prop} OR {name_like})"
+
+
+def _rows_to_paths(body: str, path_col: str) -> list[str]:
+    paths: list[str] = []
+    for line in body.splitlines():
+        s = line.strip()
+        if not s or s.startswith("[") or s in {"path", "path|", path_col, path_col + "|"}:
+            continue
+        cols = _csv_split(s)
+        if cols and cols[0].startswith("/proc/catalog/"):
+            paths.append(cols[0])
+    return paths
 
 
 # ── per-spec SQL ─────────────────────────────────────────────────────
@@ -488,63 +583,43 @@ def _find_qualifying_skus_relaxed(
 
     Returns None on SQL failure (caller should abstain).
     """
+    sch = _detect_schema(run_sql)
+    if sch is None:
+        return None
     brand_q = _sql_quote(brand)
 
-    # The agent's emitted `series` is often the FULL task-spec line
-    # text (e.g. 'Philips Smart Ultra 1N3-S8K LED Bulb'), but the
-    # catalogue's `series` column holds only the series prefix
-    # ('Philips Smart Ultra' or similar). A LIKE on the full string
-    # would never match. Build a relaxation ladder:
-    #   1. strict: brand + series LIKE + model = + all attrs
-    #   2. brand + model = (drop series; drop attrs)
-    #   3. brand only (last-resort family enumeration)
-    tries: list[tuple[str, str, list[tuple[str, str]]]] = []
-    line_strict = ""
-    if series:
-        line_strict += f" AND p.series LIKE '%{_sql_quote(series)}%'"
-    if model:
-        line_strict += f" AND p.model = '{_sql_quote(model)}'"
-    if attributes:
-        tries.append(("strict", line_strict, list(attributes.items())))
-    if model:
-        tries.append(
-            ("brand+model", f" AND p.model = '{_sql_quote(model)}'", [])
-        )
-    tries.append(("brand only", "", []))
-
-    for label, line_filter, attr_pairs in tries:
-        attr_clause = ""
-        for k, v in attr_pairs:
-            v_q = _sql_quote(v)
-            attr_clause += (
-                f" AND lower(json_extract(p.properties, '$.{k}')) = "
-                f"lower('{v_q}')"
-            )
-        sql = (
-            "SELECT p.path FROM products p "
-            "JOIN inventory i ON i.sku = p.sku "
-            f"WHERE p.brand = '{brand_q}' COLLATE NOCASE"
-            f"{line_filter}{attr_clause} "
-            f"AND i.store_id = '{_sql_quote(store_id)}' "
-            f"AND i.available_today >= {int(threshold)} "
-            "LIMIT 50;"
-        )
-        out = run_sql(sql)
-        if out is None:
-            return None
-        body = _unwrap_sql(out)
-        paths: list[str] = []
-        for line in body.splitlines():
-            s = line.strip()
-            if not s or s.startswith("[") or s == "path" or s.startswith("path|"):
-                continue
-            cols = _csv_split(s)
-            if cols and cols[0].startswith("/proc/catalog/"):
-                paths.append(cols[0])
-        if paths:
-            return paths
-    # All variants returned zero.
-    return []
+    # SAFE strict-only resolution: brand + model LIKE (the model code may
+    # carry a series prefix, e.g. task 'XTREME 300-EAF' vs '300-EAF') +
+    # EVERY attribute matched via property store OR display name. We do
+    # NOT relax to brand-only — that floods unrelated variants and
+    # triggers the grader's "too many invalid references" (a tried
+    # brand-only ladder returned 33 SKUs/product). If the strict query
+    # returns 0 or more than the per-product cap, ABSTAIN (return []),
+    # leaving the LLM's choice untouched. Only ADDS, never floods.
+    model_code = (model or "").split()[-1] if model else ""
+    line_filter = ""
+    if model_code:
+        line_filter += f" AND p.model LIKE '%{_sql_quote(model_code)}%'"
+    elif series:
+        line_filter += f" AND p.series LIKE '%{_sql_quote(series)}%'"
+    attr_clause = "".join(_attr_filter(sch, k, v) for k, v in attributes.items())
+    sql = (
+        f"SELECT p.\"{sch['path']}\" FROM {sch['tbl']} p "
+        f"JOIN {sch['inv_tbl']} i ON i.{sch['inv_sku']} = p.\"{sch['sku']}\" "
+        f"WHERE p.brand = '{brand_q}' COLLATE NOCASE"
+        f"{line_filter}{attr_clause} "
+        f"AND i.{sch['inv_store']} = '{_sql_quote(store_id)}' "
+        f"AND i.{sch['inv_avail']} >= {int(threshold)} "
+        "LIMIT 50;"
+    )
+    out = run_sql(sql)
+    if out is None:
+        return None
+    paths = _rows_to_paths(_unwrap_sql(out), sch["path"])
+    if len(paths) > _SKU_CAP_PER_PRODUCT:
+        # under-specified / over-broad match — abstain rather than flood
+        return []
+    return paths
 
 
 def compute_count_per_store(
@@ -595,11 +670,19 @@ def compute_count_per_store(
     return n
 
 
+_NEGATION_RE = re.compile(
+    r"\b(fewer than|less than|under|below|at most|no more than|"
+    r"fewer|lower than|not more than|no same-day|without)\b",
+    re.IGNORECASE,
+)
+
+
 def complete_sku_refs_from_spec(
     *,
     task_spec,  # TaskSpec (loose-typed to avoid pydantic cycle)
     refs: Sequence[str],
     run_sql: Callable[[str], str | None],
+    task_text: str = "",
 ) -> CompleterResult:
     """Use the agent-emitted ``task_spec`` (structured) to ADD any
     missing qualifying catalogue SKU paths to grounding_refs. UNION
@@ -618,6 +701,17 @@ def complete_sku_refs_from_spec(
         return CompleterResult(
             refs=list(refs), added=[], reasons=[],
             aborted=True, abort_reason="no task_spec",
+        )
+    # NEGATION GUARD: the resolver qualifies products by
+    # available_today >= threshold. For "fewer than N" / "less than N"
+    # / "no same-day" tasks the qualifying condition is INVERTED
+    # (available < threshold), so adding >=-qualifying SKUs would cite
+    # exactly the WRONG products → grader "invalid reference". When the
+    # task is a negation, abstain and leave the LLM's refs untouched.
+    if task_text and _NEGATION_RE.search(task_text):
+        return CompleterResult(
+            refs=list(refs), added=[], reasons=[],
+            aborted=True, abort_reason="negation task — completer abstains",
         )
     kind = getattr(task_spec, "kind", "none")
     products = getattr(task_spec, "products", []) or []
