@@ -388,7 +388,13 @@ def _run_with_voting(
         comps.append(captured[-1])
         if i == 0:
             kind = getattr(getattr(captured[-1], "task_spec", None), "kind", "none")
-            if kind not in ("count_per_store", "yes_no_sku"):
+            # v0.1.152: gate to count_per_store ONLY. Re-examination of the
+            # K=3 run showed the count_per_store tasks (t16/t45) voted and
+            # PASSED, while the apparent "voting damage" (t10/t15/t50) was
+            # seed variance on run-0-passthrough non-count tasks. yes_no_sku
+            # (t08) was the one voted task that failed — dropped here to keep
+            # voting to the clearly-beneficial count-token-variance case.
+            if kind != "count_per_store":
                 adapter.submit_terminal(captured[-1])  # no voting benefit
                 return last_result
         if cancel_event is not None and cancel_event.is_set():
