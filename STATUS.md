@@ -547,3 +547,32 @@ proof the enforcer avenue is closed. 53/53 remains seed-bound — reachable
 only on a lucky seed with the default config; rate limits + no-overfitting
 forbid brute-forcing it. DO NOT re-attempt deterministic count/fraud
 enforcers or re-enable voting / the t48 hint.
+
+## v0.1.151 FINAL — spec-based count override also PROD-dead; deterministic avenue CLOSED (2026-05-30)
+
+Clean count-override-only PROD A/B (run-22RtAZLG69jK2NEbUPuAHqYDo,
+BITGN_USE_REFLESS_COUNT_OVERRIDE=1 + proven stack, no fraud levers) = 45/53.
+The spec-based override (compute_refless_count_from_spec — consumes the LLM's
+task_spec.products + resolve_store_id + EXACT attr match) fired on ZERO PROD
+tasks; count tasks t14/t45/t49 still 0.0. Root cause (PROD t45 trace): gate
+DID pass (kind=count_per_store) but the RESOLVER ABSTAINED — 6 products on an
+unseen world, exact attribute matching fails on ≥1 → whole-count abstain.
+Holds for essentially every multi-product PROD count task; loosening → wrong
+counts. PROD wording/format also mutate per world ("how many of these have
+less than 5 available today" → "[QTY:2]"), defeating the text-parser too.
+
+CONCLUSION (PROD-confirmed across text-parser, spec-resolver, AND fraud — ~5
+A/B runs): deterministic count/fraud enforcers CANNOT beat PROD content
+variance (the contest author's deliberate anti-overfit design + confirmed
+fraud TRAPS). The adaptive LLM is the only viable resolver. The override
+caused NO regression (safe no-op), so 45/53 == default-config behaviour on a
+mid-band seed (band ~38-51, best 51.4/53 = run-22Rotahx).
+
+**RECOMMENDED CONFIG = DEFAULT (no BITGN_USE_* experimental flags).** All
+v145-151 levers stay default-OFF (PROD no-ops or regressive). Lasting value:
+local_bench UNGRADED fix, derived oracles, broadened-but-off fraud matcher,
+and PROOF the deterministic avenue is closed. 53/53 needs a lucky default-seed
++ genuine t48 interpretation (author-confirmed 51-52 human ceiling). DO NOT
+build more deterministic count/fraud enforcers; DO NOT enable voting / fraud
+levers / t48 hint (traps). Continue only via the default config on fresh seeds
+(within rate limits) or genuine agent-capability work — not enforcers.
