@@ -1547,6 +1547,53 @@ class AgentLoop:
                 # the LLM's per-task SQL is adaptive in ways the
                 # post-pass can't replicate. The completer should
                 # ADD refs, never rewrite the LLM's numeric answer.
+                #
+                # v0.1.138 re-introduces a count-override that is SAFE
+                # against both v0.1.106 failure modes:
+                #   - t15 (relaxation inflated the count): the resolver
+                #     is now STRICT-only (no brand-only relaxation,
+                #     flood-guarded), so it cannot over-count.
+                #   - t19 (multi-store aggregate): resolve_store_id
+                #     abstains unless EXACTLY one store matches, so
+                #     "every Vienna branch" → no override.
+                # Plus: negation guard, per-product line-resolution
+                # confidence, and a token rewrite that only fires when
+                # the message has exactly ONE integer (unambiguous).
+                # Evidence: t16's count token is non-deterministic
+                # (1↔3 on the same world) while the completer resolves
+                # the correct qualifying-product count deterministically.
+                # Env-gated default-off so the proven stack is untouched.
+                if (
+                    os.environ.get("BITGN_USE_COUNT_OVERRIDE") == "1"
+                    and getattr(task_spec_obj, "kind", "none") == "count_per_store"
+                ):
+                    try:
+                        from bitgn_contest_agent.sku_completer import (
+                            compute_count_per_store as _compute_cnt,
+                        )
+                        canonical_n = _compute_cnt(
+                            task_spec=task_spec_obj,
+                            run_sql=_run_sql_skucomp_spec,
+                            task_text=task_text or "",
+                        )
+                    except Exception:
+                        canonical_n = None
+                    if canonical_n is not None:
+                        import re as _re
+                        ints = _re.findall(r"\d+", fn.message or "")
+                        if len(ints) == 1 and int(ints[0]) != canonical_n:
+                            new_msg = _re.sub(
+                                r"\d+", str(canonical_n), fn.message, count=1
+                            )
+                            emit_arch(
+                                category=ArchCategory.REFS_DROP,
+                                at_step=None,
+                                details=(
+                                    f"count_override: {ints[0]} -> "
+                                    f"{canonical_n} (completer-resolved)"
+                                ),
+                            )
+                            fn = fn.model_copy(update={"message": new_msg})
 
             # yes_no_sku: enumerate brand+series family; verifier
             # prunes wrong-attribute members downstream.

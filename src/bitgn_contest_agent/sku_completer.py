@@ -626,20 +626,35 @@ def compute_count_per_store(
     *,
     task_spec,
     run_sql: Callable[[str], str | None],
+    task_text: str = "",
 ) -> int | None:
-    """Compute the canonical COUNT for a count_per_store task: the
-    number of distinct PRODUCTS (not SKUs) in `task_spec.products`
-    that have at least one qualifying SKU at the named store with
-    available_today >= threshold.
+    """Compute the canonical COUNT for a count_per_store *at-least* task:
+    the number of distinct PRODUCTS in `task_spec.products` that have at
+    least one qualifying SKU at the named store with available_today >=
+    threshold.
 
-    Returns None on parse/SQL failure (caller should not override).
+    Returns None (→ caller must NOT override) on ANY uncertainty:
+      - kind != count_per_store, empty products, missing brand
+      - SQL failure / store not uniquely resolvable
+      - NEGATION task ("fewer than", "less than", "no same-day", ...):
+        the >= semantics is inverted, so the count would be wrong
+      - a product whose line does not resolve to ANY catalogue variant
+        (brand+model LIKE returns 0) — the spec is unresolvable, so the
+        whole count is untrustworthy.
+    Only when EVERY product yields a confident verdict do we return a
+    count safe enough to override the LLM's token.
     """
     if task_spec is None:
         return None
     if getattr(task_spec, "kind", "none") != "count_per_store":
         return None
+    if task_text and _NEGATION_RE.search(task_text):
+        return None
     products = getattr(task_spec, "products", []) or []
     if not products:
+        return None
+    sch = _detect_schema(run_sql)
+    if sch is None:
         return None
     store_descriptor = getattr(task_spec, "store_descriptor", "") or ""
     threshold = int(getattr(task_spec, "threshold", 0) or 0)
@@ -653,15 +668,33 @@ def compute_count_per_store(
         model = getattr(p, "model", "") or ""
         attrs = dict(getattr(p, "attributes", {}) or {})
         if not brand:
-            continue
+            return None
+        # Confidence gate: the product LINE must resolve to >=1 variant
+        # (ignoring inventory/attrs). If brand+model matches nothing, the
+        # spec is unresolvable and the whole count is untrustworthy.
+        model_code = (model or "").split()[-1] if model else ""
+        line_filter = ""
+        if model_code:
+            line_filter = f" AND p.model LIKE '%{_sql_quote(model_code)}%'"
+        elif series:
+            line_filter = f" AND p.series LIKE '%{_sql_quote(series)}%'"
+        line_out = run_sql(
+            f"SELECT COUNT(*) FROM {sch['tbl']} p WHERE p.brand='{_sql_quote(brand)}' "
+            f"COLLATE NOCASE{line_filter};"
+        )
+        if line_out is None:
+            return None
+        line_n = 0
+        for ln in _unwrap_sql(line_out).splitlines():
+            s = ln.strip()
+            if s.isdigit():
+                line_n = int(s)
+                break
+        if line_n == 0:
+            return None  # unresolvable line → abstain
         skus = _find_qualifying_skus_relaxed(
-            brand=brand,
-            series=series,
-            model=model,
-            attributes=attrs,
-            store_id=store_id,
-            threshold=threshold,
-            run_sql=run_sql,
+            brand=brand, series=series, model=model, attributes=attrs,
+            store_id=store_id, threshold=threshold, run_sql=run_sql,
         )
         if skus is None:
             return None  # SQL fail → don't override
