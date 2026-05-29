@@ -16,7 +16,10 @@ from pathlib import Path
 
 import pytest
 
-from bitgn_contest_agent.refless_count_override import compute_refless_count
+from bitgn_contest_agent.refless_count_override import (
+    compute_refless_count,
+    looks_like_refless_count,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 SNAP = ROOT / "artifacts" / "ws_snapshots"
@@ -119,6 +122,21 @@ def test_abstains_on_unknown_store():
         "Nowhere PowerTool store in Atlantis",
     )
     assert compute_refless_count(run_sql, text) is None
+
+
+def test_text_detector_fires_on_template_independent_of_kind():
+    # The PROD bug: classifier left kind=None so the kind-gated override was
+    # dead. The text detector must catch the canonical count template.
+    for snap in ("t45_real2", "t16_real2"):
+        snap_dir = SNAP / snap
+        if not (snap_dir / "sql_schema.sql").exists():
+            continue
+        assert looks_like_refless_count(_instruction(snap_dir))
+    assert not looks_like_refless_count("What is the birthday of customer X?")
+    # template present but no parseable threshold → abstain (resolver would too)
+    assert not looks_like_refless_count(
+        "how many of these products are available in the Brno store"
+    )
 
 
 def test_abstains_on_empty_db():

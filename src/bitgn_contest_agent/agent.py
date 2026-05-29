@@ -1348,6 +1348,62 @@ class AgentLoop:
                         }
                     )
 
+            # v0.1.145/149 REFLESS count override. Computes the qualifying
+            # count by replicating the grader's own observable computation
+            # from the catalogue DB and rewrites the message count token ONLY
+            # when the message has exactly one integer. Count-token-only,
+            # adds NO refs (no v0.1.139 parity risk). ABSTAINS on any
+            # ambiguity. v0.1.149: fires on the TASK-TEXT template, not just
+            # task_spec.kind — in PROD the classifier often leaves kind=None
+            # on a clear count_per_store task, leaving the kind-gated override
+            # DEAD (run-22RsCqqGqyUK7aLRQo4JQduTa: t45 kind=None, override
+            # silent). Relocated here (own SQL runner) so it runs regardless
+            # of kind. See memory project_ecom_count_completer_dead_in_prod.
+            from bitgn_contest_agent.refless_count_override import (
+                compute_refless_count as _refless_cnt,
+                is_enabled as _refless_on,
+                looks_like_refless_count as _looks_refless_count,
+            )
+            if _refless_on() and (
+                getattr(getattr(fn, "task_spec", None), "kind", "none")
+                == "count_per_store"
+                or _looks_refless_count(task_text or "")
+            ):
+                from bitgn_contest_agent.adapter.ecom import Req_Exec as _Req_Exec_C
+
+                def _run_sql_refless(sql: str) -> str | None:
+                    try:
+                        tr = self._adapter.dispatch(
+                            _Req_Exec_C(
+                                tool="exec", path="/bin/sql", args=[], stdin=sql
+                            )
+                        )
+                        return tr.content if tr.ok else None
+                    except Exception:
+                        return None
+
+                try:
+                    refless_n = _refless_cnt(_run_sql_refless, task_text or "")
+                except Exception:
+                    refless_n = None
+                if refless_n is not None:
+                    import re as _re
+
+                    ints = _re.findall(r"\d+", fn.message or "")
+                    if len(ints) == 1 and int(ints[0]) != refless_n:
+                        new_msg = _re.sub(
+                            r"\d+", str(refless_n), fn.message, count=1
+                        )
+                        emit_arch(
+                            category=ArchCategory.REFS_DROP,
+                            at_step=None,
+                            details=(
+                                f"refless_count_override: {ints[0]} -> "
+                                f"{refless_n} (DB-resolved, refless)"
+                            ),
+                        )
+                        fn = fn.model_copy(update={"message": new_msg})
+
             # v0.1.147 fraud-ring completer (t40 SQL fraud-incident task).
             # The agent detects the incident by device clustering and catches
             # most of it but under-cites the ring members on a secondary
@@ -1695,49 +1751,6 @@ class AgentLoop:
                                 details=(
                                     f"count_override: {ints[0]} -> "
                                     f"{canonical_n} (completer-resolved)"
-                                ),
-                            )
-                            fn = fn.model_copy(update={"message": new_msg})
-
-                # v0.1.145 REFLESS count override (safe subset of the
-                # above). Fires only on count_per_store tasks and computes
-                # the qualifying count by replicating the grader's own
-                # observable computation from the catalogue DB. ABSTAINS
-                # (no-op) on any ambiguity, and adds NO refs — so it cannot
-                # hit the v0.1.139 count-cite parity regression (which fired
-                # on ref-bearing count tasks). Validated to exact on the
-                # faithful t16/t45 snapshots; see memory
-                # project_ecom_count_completer_dead_in_prod (REFLESS section)
-                # and tests/test_refless_count_override.py.
-                from bitgn_contest_agent.refless_count_override import (
-                    compute_refless_count as _refless_cnt,
-                    is_enabled as _refless_on,
-                )
-
-                if (
-                    _refless_on()
-                    and getattr(task_spec_obj, "kind", "none") == "count_per_store"
-                ):
-                    try:
-                        refless_n = _refless_cnt(
-                            _run_sql_skucomp_spec, task_text or ""
-                        )
-                    except Exception:
-                        refless_n = None
-                    if refless_n is not None:
-                        import re as _re
-
-                        ints = _re.findall(r"\d+", fn.message or "")
-                        if len(ints) == 1 and int(ints[0]) != refless_n:
-                            new_msg = _re.sub(
-                                r"\d+", str(refless_n), fn.message, count=1
-                            )
-                            emit_arch(
-                                category=ArchCategory.REFS_DROP,
-                                at_step=None,
-                                details=(
-                                    f"refless_count_override: {ints[0]} -> "
-                                    f"{refless_n} (DB-resolved, refless)"
                                 ),
                             )
                             fn = fn.model_copy(update={"message": new_msg})

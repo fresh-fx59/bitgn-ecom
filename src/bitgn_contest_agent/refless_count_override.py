@@ -50,6 +50,25 @@ def _norm(s: object) -> str:
     return re.sub(r"[^a-z0-9]", "", str(s).lower())
 
 
+# Text detector for the refless count template, used to fire the override
+# even when the LLM classifier leaves task_spec.kind unset (observed in PROD:
+# kind=None on a clear count_per_store task → the kind-gated override was
+# dead). The resolver still abstains on any ambiguity, so a loose detector is
+# safe — worst case it calls the resolver which returns None.
+_COUNT_TEMPLATE_RE = re.compile(
+    r"how many of these products .* available .* in ", re.IGNORECASE | re.DOTALL
+)
+
+
+def looks_like_refless_count(task_text: str) -> bool:
+    if not task_text:
+        return False
+    if not _COUNT_TEMPLATE_RE.search(task_text):
+        return False
+    # must also carry a parseable threshold direction (else resolver abstains)
+    return _parse_threshold(task_text) is not None
+
+
 # ── threshold direction ──────────────────────────────────────────────
 # Exactly one comparison must be present, else we cannot know the
 # direction and must abstain.
