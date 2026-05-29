@@ -1,0 +1,37 @@
+{
+  "ts": "20260528T165744Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t11_de",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/docs/ops-policy-notes/catalogue-count-chargers-bulbs-graz-2024-07-17.md",
+        "/proc/catalog/automotive/chargers_bulbs",
+        "/proc/stores/store_graz_jakomini.json",
+        "/proc/stores/store_graz_lend.json"
+      ],
+      "message": "0",
+      "steps": 9,
+      "wall_sec": 90.3110014628619
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t11_de": {
+        "passed": 1,
+        "runs": 1,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 1,
+      "runs": 1,
+      "rate": 1.0
+    }
+  }
+}

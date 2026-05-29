@@ -1,0 +1,34 @@
+{
+  "ts": "20260528T155536Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t11_de",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got None",
+      "outcome": null,
+      "grounding_refs": [],
+      "message": "",
+      "steps": 1,
+      "wall_sec": 127.01414367556572
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t11_de": {
+        "passed": 0,
+        "runs": 1,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got None"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 0,
+      "runs": 1,
+      "rate": 0.0
+    }
+  }
+}

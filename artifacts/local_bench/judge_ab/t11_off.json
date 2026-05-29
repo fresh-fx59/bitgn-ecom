@@ -1,0 +1,251 @@
+{
+  "ts": "20260528T123642Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t11_var0",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/ops-policy-notes/catalogue-count-chargers-bulbs-graz-2024-07-17.md"
+      ],
+      "message": "I can\u2019t compute that count in this workspace: the SQL catalogue is unavailable and the visible catalog folders contain no product records for Extension Cable.",
+      "steps": 10,
+      "wall_sec": 112.36170629505068
+    },
+    {
+      "snapshot": "t11_var0",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog/electrical",
+        "/proc/catalog/electrical/extension_cables"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 9,
+      "wall_sec": 80.0306422142312
+    },
+    {
+      "snapshot": "t11_var0",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 6,
+      "wall_sec": 43.092521803453565
+    },
+    {
+      "snapshot": "t11_var1",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 9,
+      "wall_sec": 77.51982695329934
+    },
+    {
+      "snapshot": "t11_var1",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 7,
+      "wall_sec": 67.44715465512127
+    },
+    {
+      "snapshot": "t11_var1",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog/workwear/work_tops"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 8,
+      "wall_sec": 67.29405615385622
+    },
+    {
+      "snapshot": "t11_var2",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog/garden_tools/lawn_mowers"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 8,
+      "wall_sec": 71.52553280256689
+    },
+    {
+      "snapshot": "t11_var2",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 7,
+      "wall_sec": 66.34677401185036
+    },
+    {
+      "snapshot": "t11_var2",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/garden_tools",
+        "/proc/catalog/garden_tools/lawn_mowers",
+        "/proc/README.md"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 10,
+      "wall_sec": 107.02087596151978
+    },
+    {
+      "snapshot": "t11_var3",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got None",
+      "outcome": null,
+      "grounding_refs": [],
+      "message": "",
+      "steps": 2,
+      "wall_sec": 30.27956174314022
+    },
+    {
+      "snapshot": "t11_var3",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 7,
+      "wall_sec": 52.17901919782162
+    },
+    {
+      "snapshot": "t11_var3",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 9,
+      "wall_sec": 102.82030496932566
+    },
+    {
+      "snapshot": "t11_var4",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/README.md"
+      ],
+      "message": "[QTY:0]",
+      "steps": 10,
+      "wall_sec": 88.02017273847014
+    },
+    {
+      "snapshot": "t11_var4",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "[QTY:0]",
+      "steps": 9,
+      "wall_sec": 73.13949277624488
+    },
+    {
+      "snapshot": "t11_var4",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog/hand_tools/screwdriver_hex_sets"
+      ],
+      "message": "[QTY:0]",
+      "steps": 13,
+      "wall_sec": 111.38908904325217
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t11_var0": {
+        "passed": 2,
+        "runs": 3,
+        "rate": 0.6666666666666666,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+        ]
+      },
+      "t11_var1": {
+        "passed": 3,
+        "runs": 3,
+        "rate": 1.0,
+        "fail_details": []
+      },
+      "t11_var2": {
+        "passed": 3,
+        "runs": 3,
+        "rate": 1.0,
+        "fail_details": []
+      },
+      "t11_var3": {
+        "passed": 2,
+        "runs": 3,
+        "rate": 0.6666666666666666,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got None"
+        ]
+      },
+      "t11_var4": {
+        "passed": 3,
+        "runs": 3,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 13,
+      "runs": 15,
+      "rate": 0.8666666666666667
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "benchmark": "bitgn/ecom1-dev",
+  "run_id": "run-22ReRksmBaqn9TyUsYxAB3v1A",
+  "ts": "20260528T121422Z",
+  "targets": [
+    "t04",
+    "t11",
+    "t15",
+    "t40",
+    "t44"
+  ],
+  "rows": [
+    {
+      "task_id": "t04",
+      "run_index": 0,
+      "score": 1.0,
+      "score_detail": [],
+      "wall_seconds": 27.412020683288574,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t11",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [
+        "answer contains too many invalid references"
+      ],
+      "wall_seconds": 187.69702577590942,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t15",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [
+        "answer contains too many invalid references"
+      ],
+      "wall_seconds": 331.60492968559265,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t40",
+      "run_index": 0,
+      "score": 0.6439393162727356,
+      "score_detail": [
+        "payment fraud refs recovered ~47% EUR from fraud amount, and also marked a few payments as false positives."
+      ],
+      "wall_seconds": 100.66566252708435,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t44",
+      "run_index": 0,
+      "score": 1.0,
+      "score_detail": [],
+      "wall_seconds": 35.924227714538574,
+      "terminated_by": "report_completion"
+    }
+  ]
+}

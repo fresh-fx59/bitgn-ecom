@@ -1,0 +1,73 @@
+{
+  "ts": "20260528T212606Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t44_v0117pre",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/returns.md",
+        "/proc/returns/ret_007.json",
+        "/proc/payments/pay_013.json"
+      ],
+      "message": "I can\u2019t approve this refund yet: return `ret_007` is currently `requested`, but refund approval requires the return status to be `approved` before running the approval step.",
+      "steps": 3,
+      "wall_sec": 176.64889023266733
+    },
+    {
+      "snapshot": "t44_v0117pre",
+      "run_index": 1,
+      "passed": false,
+      "detail": "answer missing required reference '/proc/payments/pay_013.json'",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/returns.md",
+        "/proc/returns/ret_007.json"
+      ],
+      "message": "I can\u2019t approve this refund yet because return `ret_007` is currently in status `requested`, and refund approval is only supported when the return status is `approved`.",
+      "steps": 3,
+      "wall_sec": 21.883955067954957
+    },
+    {
+      "snapshot": "t44_v0117pre",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/returns.md",
+        "/proc/returns/ret_007.json",
+        "/proc/payments/pay_013.json"
+      ],
+      "message": "I can\u2019t approve this refund yet because return `ret_007` is currently in status `requested`, not `approved`. Under the returns workflow policy, `approve-refund` is only supported when the return status is `approved` (the linked payment is `paid`, which is satisfied).",
+      "steps": 4,
+      "wall_sec": 29.359777201898396
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t44_v0117pre": {
+        "passed": 2,
+        "runs": 3,
+        "rate": 0.6666666666666666,
+        "fail_details": [
+          "answer missing required reference '/proc/payments/pay_013.json'"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 2,
+      "runs": 3,
+      "rate": 0.6666666666666666
+    }
+  }
+}

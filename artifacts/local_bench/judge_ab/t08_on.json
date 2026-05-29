@@ -1,0 +1,160 @@
+{
+  "ts": "20260528T130328Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t08_v112",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "I can\u2019t complete this check from the current workspace state: the catalogue database is unavailable and I could not retrieve any product record for the requested Gedore item (including model 1SM-A8X), so I can\u2019t reliably provide <YES>/<NO> with an exact checked SKU path. Please provide a workspace that includes the populated product records (or the catalogue DB).",
+      "steps": 14,
+      "wall_sec": 140.27364148478955
+    },
+    {
+      "snapshot": "t08_v112",
+      "run_index": 1,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "I can\u2019t verify that exact Gedore Classic RED 1SM-A8X variant from the current workspace catalogue data. I\u2019m missing any readable product record for that line/SKU, so I can\u2019t provide a grounded <YES>/<NO> with an exact SKU citation without guessing.",
+      "steps": 13,
+      "wall_sec": 105.86592230573297
+    },
+    {
+      "snapshot": "t08_v112",
+      "run_index": 2,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "I can\u2019t complete this catalogue verification in the current sandbox state: the product catalogue records are not accessible here (SQL catalogue unavailable and no readable product files surfaced), so I can\u2019t reliably confirm the exact Gedore Classic RED 1SM-A8X variant or cite its SKU record without guessing.",
+      "steps": 14,
+      "wall_sec": 177.528072074987
+    },
+    {
+      "snapshot": "t08_v112",
+      "run_index": 3,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "I can\u2019t verify that support-note claim from the current workspace because the catalogue product records needed for Gedore Classic RED 1SM-A8X are missing here (the relevant catalogue folders are empty, and SQL catalogue access is unavailable). Please provide the product record path or restore catalogue files so I can confirm and return <YES> or <NO> with the exact checked SKU.",
+      "steps": 16,
+      "wall_sec": 135.94347449112684
+    },
+    {
+      "snapshot": "t08_v112",
+      "run_index": 4,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "I can\u2019t verify this catalogue claim in the current sandbox because the product catalogue records are not accessible here (SQL catalogue unavailable and no readable product JSON files under the target family).",
+      "steps": 14,
+      "wall_sec": 142.2683156337589
+    },
+    {
+      "snapshot": "t08_v112fail",
+      "run_index": 0,
+      "passed": false,
+      "detail": "answer missing required reference '/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json'",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [],
+      "message": "<NO> Checked SKU: ELC-1SPATM3U. The catalogue record exists for Brennenstuhl Compact Eco 2VJ-JMP Extension Cable with color family yellow and length 3 m, but its IP rating is IP65, not IP20.",
+      "steps": 4,
+      "wall_sec": 43.4376525580883
+    },
+    {
+      "snapshot": "t08_v112fail",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json"
+      ],
+      "message": "<NO> Checked SKU: ELC-1SPATM3U. The catalogue record exists for the Brennenstuhl Compact Eco 2VJ-JMP Extension Cable and matches Yellow + 3 m, but its IP rating is IP65, so the claimed IP20 variant is not present.",
+      "steps": 4,
+      "wall_sec": 36.10175523720682
+    },
+    {
+      "snapshot": "t08_v112fail",
+      "run_index": 2,
+      "passed": false,
+      "detail": "answer missing required reference '/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json'",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [],
+      "message": "<NO> Checked SKU: ELC-1SPATM3U. The catalogue has the Brennenstuhl Compact Eco 2VJ-JMP Extension Cable variant, but its IP rating is IP65, not IP20.",
+      "steps": 7,
+      "wall_sec": 49.161866751499474
+    },
+    {
+      "snapshot": "t08_v112fail",
+      "run_index": 3,
+      "passed": false,
+      "detail": "answer missing required reference '/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json'",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [],
+      "message": "<NO> Checked SKU: ELC-1SPATM3U. The base Brennenstuhl Compact Eco 2VJ-JMP Extension Cable exists, but the claimed extra catalogue attribute is absent because this record is IP65 (not IP20).",
+      "steps": 5,
+      "wall_sec": 109.55303703714162
+    },
+    {
+      "snapshot": "t08_v112fail",
+      "run_index": 4,
+      "passed": false,
+      "detail": "answer missing required reference '/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json'",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [],
+      "message": "<NO> Checked SKU: ELC-1SPATM3U. The catalogue record exists for Brennenstuhl Compact Eco 2VJ-JMP Extension Cable with color_family yellow and length_m 3, but its ip_rating is IP65, so the IP20 claim is not present.",
+      "steps": 6,
+      "wall_sec": 46.78588171303272
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t08_v112": {
+        "passed": 0,
+        "runs": 5,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+        ]
+      },
+      "t08_v112fail": {
+        "passed": 1,
+        "runs": 5,
+        "rate": 0.2,
+        "fail_details": [
+          "answer missing required reference '/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json'",
+          "answer missing required reference '/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json'",
+          "answer missing required reference '/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json'",
+          "answer missing required reference '/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json'"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 1,
+      "runs": 10,
+      "rate": 0.1
+    }
+  }
+}

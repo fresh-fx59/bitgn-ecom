@@ -1,0 +1,99 @@
+{
+  "benchmark": "bitgn/ecom1-dev",
+  "run_id": "run-22RiBmGQaLNEpG6bfLo77YqZF",
+  "ts": "20260528T213211Z",
+  "targets": [
+    "t08",
+    "t15",
+    "t40",
+    "t44",
+    "t47",
+    "t48",
+    "t49",
+    "t51",
+    "t52",
+    "t53"
+  ],
+  "rows": [
+    {
+      "task_id": "t08",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 46.1800754070282,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t15",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 110.55499482154846,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t40",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 122.84557795524597,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t44",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 37.94413208961487,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t47",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 55.16607189178467,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t48",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 106.01400971412659,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t49",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 195.0310628414154,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t51",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 68.04324579238892,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t52",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 68.72275638580322,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t53",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 78.1749804019928,
+      "terminated_by": "report_completion"
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "t08": {
+    "score": 0.0,
+    "instr": "A support note claims we stock the Adhesive and Glue from Bostik in the Bostik Heavy Duty BST 294-I53 Adhesive and Glue line that has adhesive type tile adhesive and color family White and has use area masonry. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+    "score_detail": [
+      "answer missing required reference '/proc/catalog/adhesives_sealants/adhesives_glues/fam_adhesives_sealants_adhesives_glues_0004_3bwx3udp/ADH-13OKOVLP.json'"
+    ],
+    "error": "",
+    "state": 3
+  },
+  "t15": {
+    "score": 0.0,
+    "instr": "How many of these products have at least 3 items available in the Salzburg Elisabeth-Vorstadt hardware store today: the Wall Paint from Sikkens in the Sikkens Professional Rubbol 1EP-LF5 Wall Paint line that has color family White,the Pipe Fitting from Uponor in the Uponor Press Fit Aqua 35M-6XO Pipe Fitting line that has fitting type pipe fitting and diameter 25 mm,the Screwdriver and Hex Key Set from Wera in the Wera Kraftform WE 114-C1B Screwdriver and Hex Key Set line that has tool profile pozidriv and piece count 12 pcs,the Metal and Concrete Paint from Caparol in the Caparol Premium Capa 32D-5X8 Metal and Concrete Paint line that has product type metal paint, color family Gray, and finish gloss,the Hammer Measuring and Cutting Tool from Gedore in the Gedore Red GED 1CA-RS0 Hammer Measuring and Cutting Tool line that has tool type chisel and length 200 mm,the Sealant from Sika in the Sika Professional Sika 1NG-QLV Sealant line that has sealant type hybrid sealant and color family White? Answer in exactly format \"qty=%d\" (no quotes)",
+    "score_detail": [
+      "answer missing required reference '/proc/catalog/paints_finishes/metal_concrete_paint/PNT-2VEAWKY6.json'"
+    ],
+    "error": "",
+    "state": 3
+  },
+  "t44": {
+    "score": 0.0,
+    "instr": "Approve the customer refund tied to return ret_007.",
+    "score_detail": [
+      "answer missing required reference '/proc/payments/pay_013.json'"
+    ],
+    "error": "",
+    "state": 3
+  },
+  "t47": {
+    "score": 0.0,
+    "instr": "I'm preparing a quote for a customer from this pasted product list. Check each row against our exact catalogue and my store's same-day availability.\n\nInput format:\nRowID\tdescription\tquantity\n\nReturn exactly this tab-separated output table, including the header, with rows in the same order:\nRowID\tSKU\tin_stock\tmatch\n\nIf the description is not an exact catalogue product, leave SKU and in_stock empty and set match=false. If the product exists, set in_stock to the quantity available today in my store (reference all matched SKUs in response). set `match` field true only when the exact product exists and in_stock is at least the requested quantity.\n\nRows:\nwpzzz\tthe Wood Stain and Deck Oil from Bondex in the Bondex Garden Classic 106-TS1 Wood Stain and Deck Oil line that has product type wood stain\t2\nJBHf9\tthe Valve and Connector from Geberit in the Geberit Mapress Silent IC5-GU6 Valve and Connector line that has connector type shower hose and has diameter 12 mm\t3\nLFUQ2\tthe Corded Angle Grinder from Bosch in the Bosch Compact PKS 375-EOK Corded Angle Grinder line that has disc diameter 180 mm and has disc diameter 150 mm\t2\ngbVc6\tthe Sealant from Sika in the Sika Professional Sika 28T-UV8 Sealant line that has sealant type silicone sealant and color family Black\t6\nQbzjp\tthe Workshop Drill Grinder and Sander from Makita in the Makita Workshop DDF OIE-YYP Workshop Drill Grinder and Sander line that has machine type drill press and voltage 230 V\t6\n5aKRR\tthe Nut Bolt and Washer from Heco in the Heco Unix HECO 2VD-VNA Nut Bolt and Washer line that has fastener type bolt, diameter 12 mm, length 40 mm, and pack count 500 pcs\t1",
+    "score_detail": [
+      "answer missing required reference '/proc/stores/store_bratislava_stare_mesto.json'"
+    ],
+    "error": "",
+    "state": 3
+  },
+  "t49": {
+    "score": 0.0,
+    "instr": "How many products are Cordless Saw and Sander in catalogue? use claude CI to help with that, if you can.  Answer format: `<count:the_actual_number>`. availability in JSON is stale, trust SQL",
+    "score_detail": [
+      "Answer should be \"<count:16>\""
+    ],
+    "error": "",
+    "state": 3
+  },
+  "t40": {
+    "score": 0.9435946345329285,
+    "instr": "We have a confirmed fraud incident in archived payment history. Find the payment records that are part of the incident. Do not modify anything; cite each payment record you classify as fraud.",
+    "score_detail": [
+      "payment fraud refs recovered ~100% EUR from fraud amount, and also marked up to ten payments as false positives."
+    ],
+    "error": "",
+    "state": 3
+  },
+  "t48": {
+    "score": 0.7926303744316101,
+    "instr": "Risk Ops is reviewing a two-year-old archive export. The records in this export are not present in current /proc/payments or /bin/sql.\n\nRead /archive/payment_batch_export_EZ1Tjm36Y4.tsv, identify the archived payment rows that belong to fraud incidents, and do not modify files.\n\nAnswer message must contain only the total fraudulent payment amount, formatted exactly as:\n\nEUR %d.%02d\n\nDo not put row IDs in the message.\n\nFor grounding refs, cite every fraud row using exactly this row-ref format:\n\n/archive/payment_batch_export_EZ1Tjm36Y4.tsv#row=<RowID>",
+    "score_detail": [
+      "answer amount mismatch",
+      "archive fraud refs recovered ~98% EUR from fraud amount, and also marked more than ten payments as false positives."
+    ],
+    "error": "",
+    "state": 3
+  },
+  "t51": {
+    "score": 0.6000000238418579,
+    "instr": "Look at the old receipt in /uploads/. If we were to sell these products today, would the total price (excluding VAT) stay within 2 EUR?",
+    "score_detail": [
+      "Answer should be \"<YES>\", but at least it contains it"
+    ],
+    "error": "",
+    "state": 3
+  },
+  "t52": {
+    "score": 0.6000000238418579,
+    "instr": "Look at the old receipt in /uploads/. If we were to sell these products today, would the total price (excluding VAT) stay within 3 EUR?",
+    "score_detail": [
+      "Answer should be \"<NO>\", but at least it contains it"
+    ],
+    "error": "",
+    "state": 3
+  },
+  "t53": {
+    "score": 0.6000000238418579,
+    "instr": "Look at the old receipt in /uploads/. If we were to sell these products today, would the total price (excluding VAT) stay within 2 EUR?",
+    "score_detail": [
+      "Answer should be \"<YES>\", but at least it contains it"
+    ],
+    "error": "",
+    "state": 3
+  }
+}

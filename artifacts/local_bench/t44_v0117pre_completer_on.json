@@ -1,0 +1,76 @@
+{
+  "ts": "20260528T212350Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t44_v0117pre",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/returns.md",
+        "/proc/returns/ret_007.json",
+        "/proc/payments/pay_013.json"
+      ],
+      "message": "I can\u2019t approve this refund yet: return ret_007 is currently in status `requested`, but refund approval requires status `approved` before running `approve-refund`.",
+      "steps": 3,
+      "wall_sec": 27.013779503293335
+    },
+    {
+      "snapshot": "t44_v0117pre",
+      "run_index": 1,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/returns.md",
+        "/proc/returns/ret_007.json",
+        "/proc/payments/pay_013.json"
+      ],
+      "message": "I can\u2019t approve this refund yet: return `ret_007` is currently `requested`, but refund approval requires the return to already be `approved` (the linked payment `pay_013` is `paid`).",
+      "steps": 4,
+      "wall_sec": 26.562869779765606
+    },
+    {
+      "snapshot": "t44_v0117pre",
+      "run_index": 2,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/returns.md",
+        "/proc/returns/ret_007.json",
+        "/proc/payments/pay_013.json"
+      ],
+      "message": "I can\u2019t approve this refund yet: return `ret_007` is currently `requested`, but refund approval requires the return to already be `approved`.",
+      "steps": 3,
+      "wall_sec": 35.86558045074344
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t44_v0117pre": {
+        "passed": 0,
+        "runs": 3,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 0,
+      "runs": 3,
+      "rate": 0.0
+    }
+  }
+}

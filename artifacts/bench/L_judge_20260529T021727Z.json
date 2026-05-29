@@ -1,0 +1,63 @@
+{
+  "benchmark": "bitgn/ecom1-dev",
+  "run_id": "run-22RjJQEUD6LvCGAxjpuEj3V4Z",
+  "ts": "20260529T001733Z",
+  "targets": [
+    "t08",
+    "t14",
+    "t16",
+    "t26",
+    "t44",
+    "t47"
+  ],
+  "rows": [
+    {
+      "task_id": "t08",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 77.03241205215454,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t14",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 153.15087604522705,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t16",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 218.59985971450806,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t26",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 143.4961495399475,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t44",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 61.91212606430054,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t47",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 210.3933298587799,
+      "terminated_by": "report_completion"
+    }
+  ]
+}

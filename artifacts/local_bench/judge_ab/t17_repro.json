@@ -1,0 +1,73 @@
+{
+  "ts": "20260528T152526Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t17_pass",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog/FST-1KPF96UD.json",
+        "/proc/stores/store_vienna_praterstern.json",
+        "/proc/stores/store_vienna_meidling.json"
+      ],
+      "message": "I can identify the exact product, but I can\u2019t compute the purchasable quantity for Vienna (excluding Meidling) in this sandbox because the per-store inventory source is unavailable here.",
+      "steps": 8,
+      "wall_sec": 61.070923049002886
+    },
+    {
+      "snapshot": "t17_pass",
+      "run_index": 1,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog/FST-1KPF96UD.json",
+        "/proc/stores/store_vienna_meidling.json",
+        "/proc/stores/store_vienna_praterstern.json"
+      ],
+      "message": "I can\u2019t determine that count in this run because today-availability is only exposed through the SQL inventory projection, and the SQL catalogue backend is unavailable here. So I\u2019m unable to compute how many units you can buy in Vienna excluding Meidling.",
+      "steps": 6,
+      "wall_sec": 48.14416192937642
+    },
+    {
+      "snapshot": "t17_pass",
+      "run_index": 2,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog/FST-1KPF96UD.json",
+        "/proc/stores/store_vienna_praterstern.json",
+        "/proc/README.md"
+      ],
+      "message": "I can confirm the exact product variant, but I can\u2019t compute the numeric total you can buy in Vienna (excluding Meidling) from this workspace because the inventory dataset is missing here. Please provide the mounted catalogue SQLite DB (or inventory-by-store figures) so I can return the exact number.",
+      "steps": 7,
+      "wall_sec": 49.86870783753693
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t17_pass": {
+        "passed": 0,
+        "runs": 3,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 0,
+      "runs": 3,
+      "rate": 0.0
+    }
+  }
+}

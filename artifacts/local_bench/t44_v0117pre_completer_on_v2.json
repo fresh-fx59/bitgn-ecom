@@ -1,0 +1,72 @@
+{
+  "ts": "20260528T212559Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t44_v0117pre",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/returns.md",
+        "/proc/returns/ret_007.json",
+        "/proc/payments/pay_013.json"
+      ],
+      "message": "I can\u2019t approve this refund yet: return `ret_007` is currently `requested`, but refund approval requires the return to already be `approved`.",
+      "steps": 3,
+      "wall_sec": 157.56701929215342
+    },
+    {
+      "snapshot": "t44_v0117pre",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/returns.md",
+        "/proc/returns/ret_007.json",
+        "/proc/payments/pay_013.json"
+      ],
+      "message": "I can\u2019t approve this refund yet: return `ret_007` is currently in status `requested`, but refund approval requires status `approved` before `/bin/payments approve-refund` can be run.",
+      "steps": 2,
+      "wall_sec": 22.515396586619318
+    },
+    {
+      "snapshot": "t44_v0117pre",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/returns.md",
+        "/proc/returns/ret_007.json",
+        "/proc/payments/pay_013.json"
+      ],
+      "message": "I can\u2019t approve this refund yet: return `ret_007` is currently `requested`, but approval requires the return to already be `approved` (linked payment `pay_013` is `paid`).",
+      "steps": 4,
+      "wall_sec": 24.439481059089303
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t44_v0117pre": {
+        "passed": 3,
+        "runs": 3,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 3,
+      "runs": 3,
+      "rate": 1.0
+    }
+  }
+}

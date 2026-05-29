@@ -1,0 +1,102 @@
+{
+  "ts": "20260528T211939Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t08_v0117pre",
+      "run_index": 0,
+      "passed": false,
+      "detail": "answer missing required reference '/proc/catalog/adhesives_sealants/adhesives_glues/fam_adhesives_sealants_adhesives_glues_0004_3bwx3udp/ADH-13OKOVLP.json'",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [],
+      "message": "<NO> Checked SKU: ADH-13OKOVLP. The Bostik Heavy Duty BST 294-I53 base product exists, but the claimed variant is not present in the catalogue because this SKU has adhesive_type \"tile adhesive\" and color_family \"white\" but use_area is \"interior\" (not \"masonry\").",
+      "steps": 4,
+      "wall_sec": 50.28330303542316
+    },
+    {
+      "snapshot": "t15_v0117pre",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/run/actions/README.md",
+        "/AGENTS.MD"
+      ],
+      "message": "I\u2019m missing the actual task to execute. Please provide the concrete commerce request (or register an action control file) and I can proceed.",
+      "steps": 3,
+      "wall_sec": 16.836727848276496
+    },
+    {
+      "snapshot": "t44_v0117pre",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/returns.md",
+        "/proc/returns/ret_007.json",
+        "/proc/payments/pay_013.json"
+      ],
+      "message": "I can\u2019t approve this refund yet: return `ret_007` is currently in `requested` status, and refund approval is only supported when the return status is `approved`.",
+      "steps": 3,
+      "wall_sec": 28.35623719636351
+    },
+    {
+      "snapshot": "t47_v0117pre",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/run/actions/README.md"
+      ],
+      "message": "I don\u2019t have an actionable commerce request yet. Please provide the concrete task/instruction to run.",
+      "steps": 3,
+      "wall_sec": 15.060366312041879
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t08_v0117pre": {
+        "passed": 0,
+        "runs": 1,
+        "rate": 0.0,
+        "fail_details": [
+          "answer missing required reference '/proc/catalog/adhesives_sealants/adhesives_glues/fam_adhesives_sealants_adhesives_glues_0004_3bwx3udp/ADH-13OKOVLP.json'"
+        ]
+      },
+      "t15_v0117pre": {
+        "passed": 0,
+        "runs": 1,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION"
+        ]
+      },
+      "t44_v0117pre": {
+        "passed": 0,
+        "runs": 1,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+        ]
+      },
+      "t47_v0117pre": {
+        "passed": 0,
+        "runs": 1,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 0,
+      "runs": 4,
+      "rate": 0.0
+    }
+  }
+}

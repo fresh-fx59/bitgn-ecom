@@ -1,0 +1,237 @@
+{
+  "ts": "20260528T123646Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t11_var0",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog/electrical/extension_cables"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 8,
+      "wall_sec": 82.04301651753485
+    },
+    {
+      "snapshot": "t11_var0",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [],
+      "message": "<COUNT:0>",
+      "steps": 8,
+      "wall_sec": 83.35839102882892
+    },
+    {
+      "snapshot": "t11_var0",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [],
+      "message": "<COUNT:0>",
+      "steps": 8,
+      "wall_sec": 67.39847102109343
+    },
+    {
+      "snapshot": "t11_var1",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got None",
+      "outcome": null,
+      "grounding_refs": [],
+      "message": "",
+      "steps": 5,
+      "wall_sec": 63.1881731627509
+    },
+    {
+      "snapshot": "t11_var1",
+      "run_index": 1,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "I can\u2019t map \"Work Top\" to any catalogue category in this workspace. Please provide the exact category_id/category name used in the catalog so I can return the count in <COUNT:%d> format.",
+      "steps": 8,
+      "wall_sec": 74.30687129497528
+    },
+    {
+      "snapshot": "t11_var1",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 11,
+      "wall_sec": 108.45646791625768
+    },
+    {
+      "snapshot": "t11_var2",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got None",
+      "outcome": null,
+      "grounding_refs": [],
+      "message": "",
+      "steps": 5,
+      "wall_sec": 69.74501042440534
+    },
+    {
+      "snapshot": "t11_var2",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 8,
+      "wall_sec": 93.18102776817977
+    },
+    {
+      "snapshot": "t11_var2",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog",
+        "/proc/catalog/garden_tools/lawn_mowers"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 9,
+      "wall_sec": 113.8367126127705
+    },
+    {
+      "snapshot": "t11_var3",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "<COUNT:0>",
+      "steps": 9,
+      "wall_sec": 78.90454153064638
+    },
+    {
+      "snapshot": "t11_var3",
+      "run_index": 1,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got None",
+      "outcome": null,
+      "grounding_refs": [],
+      "message": "",
+      "steps": 5,
+      "wall_sec": 42.192053341306746
+    },
+    {
+      "snapshot": "t11_var3",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [],
+      "message": "<COUNT:0>",
+      "steps": 7,
+      "wall_sec": 63.097351633012295
+    },
+    {
+      "snapshot": "t11_var4",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got None",
+      "outcome": null,
+      "grounding_refs": [],
+      "message": "",
+      "steps": 7,
+      "wall_sec": 80.66969374381006
+    },
+    {
+      "snapshot": "t11_var4",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/catalog/hand_tools/screwdriver_hex_sets"
+      ],
+      "message": "[QTY:0]",
+      "steps": 6,
+      "wall_sec": 78.98157649300992
+    },
+    {
+      "snapshot": "t11_var4",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [],
+      "message": "[QTY:0]",
+      "steps": 8,
+      "wall_sec": 66.03507764078677
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t11_var0": {
+        "passed": 3,
+        "runs": 3,
+        "rate": 1.0,
+        "fail_details": []
+      },
+      "t11_var1": {
+        "passed": 1,
+        "runs": 3,
+        "rate": 0.3333333333333333,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got None",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION"
+        ]
+      },
+      "t11_var2": {
+        "passed": 2,
+        "runs": 3,
+        "rate": 0.6666666666666666,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got None"
+        ]
+      },
+      "t11_var3": {
+        "passed": 2,
+        "runs": 3,
+        "rate": 0.6666666666666666,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got None"
+        ]
+      },
+      "t11_var4": {
+        "passed": 2,
+        "runs": 3,
+        "rate": 0.6666666666666666,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got None"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 10,
+      "runs": 15,
+      "rate": 0.6666666666666666
+    }
+  }
+}

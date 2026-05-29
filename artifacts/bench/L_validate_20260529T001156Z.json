@@ -1,0 +1,18 @@
+{
+  "benchmark": "bitgn/ecom1-dev",
+  "run_id": "run-22RiTK5ZpmDqkduutVSSe9ppa",
+  "ts": "20260528T221158Z",
+  "targets": [
+    "t01"
+  ],
+  "rows": [
+    {
+      "task_id": "t01",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 66.26961493492126,
+      "terminated_by": "report_completion"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "ts": "20260528T212159Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t08_v0117pre",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/adhesives_sealants/adhesives_glues/fam_adhesives_sealants_adhesives_glues_0004_3bwx3udp/ADH-13OKOVLP.json"
+      ],
+      "message": "<NO> Checked SKU ADH-13OKOVLP: the base product line exists, but the extra claim is absent because the record shows use_area as interior (not masonry).",
+      "steps": 5,
+      "wall_sec": 62.074612474069
+    },
+    {
+      "snapshot": "t08_v0117pre",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/adhesives_sealants/adhesives_glues/fam_adhesives_sealants_adhesives_glues_0004_3bwx3udp/ADH-13OKOVLP.json"
+      ],
+      "message": "<NO> I checked SKU ADH-13OKOVLP in the Bostik Heavy Duty BST 294-I53 line: it has adhesive_type \"tile adhesive\" and color_family \"white\", but use_area is \"interior\" (not \"masonry\"), so that extra catalogue claim is absent.",
+      "steps": 4,
+      "wall_sec": 36.788464426994324
+    },
+    {
+      "snapshot": "t08_v0117pre",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/adhesives_sealants/adhesives_glues/fam_adhesives_sealants_adhesives_glues_0004_3bwx3udp/ADH-13OKOVLP.json"
+      ],
+      "message": "<NO> Checked SKU: ADH-13OKOVLP. The base Bostik Heavy Duty BST 294-I53 Adhesive and Glue item exists, but the claimed variant with adhesive type tile adhesive, color family White, and use area masonry is not present in the catalogue (the closest record has use_area=\"interior\").",
+      "steps": 4,
+      "wall_sec": 41.84588838275522
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t08_v0117pre": {
+        "passed": 3,
+        "runs": 3,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 3,
+      "runs": 3,
+      "rate": 1.0
+    }
+  }
+}

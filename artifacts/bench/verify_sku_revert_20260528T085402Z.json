@@ -1,0 +1,38 @@
+{
+  "benchmark": "bitgn/ecom1-dev",
+  "run_id": "run-22RcGaLsybj2CpnP5B89e83He",
+  "ts": "20260528T065405Z",
+  "targets": [
+    "t15",
+    "t17",
+    "t44"
+  ],
+  "rows": [
+    {
+      "task_id": "t15",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [
+        "answer contains too many invalid references"
+      ],
+      "wall_seconds": 161.66245317459106,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t17",
+      "run_index": 0,
+      "score": 1.0,
+      "score_detail": [],
+      "wall_seconds": 71.42097783088684,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t44",
+      "run_index": 0,
+      "score": 1.0,
+      "score_detail": [],
+      "wall_seconds": 38.56515431404114,
+      "terminated_by": "report_completion"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "ts": "20260528T144724Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t08_v112fail",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json"
+      ],
+      "message": "<NO> Checked SKU: ELC-1SPATM3U. The base Brennenstuhl Compact Eco 2VJ-JMP Extension Cable exists, but the claimed extra catalogue variant is absent because this record is IP65 (not IP20).",
+      "steps": 4,
+      "wall_sec": 95.90362826827914
+    },
+    {
+      "snapshot": "t08_v112fail",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json"
+      ],
+      "message": "<NO> Checked SKU: ELC-1SPATM3U. The catalogue record exists for Brennenstuhl Compact Eco 2VJ-JMP Extension Cable with color_family yellow and length_m 3, but its ip_rating is IP65 (not IP20), so the extra claim is absent.",
+      "steps": 4,
+      "wall_sec": 30.977920902892947
+    },
+    {
+      "snapshot": "t08_v112fail",
+      "run_index": 2,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json"
+      ],
+      "message": "<NO> Checked SKU: ELC-1SPATM3U. The base Brennenstuhl Compact Eco 2VJ-JMP Extension Cable exists, but the claimed extra catalogue detail is absent because the product record shows ip_rating=IP65 (not IP20).",
+      "steps": 4,
+      "wall_sec": 32.77701259404421
+    },
+    {
+      "snapshot": "t08_v112fail",
+      "run_index": 3,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json"
+      ],
+      "message": "<NO> Checked SKU: ELC-1SPATM3U. The Brennenstuhl Compact Eco 2VJ-JMP Extension Cable base item exists, but the claimed variant with ip rating IP20 is not present (catalog record shows IP65).",
+      "steps": 4,
+      "wall_sec": 33.37361490447074
+    },
+    {
+      "snapshot": "t08_v112fail",
+      "run_index": 4,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json"
+      ],
+      "message": "<NO> The base product exists, but the claimed extra catalogue variant is absent: checked SKU ELC-1SPATM3U has color family Yellow and length 3 m, but ip rating is IP65 (not IP20).",
+      "steps": 5,
+      "wall_sec": 35.5137636018917
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t08_v112fail": {
+        "passed": 5,
+        "runs": 5,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 5,
+      "runs": 5,
+      "rate": 1.0
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "ts": "20260528T212750Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t47_v0117pre",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/AGENTS.MD"
+      ],
+      "message": "I only received pre-pass context and no actionable request. Please provide the specific task you want me to complete.",
+      "steps": 1,
+      "wall_sec": 38.181345250457525
+    },
+    {
+      "snapshot": "t47_v0117pre",
+      "run_index": 1,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/run/actions/README.md"
+      ],
+      "message": "I\u2019m missing the actual task instruction to execute. Please provide the concrete request (what you want checked/updated/counting target), and I\u2019ll proceed immediately.",
+      "steps": 4,
+      "wall_sec": 19.913926906883717
+    },
+    {
+      "snapshot": "t47_v0117pre",
+      "run_index": 2,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/run/actions/README.md",
+        "/AGENTS.MD"
+      ],
+      "message": "I\u2019m missing the actual task instruction. Please provide the specific commerce request you want executed.",
+      "steps": 3,
+      "wall_sec": 14.139336339198053
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t47_v0117pre": {
+        "passed": 0,
+        "runs": 3,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 0,
+      "runs": 3,
+      "rate": 0.0
+    }
+  }
+}
