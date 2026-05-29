@@ -483,3 +483,38 @@ count tasks, probabilistic, 3-5× cost), the override deterministically
 (refless subset only, exact, free). If voting already stabilizes the count
 family, ship voting. If not, A/B the override on the next DEV run before
 making it default. Do NOT ship both blindly. Fraud stays the ceiling.
+
+## v0.1.146 — VOTING net-negative; two surgical deterministic levers (2026-05-29)
+
+**Voting (BITGN_VOTE_K=3) DEV run = 47/53, WORSE than 50/53 baseline.**
+(run-22RrizrGskqUKHykTW1rf1Hbb, overall 0.9157.) It DID stabilize the count
+family (t13/t16/t45/t47/t49 all passed — confirms in-trial count variance is
+real) but applies to ALL tasks and its representative-picker broke 4
+normally-passing NON-count tasks (t08/t10/t15/t50 → 0.0). DECISION: do not
+ship blanket voting; if revived, gate strictly to kind∈{count_per_store,
+yes_no_sku}. Keep BITGN_VOTE_K unset.
+
+Two surgical, ADD-only/abstain-safe, deterministic levers replace it
+(both default-off, locally validated, NOT yet A/B'd on PROD):
+
+- **v0.1.145 BITGN_USE_REFLESS_COUNT_OVERRIDE** — deterministic count for
+  REFLESS count_per_store tasks (no ref-parity risk, unlike v139 which broke
+  on ref-bearing t14). Count-token-only, abstains on any ambiguity.
+  Validated exact via real SQLite on faithful snapshots: t45→4, t16→3.
+
+- **v0.1.146 BITGN_USE_QUOTE_REF_COMPLETER** — fixes t47 under-matching
+  (grader-confirmed "missing required reference"): resolves each pasted row's
+  exact SKU and UNIONS matched record_paths into grounding_refs. ADD-ONLY.
+  Validated: resolves all 4 t47 exact SKUs, adds exactly the under-cited ones.
+
+**Harness fidelity fixes (critical):** local_bench was FALSE-PASSING
+snapshots with no expected_answer (t47 "passed" while wrong on 3/5 rows).
+Now flags them [WARN] UNGRADED. Wired the verified t47 oracle (required_refs
+= 4 exact SKUs) into t47_real2 metadata → local_bench now grades t47
+truthfully (fails under-matching, passes the completer fix).
+
+REMAINING CEILING: t40/t48 fraud (0.88/0.65, never 1.0) — cannot be validated
+locally (unobservable seeded set) and deterministic enforcers regress it.
+Realistic max ≈ 51/53; clean 53/53 needs a lucky fraud seed. t50 passes 8/9
+(not a real gap). NEXT: focused local A/B of both levers (in progress), then
+one DEV run with both ON vs the 50/53 baseline.
