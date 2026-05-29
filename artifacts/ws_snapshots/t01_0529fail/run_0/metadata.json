@@ -1,0 +1,12 @@
+{
+  "instruction": "Is the Tool Box and Bag from Festool in the Festool Stackable SYS 3JJ-9LM Tool Box and Bag line that has storage type parts case in the catalogue?",
+  "context_date": "2025-06-22T09:13:19Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "rebuilt from bench_20260529T003251Z on 2026-05-29",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 2 files / 0 dirs from 14 dump records. Window: started_at=2026-05-29T00:32:52.642271+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='anonymous' roles='GUEST'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

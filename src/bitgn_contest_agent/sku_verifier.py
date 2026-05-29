@@ -74,13 +74,31 @@ def sku_mismatches_task(
     # Now check property values.
     if not isinstance(props, dict):
         return None
+
+    # Build a label-search text that EXCLUDES the product's own
+    # brand/series/model tokens. A property NAME that only appears as
+    # part of the line name (e.g. property `stackable` vs the series
+    # "Festool Stackable", `flexible` vs "Bostik Flexible Fix") is NOT
+    # a task-specified attribute — it's the product's name. Matching
+    # such a label and then demanding its value be present in the task
+    # text falsely strips the CORRECT SKU (v-2026-05 t01: stripped
+    # STO-2R84BSHQ for stackable='yes' although the task only required
+    # storage_type='parts case'). Value matching still uses the FULL
+    # task text so genuine attribute values (which may also appear in
+    # the line name, e.g. "parts case") still match.
+    label_search_text = task_text_norm
+    for token in (brand, series, model):
+        t = _normalize(token)
+        if t:
+            label_search_text = label_search_text.replace(t, " ")
+
     for prop_name, prop_value in props.items():
         if not isinstance(prop_value, str) or not prop_value:
             continue
         if not isinstance(prop_name, str):
             continue
         prop_label = prop_name.replace("_", " ").lower()
-        if prop_label not in task_text_norm:
+        if prop_label not in label_search_text:
             continue  # task does not specify this attribute, skip
         value_norm = _normalize(prop_value)
         if value_norm in task_text_norm:

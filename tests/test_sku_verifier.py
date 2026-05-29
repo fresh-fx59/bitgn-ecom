@@ -41,6 +41,30 @@ def test_matching_sku_returns_none():
     assert sku_mismatches_task(sku, _normalize(task)) is None
 
 
+def test_series_name_token_is_not_an_attribute_spec():
+    """v-2026-05 t01 regression: a property whose NAME coincides with a
+    token in the series/line name must NOT be treated as a
+    task-specified attribute. The task only required storage_type=parts
+    case; the product's stackable='yes' (matched only because the
+    series is "Stackable") must not strip the correct SKU.
+    """
+    sku = _sku(
+        "Festool",
+        "Stackable",
+        "SYS 3JJ-9LM",
+        storage_type="parts case",
+        stackable="yes",
+        color_family="yellow",
+        volume_l="60",
+    )
+    task = (
+        "Is the Tool Box and Bag from Festool in the Festool Stackable "
+        "SYS 3JJ-9LM Tool Box and Bag line that has storage type parts "
+        "case in the catalogue?"
+    )
+    assert sku_mismatches_task(sku, _normalize(task)) is None
+
+
 def test_wrong_voltage_is_mismatch():
     sku = _sku(
         "Acmetool",

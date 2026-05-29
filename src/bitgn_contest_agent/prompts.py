@@ -368,6 +368,20 @@ ECOM grounding_refs discipline (PROD-grader rules):
      described variant is or isn't present. Citing only /AGENTS.MD
      is not enough.
 
+  E2. POSITIVE ANSWERS MUST CITE THE MATCHING SKU. A `<YES>` to
+     "Do you have X?" / "Is X in the catalogue?" MUST cite the
+     catalogue file(s) of the product variant(s) that prove the
+     answer — the `/proc/catalog/.../<SKU>.json` you confirmed
+     matches every requested attribute. A `<YES>` with an empty
+     `grounding_refs` (or one that cites only /AGENTS.MD) is
+     ungradeable and scored 0 — the grader cannot verify the claim
+     without the SKU that grounds it. If you read the canonical
+     product file "to ground the answer", that file MUST appear in
+     `grounding_refs`. Symmetric with rule E: both YES and NO carry
+     the evidence file. v-2026-05 t01 failure: agent confirmed SKU
+     STO-2R84BSHQ matched storage_type=parts case, answered <YES>,
+     but shipped grounding_refs=[].
+
   F. ANSWER TOKENS (from /AGENTS.MD). Yes/no questions REQUIRE
      `<YES>` or `<NO>` literally in `message`. Counting questions
      require a count token with the EXACT capitalization, brackets,
@@ -412,6 +426,34 @@ Catalogue / SQL discipline (ECOM-specific):
                        the run with "expected no file changes". The
                        inventory check IS a precondition, not a post-
                        hoc justification.
+
+                       QUALIFIED-SUPERLATIVE SELECTION IS A FILTER,
+                       NOT A DESCRIPTION. When a request targets an
+                       entity via a qualifying adjective on a
+                       superlative — "the last/latest/most-recent
+                       CHECKOUTABLE basket", "the last PAID order",
+                       "the most recent SETTLED payment", "the newest
+                       ACTIVE return — the adjective (checkoutable,
+                       paid, settled, active, eligible, ...) is a
+                       FILTER predicate, not a redundant restatement
+                       of "the single most-recent row". The correct
+                       procedure is:
+                         1. enumerate ALL candidate entities ordered
+                            by the superlative key (recency desc),
+                         2. evaluate the qualifier predicate on each
+                            candidate (e.g. run the pre-checkout
+                            inventory gate per basket),
+                         3. select the most-recent candidate that
+                            SATISFIES the predicate.
+                       Do NOT take the single most-recent row, test
+                       the predicate once, and refuse when it fails —
+                       FALL THROUGH to the next candidate. Refuse
+                       (OUTCOME_NONE_UNSUPPORTED / CLARIFICATION) only
+                       when NO candidate satisfies the predicate. The
+                       inventory gate above gates WHETHER a given
+                       basket qualifies; it does not license refusing
+                       the whole request when an earlier, qualifying
+                       basket exists.
     Discover the table inventory by reading /AGENTS.MD — do NOT guess
     table or column names.
   - Prefer SQL over file-walking for any aggregation, count, sum,

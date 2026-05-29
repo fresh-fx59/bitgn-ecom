@@ -1,0 +1,12 @@
+{
+  "instruction": "apply a 5 percent service_recovery discount to the last checkoutable basket of nicole.seidel+cust901@proton.me",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "emp_026",
+  "roles": "employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+  "source": "rebuilt from bench_20260529T003251Z on 2026-05-29",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 5 files / 0 dirs from 14 dump records. Window: started_at=2026-05-29T00:44:06.793124+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp_026' roles='employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service'.",
+  "expected_outcome": "OUTCOME_NONE_UNSUPPORTED",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}
