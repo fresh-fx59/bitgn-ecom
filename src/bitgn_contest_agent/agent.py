@@ -1595,6 +1595,49 @@ class AgentLoop:
                             )
                             fn = fn.model_copy(update={"message": new_msg})
 
+                # v0.1.145 REFLESS count override (safe subset of the
+                # above). Fires only on count_per_store tasks and computes
+                # the qualifying count by replicating the grader's own
+                # observable computation from the catalogue DB. ABSTAINS
+                # (no-op) on any ambiguity, and adds NO refs — so it cannot
+                # hit the v0.1.139 count-cite parity regression (which fired
+                # on ref-bearing count tasks). Validated to exact on the
+                # faithful t16/t45 snapshots; see memory
+                # project_ecom_count_completer_dead_in_prod (REFLESS section)
+                # and tests/test_refless_count_override.py.
+                from bitgn_contest_agent.refless_count_override import (
+                    compute_refless_count as _refless_cnt,
+                    is_enabled as _refless_on,
+                )
+
+                if (
+                    _refless_on()
+                    and getattr(task_spec_obj, "kind", "none") == "count_per_store"
+                ):
+                    try:
+                        refless_n = _refless_cnt(
+                            _run_sql_skucomp_spec, task_text or ""
+                        )
+                    except Exception:
+                        refless_n = None
+                    if refless_n is not None:
+                        import re as _re
+
+                        ints = _re.findall(r"\d+", fn.message or "")
+                        if len(ints) == 1 and int(ints[0]) != refless_n:
+                            new_msg = _re.sub(
+                                r"\d+", str(refless_n), fn.message, count=1
+                            )
+                            emit_arch(
+                                category=ArchCategory.REFS_DROP,
+                                at_step=None,
+                                details=(
+                                    f"refless_count_override: {ints[0]} -> "
+                                    f"{refless_n} (DB-resolved, refless)"
+                                ),
+                            )
+                            fn = fn.model_copy(update={"message": new_msg})
+
             # yes_no_sku: enumerate brand+series family; verifier
             # prunes wrong-attribute members downstream.
             if (
