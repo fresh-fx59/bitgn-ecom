@@ -1,0 +1,49 @@
+{
+  "ts": "20260529T145001Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "multi_sku_attr_line",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/store_acmetown_central.json",
+        "/proc/catalog/Acmetool/PWR-AAACASE18V.json"
+      ],
+      "message": "0",
+      "steps": 8,
+      "wall_sec": 82.39732684474438
+    },
+    {
+      "snapshot": "multi_sku_attr_line",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Acmetool/PWR-AAACASE18V.json",
+        "/proc/stores/store_acmetown_central.json"
+      ],
+      "message": "0",
+      "steps": 8,
+      "wall_sec": 79.62467205245048
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "multi_sku_attr_line": {
+        "passed": 2,
+        "runs": 2,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 2,
+      "runs": 2,
+      "rate": 1.0
+    }
+  }
+}

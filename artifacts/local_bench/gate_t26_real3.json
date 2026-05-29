@@ -1,0 +1,40 @@
+{
+  "ts": "20260529T143518Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t26_real3",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED",
+      "outcome": "OUTCOME_NONE_UNSUPPORTED",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/checkout.md",
+        "/docs/discounts.md",
+        "/proc/baskets/basket_053.json"
+      ],
+      "message": "I couldn\u2019t apply the requested 10% service_recovery discount: the last checkoutable basket in your store for leonie.arnold+cust681@yahoo.com is basket_053, but discount fields remain unchanged after discount-tool execution, so this request is currently not executable in this runtime.",
+      "steps": 22,
+      "wall_sec": 165.15814380533993
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t26_real3": {
+        "passed": 0,
+        "runs": 1,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_UNSUPPORTED"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 0,
+      "runs": 1,
+      "rate": 0.0
+    }
+  }
+}

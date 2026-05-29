@@ -1,0 +1,39 @@
+{
+  "ts": "20260529T143410Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t53_real2",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/uploads/receipt_ocr_GXbdfLSi.txt",
+        "/proc/catalog/Mellerud/CLN-G49YK0ZE.json",
+        "/proc/catalog/Fischer/FST-WY12PHPB.json",
+        "/proc/catalog/Holzmann/MAC-28R9X4AP.json",
+        "/proc/catalog/Raaco/STO-1IL9J3GJ.json",
+        "/proc/catalog/Heco/FST-1S0ZWLK7.json"
+      ],
+      "message": "<YES> Today\u2019s total price excluding VAT is EUR 2788.00, which is EUR 0.06 away from the old receipt\u2019s EUR 2787.94, so it stays within 3 EUR.",
+      "steps": 7,
+      "wall_sec": 66.41532563883811
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t53_real2": {
+        "passed": 1,
+        "runs": 1,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 1,
+      "runs": 1,
+      "rate": 1.0
+    }
+  }
+}

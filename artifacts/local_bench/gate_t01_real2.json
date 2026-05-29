@@ -1,0 +1,34 @@
+{
+  "ts": "20260529T142926Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t01_real2",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/STO-2R84BSHQ.json"
+      ],
+      "message": "<YES>",
+      "steps": 6,
+      "wall_sec": 50.67378708347678
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t01_real2": {
+        "passed": 1,
+        "runs": 1,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 1,
+      "runs": 1,
+      "rate": 1.0
+    }
+  }
+}
