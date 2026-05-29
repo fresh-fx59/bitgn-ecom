@@ -1188,10 +1188,12 @@ class AgentLoop:
                 except Exception:
                     return None
 
+            _ts_v = getattr(fn, "task_spec", None)
             sku_filtered = filter_sku_refs(
                 task_text=task_text,
                 refs=fn.grounding_refs,
                 read_sku=_read_sku,
+                spec_products=(getattr(_ts_v, "products", None) or None),
             )
             if sku_filtered.dropped:
                 emit_arch(
@@ -1510,6 +1512,7 @@ class AgentLoop:
                         task_text=task_text,
                         refs=fn.grounding_refs,
                         read_sku=_read_sku_post_count,
+                        spec_products=(getattr(task_spec_obj, "products", None) or None),
                     )
                     if post_filt.dropped:
                         emit_arch(

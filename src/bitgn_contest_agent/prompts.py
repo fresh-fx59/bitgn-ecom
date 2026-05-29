@@ -568,6 +568,34 @@ Catalogue / SQL discipline (ECOM-specific):
     DISAMBIGUATORS, not decorations. Push every disambiguator into
     the WHERE clause.
 
+    NEVER EQUALITY-MATCH THE DISPLAY-NAME COLUMN AGAINST THE SHORT
+    PRODUCT TYPE. The catalogue's `name` / `product_name` column is a
+    long descriptive concatenation (brand + series + model + attrs +
+    type, e.g. "Festool Stackable SYS 3JJ-9LM Tool Box and Bag parts
+    case 60l Yellow"). The task quotes only the bare product TYPE
+    ("Work Trousers", "Sealant", "Tool Box and Bag"). A predicate like
+    `v.product_name = '<task type>'` therefore matches ZERO rows and
+    silently drops EVERY product — including the valid ones. Product
+    LINE identity is `brand` + `series` (LIKE) + `model`; product
+    VARIANT identity adds the json_extract attribute filters. Do NOT
+    add the display name as a join/equality key. If you must reference
+    the type, match the structured `kind_id` / `category_id`, never an
+    equality on the free-text name. (v-2026-05 t47: a 7-row
+    pasted-list validation returned all-false because the join keyed
+    `product_name` on the short type and found nothing.)
+
+    PASTED-LIST / PER-ROW VALIDATION TASKS. When the task pastes a
+    multi-row product list and asks for a per-row table (RowID → SKU /
+    in_stock / match), resolve EACH row independently with the
+    brand+series+model+attributes lookup above. A row whose attributes
+    are internally CONTRADICTORY (the same attribute named twice with
+    different values, e.g. "color family Black ... color family brown",
+    "voltage 230 V ... voltage 110 V", "volume 250 ml ... volume 4000
+    ml") cannot match any single SKU → leave SKU/in_stock empty,
+    match=false. But a row with consistent attributes that DOES exist
+    must return its SKU and the store's same-day quantity; do not let
+    one over-broad join collapse all rows to false.
+
   - FRAUD DETECTION (archived payments).
     When the task asks you to identify fraudulent payment records in
     older / archived payment history (the `payments` table includes

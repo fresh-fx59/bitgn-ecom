@@ -1,0 +1,12 @@
+{
+  "instruction": "How many of these products have at least 3 items available in the old-town Bratislava PowerTool store today: the Wiring Device from Legrand in the Legrand Indoor LG 3KD-GSH Wiring Device line that has device type switch, color family White, and ip rating IP20,the Pipe Fitting from Geberit in the Geberit Mapress Mapress 5D7-TSX Pipe Fitting line that has fitting type thread adapter and diameter 40 mm,the Work Trousers from Sparco in the Sparco Pro SP 1VN-V9E Work Trousers line that has color family Orange, size L, and fit relaxed,the Extension Cable from Legrand in the Legrand Outdoor Valena 2T3-OA7 Extension Cable line that has color family White and length 2 m,the Shelving and Cabinet from Allit in the Allit Workshop EuroPlus 1LB-7VT Shelving and Cabinet line that has storage type shelving unit and color family Clear,the Adhesive and Glue from Soudal in the Soudal High Tack Fix 14P-LSY Adhesive and Glue line that has adhesive type mounting adhesive and color family Gray? Answer in exactly format \"qty=%d\" (no quotes)",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "rebuilt from bench_20260529T003251Z on 2026-05-29",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 5 files / 0 dirs from 22 dump records. Window: started_at=2026-05-29T00:37:49.098623+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='anonymous' roles='GUEST'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

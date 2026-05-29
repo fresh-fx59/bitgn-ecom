@@ -1,0 +1,12 @@
+{
+  "instruction": "pls check the central Graz PowerTool shop, how many of these have less than 4 available today: the Work Trousers from Engelbert Strauss in the Engelbert Strauss Classic e.s. 37H-N9K Work Trousers line that has color family Gray,the Wood Stain and Deck Oil from Bondex in the Bondex Garden Classic 106-TS1 Wood Stain and Deck Oil line that has product type lacquer,the Safety Eyewear from 3M in the 3M Ventilated SecureFit 2CE-B35 Safety Eyewear line that has lens color Clear and size XL,the Metal and Concrete Paint from Helios in the Helios Professional Helios 29A-FTE Metal and Concrete Paint line that has product type metal paint and color family Green,the Screwdriver and Hex Key Set from Wiha in the Wiha VDE VDE 13X-B49 Screwdriver and Hex Key Set line that has tool profile hex,the Valve and Connector from Geberit in the Geberit Mapress Silent IC5-GU6 Valve and Connector line that has connector type ball valve? Answer in exactly format \"%d\" (no quotes)",
+  "context_date": "2025-10-08T16:53:18Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "rebuilt from bench_20260529T003251Z on 2026-05-29",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 5 files / 0 dirs from 25 dump records. Window: started_at=2026-05-29T00:50:33.039636+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='anonymous' roles='GUEST'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

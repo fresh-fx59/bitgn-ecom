@@ -3,12 +3,24 @@ from __future__ import annotations
 
 import json
 
+from dataclasses import dataclass, field
+
 from bitgn_contest_agent.sku_verifier import (
     FilterResult,
     filter_sku_refs,
     sku_mismatches_task,
+    sku_mismatches_spec,
     _normalize,
 )
+
+
+@dataclass
+class _Prod:
+    brand: str = ""
+    series: str = ""
+    model: str = ""
+    name: str = ""
+    attributes: dict = field(default_factory=dict)
 
 
 # ── unit tests for sku_mismatches_task ────────────────────────────────
@@ -277,3 +289,55 @@ def test_filter_real_v160b_t14_overcite_pattern():
     assert "/proc/catalog/Acmetool/PWR-P1RIGHT.json" in res.kept
     assert "/proc/catalog/Acmetool/PWR-P1LOW.json" in res.dropped
     assert "/proc/catalog/Acmetool/PWR-P1BARE.json" in res.dropped
+
+
+# ── spec-based path (task_spec.products) ──────────────────────────────
+
+
+def _sku_full(path, brand, series, model, **props):
+    return path, {
+        "brand": brand, "series": series, "model": model,
+        "name": "x", "properties": dict(props),
+    }
+
+
+def test_spec_keeps_correct_sku_with_extra_props():
+    """t01: only storage_type specified; stackable='yes' must not strip."""
+    prod = _Prod(brand="Festool", series="Stackable", model="SYS 3JJ-9LM",
+                 attributes={"storage_type": "parts case"})
+    sku = {"brand": "Festool", "series": "Stackable", "model": "SYS 3JJ-9LM",
+           "properties": {"storage_type": "parts case", "stackable": "yes",
+                          "color_family": "yellow"}}
+    assert sku_mismatches_spec(sku, prod) is None
+
+
+def test_spec_strips_genuine_attr_mismatch():
+    prod = _Prod(brand="Acmetool", series="Pro Z9", model="Z9-DR1",
+                 attributes={"voltage": "18 V"})
+    sku = {"brand": "Acmetool", "series": "Pro Z9", "model": "Z9-DR1",
+           "properties": {"voltage": "12 V"}}
+    msg = sku_mismatches_spec(sku, prod)
+    assert msg is not None and "voltage" in msg
+
+
+def test_filter_spec_no_cross_product_contamination():
+    """t16: P4's SKU (ip_rating=IP65) must survive even though a
+    DIFFERENT product P1 specified ip_rating=IP20."""
+    p1 = _Prod(brand="Legrand", series="Indoor", model="LG 3KD-GSH",
+               attributes={"device_type": "switch", "color_family": "White",
+                           "ip_rating": "IP20"})
+    p4 = _Prod(brand="Legrand", series="Outdoor Valena", model="2T3-OA7",
+               attributes={"color_family": "White", "length": "2 m"})
+    path, sku = _sku_full(
+        "/proc/catalog/electrical/ELC-2CE5QWCH.json",
+        "Legrand", "Outdoor Valena", "2T3-OA7",
+        color_family="White", length="2 m", ip_rating="IP65",
+    )
+    res = filter_sku_refs(
+        task_text="legrand ... ip rating ip20 ... legrand outdoor valena 2t3-oa7 white 2 m",
+        refs=[path],
+        read_sku=lambda p: json.dumps(sku),
+        spec_products=[p1, p4],
+    )
+    assert res.dropped == [], res.reasons
+    assert path in res.kept

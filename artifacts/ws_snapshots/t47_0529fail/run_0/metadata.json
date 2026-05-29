@@ -1,0 +1,12 @@
+{
+  "instruction": "I'm preparing a quote for a customer from this pasted product list. Check each row against our exact catalogue and my store's same-day availability.\n\nInput format:\nRowID\tdescription\tquantity\n\nReturn exactly this tab-separated output table, including the header, with rows in the same order:\nRowID\tSKU\tin_stock\tmatch\n\nIf the description is not an exact catalogue product, leave SKU and in_stock empty and set match=false. If the product exists, set in_stock to the quantity available today in my store (reference all matched SKUs in response). set `match` field true only when the exact product exists and in_stock is at least the requested quantity.\n\nRows:\n69ZbV\tthe Sealant from Bostik in the Bostik Flexible Fix 3S9-FF7 Sealant line that has sealant type acrylic sealant and color family Black and has color family brown\t1\nbJFy7\tthe Work Trousers from Carhartt in the Carhartt Stretch Rugged 3EY-11K Work Trousers line that has color family Green and size M\t2\nFRpNJ\tthe Work Gloves from Uvex in the Uvex Industrial uvex 2KV-937 Work Gloves line that has size L, color family Black, and protection class cut-3\t1\n8c217\tthe Workshop Saw and Cutter from Bosch in the Bosch Workshop GSR 3JW-ULH Workshop Saw and Cutter line that has machine type table saw, voltage 230 V, and power 3000 W and has voltage 110 V\t1\nb6EfL\tthe Wood and Drywall Screw from Spax in the Spax Outdoor T-Star 1GS-NEI Wood and Drywall Screw line that has screw type deck screw and diameter 8 mm\t12\nPFiGE\tthe Engine Oil from Castrol in the Castrol All Season GTX 3PP-ZPA Engine Oil line that has volume 250 ml and viscosity 5W-40 and has volume 4000 ml\t1\nX7GoA\tthe Cloth Mop and Wipe from Leifheit in the Leifheit Fresh Profi NBC-KFA Cloth Mop and Wipe line that has cleaning type sponge\t1",
+  "context_date": "2024-07-17T20:49:48Z",
+  "actor_id": "emp_041",
+  "roles": "employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+  "source": "rebuilt from bench_20260529T003251Z on 2026-05-29",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 2 files / 0 dirs from 10 dump records. Window: started_at=2026-05-29T00:52:01.611631+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp_041' roles='employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}
