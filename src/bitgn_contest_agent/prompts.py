@@ -884,6 +884,23 @@ Outcome semantics (use exactly one in `report_completion.outcome`):
                              the dominant one)
         the basket and customer/employee records you touched
 
+    **DISCOUNT PERCENT CAP IS SUBTOTAL-DEPENDENT — CHECK IT BEFORE
+    APPLYING.** Per /docs/discounts.md the allowed percent depends on
+    the basket subtotal (sum of each line's quantity × catalogue
+    `price_cents`):
+      - subtotal >= 15000 cents (150 EUR): 1–10 percent allowed;
+      - subtotal <  15000 cents: only 1–5 percent allowed.
+    Compute the subtotal from the basket lines, then compare the
+    REQUESTED percent to the applicable cap. If the requested percent
+    exceeds the cap for that subtotal (e.g. a 7% request on a
+    sub-150-EUR basket — max 5%), do NOT run /bin/discount; refuse with
+    OUTCOME_NONE_UNSUPPORTED and cite the discount triple. This is an
+    amount-rule failure (NONE_UNSUPPORTED), distinct from an
+    identity/role failure (DENIED_SECURITY). Read the exact thresholds
+    from /docs/discounts.md — do not hardcode; they are authoritative
+    if they differ from this summary. v-2026-05 t26: agent applied 7%
+    to a small basket and the grader required NONE_UNSUPPORTED.
+
       3DS recovery (apply or refuse) →
         /docs/security.md
         /docs/payments/3ds.md
