@@ -186,13 +186,14 @@ def deep_extract(client, out_dir: Path, task_id, instruction):
             _write_ws(ws, path, _read(client, path))
     except Exception:
         pass
-    # uploads (OCR receipts)
-    try:
-        ut = client.tree(E.TreeRequest(root="/uploads", level=3))
-        for path in _walk_files(ut.root, "/uploads"):
-            _write_ws(ws, path, _read(client, path))
-    except Exception:
-        pass
+    # uploads (OCR receipts) + archive (fraud TSV exports, e.g. t48)
+    for root in ("/uploads", "/archive"):
+        try:
+            ut = client.tree(E.TreeRequest(root=root, level=4))
+            for path in _walk_files(ut.root, root):
+                _write_ws(ws, path, _read(client, path))
+        except Exception:
+            pass
 
     # SQL: per-table schema (via pragma) + full row dumps → catalogue.db
     tables = _list_tables(client)
