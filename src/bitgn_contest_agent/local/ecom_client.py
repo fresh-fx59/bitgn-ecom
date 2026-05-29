@@ -513,7 +513,17 @@ class LocalEcomClient:
                 ).fetchone()
             if row is None:
                 return None
-            return json.dumps({k: row[k] for k in row.keys()})
+            d = {k: row[k] for k in row.keys()}
+            # Reflect a discount applied this session via /bin/discount
+            # so the agent's verify-after-write re-read of the basket
+            # sees the mutation (PROD mutates; the local db is read-only).
+            if table == "shopping_baskets":
+                applied = getattr(self, "_applied_discounts", {}).get(
+                    d.get("basket_id") or token
+                )
+                if applied:
+                    d.update(applied)
+            return json.dumps(d)
         except Exception:
             return None
         finally:
@@ -767,7 +777,22 @@ class LocalEcomClient:
                     "code, and issuer id\n"
                 ),
             )
-        return ecom_pb2.ExecResponse()
+        # Record the applied discount so a subsequent basket re-read
+        # reflects it — PROD mutates discount state; without modelling
+        # this the agent's verify-after-write re-read sees an empty
+        # discount and falsely refuses NONE_UNSUPPORTED (local t26
+        # apply-case). args = [basket_id, percent, reason_code, issuer].
+        basket_id, percent, reason, issuer = args[0], args[1], args[2], args[3]
+        if not hasattr(self, "_applied_discounts"):
+            self._applied_discounts = {}
+        self._applied_discounts[basket_id] = {
+            "discount_percent": percent,
+            "discount_reason_code": reason,
+            "discount_issuer_employee_id": issuer,
+        }
+        return ecom_pb2.ExecResponse(
+            stdout=f"discount_applied {basket_id} {percent}\n"
+        )
 
     def _exec_payments(
         self, *, args: list[str], stdin: str,
