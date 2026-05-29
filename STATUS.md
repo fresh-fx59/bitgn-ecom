@@ -1,26 +1,70 @@
-# Status — BitGN ECOM contest agent, v0.1.112 milestone
+# Status — BitGN ECOM contest agent, v0.1.117 milestone
 
 ## Headline
 
-**44/44 (peak) within a 40-44/44 variance band on the current
-contest surface.** Bench wall reduced to ~11 min (was 17.7 min,
-−38%) at v0.1.112 via prompt-cache plumbing, prepass cross-task
-cache, post-pass read dedup, and classifier connection-pool reuse.
-Multi-language inputs supported via the v0.1.109 i18n
-canonicalization prepass (validated by local A/B across
-en/de/cs/hu/ja).
+**46/53 perfect, mean 0.894 (NEW BEST) on the 53-task contest
+surface.** linkapi.ai + four deterministic completers + the
+LLM-as-judge enforcer beat the 43/53 baseline (mean 0.878) by
++3 perfect / +0.016 mean. The judge delivered +4 task wins
+(t14/t17/t18/t49 — yes_no_sku, count_per_store, format
+precision) on top of completer wins (t08/t11/t13/t44/t53),
+offset by 1 content-variance loss (t01).
 
-| Run | Score | Wall | Notes |
+| Run | Provider | Score | Notes |
 |---|---|---|---|
-| v0.1.108 cliproxyapi (42-task era) | 42/42 mean 1.000 | n/a | two consecutive |
-| v0.1.108 cliproxyapi t43/t44 filtered ×3 | 6/6 mean 1.000 | n/a | refund family |
-| v0.1.111 CloseRouter (44-task) | **44/44 mean 1.000** | 17.7 min | full bench |
-| v0.1.112 speedups run 1 | 40/44 (in variance band) | 11.0 min | -38% wall |
-| v0.1.112 speedups run 2 | 41/44 (in variance band) | ~11.5 min | -35% wall |
+| v0.1.108 (42-task era) | cliproxyapi | 42/42 mean 1.000 | two consecutive |
+| v0.1.111 (44-task) | CloseRouter | 44/44 mean 1.000 | i18n A/B validated |
+| v0.1.112 speedups | cliproxyapi | 40-41/44 var band | -38% wall |
+| v0.1.117-pre baseline | cliproxyapi | 43/53 mean 0.878 | classifier streaming fix only |
+| v0.1.117 L_full_v2 | linkapi | 42/53 mean 0.842 | 4 completers, no judge |
+| **v0.1.117 L_judge_full** | **linkapi** | **46/53 mean 0.894** | **completers + judge — current best** |
 
 Session arc: 30/31 (v0.1.44) → 42/42 (v0.1.108) → 44/44 peak
-(v0.1.111) → 40-44/44 + −38% wall (v0.1.112) across ~55 PROD
-iterations on two different providers.
+(v0.1.111) → 40-44/44 + −38% wall (v0.1.112) → **46/53 mean
+0.894 (v0.1.117)** across ~60 PROD iterations on three different
+providers (cliproxyapi, CloseRouter, linkapi.ai).
+
+## v0.1.117 stack additions (all env-gated default-off)
+
+| Env flag | Module | Targets |
+|---|---|---|
+| `BITGN_USE_CHECKED_SKU_COMPLETER` | checked_sku_completer | yes_no_sku `<NO> Checked SKU: X` → add X.json from seen_refs |
+| `BITGN_USE_REFUND_PAYMENT_COMPLETER` | refund_payment_completer | refund refusal → chain return → linked pay_NNN.json |
+| `BITGN_USE_STORE_BACK_COMPLETER` | store_back_completer | store-availability task → chain emp record → store_<id>.json (+ prepass actor_id fallback) |
+| `BITGN_USE_CATALOG_STRIP_ENFORCER` | catalog_strip_enforcer | catalogue_count + addenda cited → strip individual catalog refs |
+| `BITGN_USE_LLM_JUDGE` | judge_enforcer | Haiku-as-judge: adaptive ref add/drop per task |
+
+Plus the classifier streaming refactor (`raw_completion` + `classify`
++ `_try_fix_json` all stream + concat content deltas), the
+format-token verbatim-mirror prompt fix, the sku_completer salvage
+path for misclassified task_spec.kind, and the linkapi.ai provider
+toggle in `scripts/use_provider.sh`.
+
+**Recommended runtime gates for the headline run:**
+```
+set -a && source .env && set +a && \
+  export BITGN_USE_CHECKED_SKU_COMPLETER=1 \
+         BITGN_USE_REFUND_PAYMENT_COMPLETER=1 \
+         BITGN_USE_STORE_BACK_COMPLETER=1 \
+         BITGN_USE_CATALOG_STRIP_ENFORCER=1 \
+         BITGN_USE_LLM_JUDGE=1
+```
+(`export` is REQUIRED — bare inline assignment doesn't propagate
+through `&&` chains. See saved memory `feedback_bench_env_export`.)
+
+## Residual 5 zeros + 2 partials
+
+| Task | Class | Why it's hard |
+|---|---|---|
+| t01, t16, t47 | yes_no_sku content variance | grader's required SKU shifts per PROD run; judge tried and missed on this content shape |
+| t26 | wrong-basket-pick (precision) | agent's "last checkoutable basket" resolved to basket_115; grader wanted basket_043 |
+| t45 | INVALID over-cite | sku_verifier let a non-qualifying SKU through |
+| t40 (0.94) | fraud variance | long-documented per `project_ecom_variance_ceiling` |
+| t48 (0.42) | archive fraud variance | same family, harder |
+
+To reach 53/53 from here needs n-best self-consistency voting (≥3× LLM
+cost per task) per memory `project_ecom_variance_ceiling` — the
+deterministic+adaptive stack is at the 0.894 ceiling.
 
 ## Locked-in stack
 
