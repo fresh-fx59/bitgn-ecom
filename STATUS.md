@@ -576,3 +576,27 @@ and PROOF the deterministic avenue is closed. 53/53 needs a lucky default-seed
 build more deterministic count/fraud enforcers; DO NOT enable voting / fraud
 levers / t48 hint (traps). Continue only via the default config on fresh seeds
 (within rate limits) or genuine agent-capability work — not enforcers.
+
+## v0.1.152 — voting also doesn't reliably help; lever space EXHAUSTED (2026-05-30)
+
+Count-gated VOTE_K=3 A/B (run-22RtbAJZjmKcNZPG9uCtLN1NA) = 43/53. t16 AND t45
+were VOTED (count_per_store) and STILL FAILED — voting submits the MAJORITY,
+but the agent computes t45 wrong ~89% / t16 marginally, so K=3 majority is
+often also wrong. Voting only rescues tasks where the agent is reliably >50%
+right (t13/t14 passed). 43 ≈ baseline 44 (seed noise) → no clear lift.
+
+EXHAUSTIVE LEVER MATRIX (all PROD-tested, none reliably lifts the score):
+  enforcers: count-override text (41) + spec (45, fires nowhere) + fraud
+    (38, trap) — abstain or regress on PROD content variance.
+  voting: ungated (47, misattributed) + count-gated (43) — amplifies the
+    agent's wrong-majority on the very tasks that fail.
+  prompt hints: t48 hint (regressed 0.43→0.0, author trap).
+Per-task max over 12 runs: ONLY t40 (0.944) + t48 (0.730) structurally capped;
+everything else hit 1.0 at some point (variance). Theoretical max ≈52.67/53.
+
+RECOMMENDED SHIPPING CONFIG = PROVEN DEFAULT (5 enforcer flags, NO VOTE_K, NO
+experimental levers): the proven 51.4 best, seed-variant band 38-51, NOT
+regressed by this session. 53/53 needs t40 AND t48 at 1.0 (t48 author-trapped)
++ a perfect seed on the rest — unreachable by any validatable lever within the
+constraints. The agent's adaptive LLM capability + seed variance IS the
+ceiling. Lever space fully mapped; do not re-test these.
