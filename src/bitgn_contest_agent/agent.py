@@ -1297,6 +1297,57 @@ class AgentLoop:
                         update={"grounding_refs": sbr.refs}
                     )
 
+            # v0.1.146 quote/pasted-list ref completer (t47 family). The
+            # observed failure is UNDER-MATCHING: the agent declares a
+            # genuinely-exact catalogue product "no exact match" and omits
+            # its grounding ref (t47 cited only 1 of 4 exact SKUs → grader
+            # "missing required reference"). This resolves each pasted row's
+            # exact variant (line code + all attrs) and UNIONS the matched
+            # SKU record_paths into grounding_refs. ADD-ONLY (never rewrites
+            # the TSV message, never removes a ref) — the safe enforcer
+            # pattern. Validated against the faithful t47 oracle; see
+            # tests/test_quote_ref_completer.py + memory
+            # project_ecom_t47_tsv_oracle. Env-gated default-off.
+            from bitgn_contest_agent.quote_ref_completer import (
+                complete_quote_refs as _complete_quote_refs,
+                is_enabled as _quote_refs_enabled,
+            )
+            if _quote_refs_enabled():
+                from bitgn_contest_agent.adapter.ecom import Req_Exec as _Req_Exec_Q
+
+                def _run_sql_quote(sql: str) -> str | None:
+                    try:
+                        tr = self._adapter.dispatch(
+                            _Req_Exec_Q(
+                                tool="exec", path="/bin/sql", args=[], stdin=sql
+                            )
+                        )
+                        return tr.content if tr.ok else None
+                    except Exception:
+                        return None
+
+                try:
+                    quote_added = _complete_quote_refs(
+                        _run_sql_quote, task_text or "", list(fn.grounding_refs)
+                    )
+                except Exception:
+                    quote_added = []
+                if quote_added:
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP,
+                        at_step=None,
+                        details=(
+                            f"quote_ref_completer added "
+                            f"{len(quote_added)} ref(s): {quote_added}"
+                        ),
+                    )
+                    fn = fn.model_copy(
+                        update={
+                            "grounding_refs": list(fn.grounding_refs)
+                            + quote_added
+                        }
+                    )
+
             # Step 1c-bis (v0.1.117-pre): refund payment back-completer.
             # When the task is refund family and the agent cited a
             # /proc/returns/ret_NNN.json, chain to the linked
