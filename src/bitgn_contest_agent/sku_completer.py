@@ -824,17 +824,24 @@ def _find_family_skus(
     tiers fail, abstain — the catalogue genuinely lacks a matching
     SKU and the agent's own 'closest miss' citation is best we can
     do."""
+    sch = _detect_schema(run_sql)
+    if sch is None:
+        return None
     brand_q = _sql_quote(brand)
+    namecol = sch["name"]
     tries: list[list[str]] = []
     base = f"p.brand = '{brand_q}' COLLATE NOCASE"
-    if series and model:
+    # model code may carry a series prefix (task 'XTREME 300-EAF' vs
+    # catalogue model column) — match by LIKE on the code, not exact.
+    model_code = (model or "").split()[-1] if model else ""
+    if series and model_code:
         tries.append([
             base,
             f"p.series LIKE '%{_sql_quote(series)}%'",
-            f"p.model = '{_sql_quote(model)}'",
+            f"p.model LIKE '%{_sql_quote(model_code)}%'",
         ])
-    if model:
-        tries.append([base, f"p.model = '{_sql_quote(model)}'"])
+    if model_code:
+        tries.append([base, f"p.model LIKE '%{_sql_quote(model_code)}%'"])
     # brand + name LIKE: when model doesn't exist (false claim),
     # filter to the right product category via product name
     # ("Wiring Device", "Nut Bolt and Washer", etc.) instead of
@@ -844,12 +851,12 @@ def _find_family_skus(
     # nuts_bolts_washers product line.
     if name:
         tries.append(
-            [base, f"p.name LIKE '%{_sql_quote(name)}%'"]
+            [base, f"p.\"{namecol}\" LIKE '%{_sql_quote(name)}%'"]
         )
 
     for where_clauses in tries:
         sql = (
-            "SELECT p.path FROM products p "
+            f"SELECT p.\"{sch['path']}\" FROM {sch['tbl']} p "
             f"WHERE {' AND '.join(where_clauses)} LIMIT 50;"
         )
         out = run_sql(sql)
