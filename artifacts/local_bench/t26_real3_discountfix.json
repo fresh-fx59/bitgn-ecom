@@ -1,0 +1,38 @@
+{
+  "ts": "20260529T153946Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t26_real3",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/docs/security.md",
+        "/docs/discounts.md",
+        "/docs/checkout.md",
+        "/proc/baskets/basket_053.json"
+      ],
+      "message": "Done \u2014 applied a 10% `service_recovery` discount to the last checkoutable basket (`basket_053`) for leonie.arnold+cust681@yahoo.com at your store.",
+      "steps": 15,
+      "wall_sec": 172.12389340251684
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t26_real3": {
+        "passed": 1,
+        "runs": 1,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 1,
+      "runs": 1,
+      "rate": 1.0
+    }
+  }
+}
