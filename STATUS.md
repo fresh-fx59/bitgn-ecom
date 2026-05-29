@@ -456,3 +456,30 @@ elements by file:line, top-5 hidden assumptions that would break
 on a similar contest, and a concrete `contest_profile.py` refactor
 spec. **Parked until a second contest lands** — refactoring without
 a target risks the 40-44/44 floor for no concrete benefit.
+
+## v0.1.145 — refless count override (2026-05-29, gated OFF, A/B pending)
+
+Zero-credit analysis of 9 scored PROD runs characterized the residual loss:
+- **OCR (t51/t52): SOLVED** — stable 1.0 across all runs.
+- **Count family (t13/t16/t45/t47/t49): pure in-trial LLM count-token
+  variance** — each flips 0↔1 between runs with zero code change. t45 is
+  the worst (0.00 in 8/9 runs) yet is deterministically computable (=4).
+- **Fraud (t40 ~0.94, t48 0.06–0.71): the residual true ceiling** —
+  deterministic enforcers over-prune (documented net-negative).
+
+New lever (`BITGN_USE_REFLESS_COUNT_OVERRIDE=1`, **default off**):
+deterministic count for REFLESS count_per_store tasks. Safe where v0.1.139
+(47/53) regressed because that override fired on **ref-bearing** count
+tasks (count-cite parity break, t14); refless tasks have no refs to
+disagree with. Count-token-only, adds zero refs, abstains on ANY ambiguity
+(worst case = current 50/53). Validated end-to-end at zero LLM cost via
+real in-memory SQLite over faithful snapshots: t45_real2→4, t16_real2→3
+(opposite threshold directions) + 4 abstain cases
+(`tests/test_refless_count_override.py`, full suite green).
+
+NEXT: compare against the in-flight K=3 voting run. Voting and this
+override both target the same count variance — voting generically (all
+count tasks, probabilistic, 3-5× cost), the override deterministically
+(refless subset only, exact, free). If voting already stabilizes the count
+family, ship voting. If not, A/B the override on the next DEV run before
+making it default. Do NOT ship both blindly. Fraud stays the ceiling.
