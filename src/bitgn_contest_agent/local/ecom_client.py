@@ -360,19 +360,26 @@ class LocalEcomClient:
             # be thousands. Synthesize them from the catalogue.db so the
             # agent reads/cites them exactly as on PROD (where they are
             # real files whose record_path lives in product_variants).
+            synth = None
             if path.startswith("/proc/catalog/") and path.endswith(".json"):
                 synth = self._synth_catalog_read(path)
-                if synth is not None:
-                    self.reads.add(path.lstrip("/"))
-                    self.ops_log.append({
-                        "op": "read", "path": path, "bytes": len(synth),
-                        "truncated": False, "synth_catalog": True,
-                    })
-                    return ecom_pb2.ReadResponse(
-                        path=path, content_type="application/json",
-                        content=synth,
-                        sha256=hashlib.sha256(synth.encode("utf-8")).hexdigest(),
-                    )
+            elif path.startswith("/proc/payments/") and path.endswith(".json"):
+                synth = self._synth_row_read(
+                    path, "payment_transactions", "payment_id")
+            elif path.startswith("/proc/baskets/") and path.endswith(".json"):
+                synth = self._synth_row_read(
+                    path, "shopping_baskets", "basket_id")
+            if synth is not None:
+                self.reads.add(path.lstrip("/"))
+                self.ops_log.append({
+                    "op": "read", "path": path, "bytes": len(synth),
+                    "truncated": False, "synth_row": True,
+                })
+                return ecom_pb2.ReadResponse(
+                    path=path, content_type="application/json",
+                    content=synth,
+                    sha256=hashlib.sha256(synth.encode("utf-8")).hexdigest(),
+                )
             raise FileNotFoundError(f"File not found: {path}")
 
         # /bin/* are zero-byte executable stubs on PROD. `read` returns
@@ -474,6 +481,39 @@ class LocalEcomClient:
                 "properties": props,
             }
             return json.dumps(out)
+        except Exception:
+            return None
+        finally:
+            if conn is not None:
+                conn.close()
+
+    def _synth_row_read(self, path: str, table: str, key_col: str) -> Optional[str]:
+        """Synthesize a /proc/<ns>/<id>.json read from a db row (by
+        record_path, then by the trailing id token against key_col).
+        Used for payments/baskets which aren't materialised as files in
+        db-backed snapshots. Returns the row as JSON, or None."""
+        if not self._sql_dbs.primary:
+            return None
+        token = path.rsplit("/", 1)[-1][:-len(".json")]
+        conn = None
+        try:
+            conn = sqlite3.connect(str(self._sql_dbs.primary))
+            conn.row_factory = sqlite3.Row
+            cols = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+            if not cols:
+                return None
+            row = None
+            if "record_path" in cols:
+                row = conn.execute(
+                    f"SELECT * FROM {table} WHERE record_path=? LIMIT 1", (path,)
+                ).fetchone()
+            if row is None:
+                row = conn.execute(
+                    f"SELECT * FROM {table} WHERE {key_col}=? LIMIT 1", (token,)
+                ).fetchone()
+            if row is None:
+                return None
+            return json.dumps({k: row[k] for k in row.keys()})
         except Exception:
             return None
         finally:
