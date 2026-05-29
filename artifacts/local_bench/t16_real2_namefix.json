@@ -1,0 +1,34 @@
+{
+  "ts": "20260529T100642Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t16_real2",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got None",
+      "outcome": null,
+      "grounding_refs": [],
+      "message": "",
+      "steps": 2,
+      "wall_sec": 53.3222616314888
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t16_real2": {
+        "passed": 0,
+        "runs": 1,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got None"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 0,
+      "runs": 1,
+      "rate": 0.0
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "ts": "20260529T101228Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t16_real2",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/stores/README.md",
+        "/proc/catalog/automotive/wiper_blades/fam_automotive_wiper_blades_0005_2rcco0bw/AUT-39TYC7F4.json",
+        "/proc/catalog/cleaning/cleaning_liquids/fam_cleaning_cleaning_liquids_0013_1rn3tgz0/CLN-10BI74OI.json",
+        "/proc/catalog/plumbing/valves_connectors/fam_plumbing_valves_connectors_0017_xp2iglo1/PLB-231GEAQI.json"
+      ],
+      "message": "result 3",
+      "steps": 13,
+      "wall_sec": 186.14892135653645
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t16_real2": {
+        "passed": 1,
+        "runs": 1,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 1,
+      "runs": 1,
+      "rate": 1.0
+    }
+  }
+}

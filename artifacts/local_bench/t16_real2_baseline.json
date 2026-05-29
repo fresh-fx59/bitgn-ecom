@@ -1,0 +1,62 @@
+{
+  "ts": "20260529T095632Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t16_real2",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected answer fragment not found: 'result 3'",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/catalogue.db",
+        "/proc/stores/README.md"
+      ],
+      "message": "result 2",
+      "steps": 11,
+      "wall_sec": 259.8245049966499
+    },
+    {
+      "snapshot": "t16_real2",
+      "run_index": 1,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got None",
+      "outcome": null,
+      "grounding_refs": [],
+      "message": "",
+      "steps": 3,
+      "wall_sec": 51.599540397524834
+    },
+    {
+      "snapshot": "t16_real2",
+      "run_index": 2,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got None",
+      "outcome": null,
+      "grounding_refs": [],
+      "message": "",
+      "steps": 3,
+      "wall_sec": 76.42763873189688
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t16_real2": {
+        "passed": 0,
+        "runs": 3,
+        "rate": 0.0,
+        "fail_details": [
+          "expected answer fragment not found: 'result 3'",
+          "expected outcome OUTCOME_OK, got None",
+          "expected outcome OUTCOME_OK, got None"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 0,
+      "runs": 3,
+      "rate": 0.0
+    }
+  }
+}

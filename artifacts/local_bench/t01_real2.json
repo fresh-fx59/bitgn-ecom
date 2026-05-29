@@ -1,0 +1,47 @@
+{
+  "ts": "20260529T101734Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t01_real2",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/STO-2R84BSHQ.json"
+      ],
+      "message": "<YES>",
+      "steps": 6,
+      "wall_sec": 61.32196148484945
+    },
+    {
+      "snapshot": "t01_real2",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/STO-2R84BSHQ.json"
+      ],
+      "message": "<YES>",
+      "steps": 6,
+      "wall_sec": 50.366330496035516
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t01_real2": {
+        "passed": 2,
+        "runs": 2,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 2,
+      "runs": 2,
+      "rate": 1.0
+    }
+  }
+}

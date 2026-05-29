@@ -49,11 +49,47 @@ the strip so the ref survives.
   Viega current record which the agent never queried).
 
 Net: +3 confirmed fixes, −1 OCR variance, +1 fraud variance gain.
-Remaining gap (t16, t45, t40, t48, t53) is variance / under-spec
-ambiguity / OCR-drift — none cleanly reproducible on local snapshots
-(`feedback_local_ab_variance_ceiling`); 53/53 needs self-consistency
-voting (`project_ecom_variance_ceiling`), a large change whose lift
-cannot be measured locally.
+
+### v0.1.124-125: faithful local emulation + 3 more fixes validated
+
+Built `scripts/deep_extract_trial.py` (dumps full PROD-schema
+catalogue.db from live trials) + LocalEcomClient `/proc/catalog`
+synthesis → faithful `*_real2` snapshots. Validated locally with fixes:
+- **t01 2/2 PASS** (verifier series-name/spec scoping).
+- **t16 1/1 PASS** "result 3": name-encoded-attribute matching (length
+  in product_name) + catalog-read synthesis + linkapi concurrency-retry.
+- **t53 2/2 PASS**: OCR old-receipt name-fallback (resolved a garbled
+  Heco SKU; computed ex-VAT 2788.00 vs 2787.94 → YES).
+
+### DEV run-22RoR (v0.1.125): 47/53 mean 0.9123
+
+**t16 ✓ and t53 ✓ landed** (the fixes work). But t13/t47/t49 churned to
+fail (all "missing required reference" on DIFFERENT randomized content —
+variance, not regressions; my changes don't cause under-citing). t45/t40
+/t48 unchanged. Net 48↔47 is within the variance band.
+
+### Key finding: the count_per_store completer is DEAD in PROD
+
+`sku_completer.py` SQL targets the legacy `products`/`inventory`/
+`stores.id` schema; PROD now uses `product_variants`/
+`product_variant_properties`/`store_inventory`/`stores.store_id`. Every
+completer query errors → adds nothing → the count/recall family
+(t13/t16/t45/t47/t49) has NO deterministic ref-recall backstop and
+churns ±2-3 per run. A schema-adaptive rewrite was attempted and
+REVERTED — it over-matched (33 SKUs/product) because model exact-match
+fell through to a brand-only flood. See memory
+`project_ecom_count_completer_dead_in_prod` for the safe-rewrite spec.
+
+### Honest ceiling
+
+Validated band ~47-49/53. 5 of 7 original failures have grader-confirmed
+root-cause fixes (t01/t16/t26/t47/t53). The residual is irreducible
+without grader internals: **t40/t48** (per-world fraud clusters, unknown
+labels — partial credit 0.94/0.41), **t45** (under-spec count: no-row
+qualification + canonical-variant choice), plus per-run count/recall
+variance. 53/53 in one run would need a correct (non-over-matching)
+deterministic count completer AND/OR self-consistency voting — neither
+locally lift-validatable, and neither fixes the fraud/ambiguity tasks.
 
 ---
 

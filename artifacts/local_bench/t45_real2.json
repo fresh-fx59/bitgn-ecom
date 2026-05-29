@@ -1,0 +1,54 @@
+{
+  "ts": "20260529T102231Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t45_real2",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected answer fragment not found: '<COUNT:4>'",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Sika/ADH-2D3Q64KH.json",
+        "/proc/stores/README.md",
+        "/AGENTS.MD"
+      ],
+      "message": "<COUNT:1>",
+      "steps": 10,
+      "wall_sec": 150.5539355268702
+    },
+    {
+      "snapshot": "t45_real2",
+      "run_index": 1,
+      "passed": false,
+      "detail": "expected answer fragment not found: '<COUNT:4>'",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Sika/ADH-2D3Q64KH.json",
+        "/proc/stores/README.md",
+        "/AGENTS.MD"
+      ],
+      "message": "<COUNT:1>",
+      "steps": 14,
+      "wall_sec": 224.07910517044365
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t45_real2": {
+        "passed": 0,
+        "runs": 2,
+        "rate": 0.0,
+        "fail_details": [
+          "expected answer fragment not found: '<COUNT:4>'",
+          "expected answer fragment not found: '<COUNT:4>'"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 0,
+      "runs": 2,
+      "rate": 0.0
+    }
+  }
+}

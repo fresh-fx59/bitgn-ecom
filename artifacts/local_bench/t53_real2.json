@@ -1,0 +1,57 @@
+{
+  "ts": "20260529T101928Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t53_real2",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/uploads/receipt_ocr_GXbdfLSi.txt",
+        "/proc/catalog/Mellerud/CLN-G49YK0ZE.json",
+        "/proc/catalog/Fischer/FST-WY12PHPB.json",
+        "/proc/catalog/Holzmann/MAC-28R9X4AP.json",
+        "/proc/catalog/Raaco/STO-1IL9J3GJ.json",
+        "/proc/catalog/Heco/FST-1S0ZWLK7.json"
+      ],
+      "message": "<YES> The total would stay within 3 EUR (excluding VAT). Today\u2019s ex-VAT total is EUR 2788.00 versus EUR 2787.94 on the old receipt, so the difference is EUR 0.06.",
+      "steps": 7,
+      "wall_sec": 63.2868838775903
+    },
+    {
+      "snapshot": "t53_real2",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/uploads/receipt_ocr_GXbdfLSi.txt",
+        "/proc/catalog/Mellerud/CLN-G49YK0ZE.json",
+        "/proc/catalog/Fischer/FST-WY12PHPB.json",
+        "/proc/catalog/Holzmann/MAC-28R9X4AP.json",
+        "/proc/catalog/Raaco/STO-1IL9J3GJ.json",
+        "/proc/catalog/Heco/FST-1S0ZWLK7.json"
+      ],
+      "message": "Yes \u2014 the total would stay within 3 EUR. Today\u2019s ex-VAT total is 2788.00 EUR versus 2787.94 EUR on the old receipt, a difference of 0.06 EUR.",
+      "steps": 6,
+      "wall_sec": 62.13299067225307
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t53_real2": {
+        "passed": 2,
+        "runs": 2,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 2,
+      "runs": 2,
+      "rate": 1.0
+    }
+  }
+}
