@@ -48,6 +48,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import io
+import json
 import os
 import re
 import sqlite3
@@ -354,6 +355,24 @@ class LocalEcomClient:
         number = bool(getattr(req, "number", False))
         resolved = self._resolve(path)
         if not resolved.exists() or resolved.is_dir():
+            # Catalogue product files (/proc/catalog/.../<SKU>.json) are
+            # not materialised on disk in db-backed snapshots — there can
+            # be thousands. Synthesize them from the catalogue.db so the
+            # agent reads/cites them exactly as on PROD (where they are
+            # real files whose record_path lives in product_variants).
+            if path.startswith("/proc/catalog/") and path.endswith(".json"):
+                synth = self._synth_catalog_read(path)
+                if synth is not None:
+                    self.reads.add(path.lstrip("/"))
+                    self.ops_log.append({
+                        "op": "read", "path": path, "bytes": len(synth),
+                        "truncated": False, "synth_catalog": True,
+                    })
+                    return ecom_pb2.ReadResponse(
+                        path=path, content_type="application/json",
+                        content=synth,
+                        sha256=hashlib.sha256(synth.encode("utf-8")).hexdigest(),
+                    )
             raise FileNotFoundError(f"File not found: {path}")
 
         # /bin/* are zero-byte executable stubs on PROD. `read` returns
@@ -394,6 +413,72 @@ class LocalEcomClient:
         if truncated:
             resp.truncated = True
         return resp
+
+    def _synth_catalog_read(self, path: str) -> Optional[str]:
+        """Build a PROD-shaped catalogue product JSON from the db by
+        record_path (falls back to matching the trailing <SKU> token).
+        Returns the JSON string, or None if no matching variant exists.
+        """
+        if not self._sql_dbs.primary:
+            return None
+        sku_token = path.rsplit("/", 1)[-1][:-len(".json")]
+        conn = None
+        try:
+            conn = sqlite3.connect(str(self._sql_dbs.primary))
+            conn.row_factory = sqlite3.Row
+            # tables may differ across worlds; guard each access
+            cols = {r[1] for r in conn.execute("PRAGMA table_info(product_variants)")}
+            if not cols:
+                return None
+            row = conn.execute(
+                "SELECT * FROM product_variants WHERE record_path=? LIMIT 1", (path,)
+            ).fetchone()
+            if row is None and "product_sku" in cols:
+                row = conn.execute(
+                    "SELECT * FROM product_variants WHERE product_sku=? LIMIT 1",
+                    (sku_token,),
+                ).fetchone()
+            if row is None:
+                return None
+            d = dict(row)
+            props = {}
+            try:
+                for pr in conn.execute(
+                    "SELECT property_key, property_value_text, property_value_number "
+                    "FROM product_variant_properties WHERE product_sku=?",
+                    (d.get("product_sku"),),
+                ):
+                    v = pr["property_value_text"]
+                    if v in (None, ""):
+                        v = pr["property_value_number"]
+                    props[pr["property_key"]] = v
+            except Exception:
+                pass
+            # merge any inline properties column (JSON) if present
+            if not props and d.get("properties"):
+                try:
+                    props = json.loads(d["properties"])
+                except Exception:
+                    pass
+            out = {
+                "sku": d.get("product_sku"),
+                "category_id": d.get("product_category_id"),
+                "kind_id": d.get("product_kind_id"),
+                "family_id": d.get("product_family_id"),
+                "brand": d.get("brand"),
+                "series": d.get("series"),
+                "model": d.get("model"),
+                "name": d.get("product_name"),
+                "price_cents": d.get("price_cents"),
+                "price_currency": d.get("price_currency"),
+                "properties": props,
+            }
+            return json.dumps(out)
+        except Exception:
+            return None
+        finally:
+            if conn is not None:
+                conn.close()
 
     def search(self, req: Any) -> "ecom_pb2.SearchResponse":
         root = getattr(req, "root", "") or "/"
