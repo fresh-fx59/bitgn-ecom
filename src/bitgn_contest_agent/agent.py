@@ -1361,12 +1361,13 @@ class AgentLoop:
             # of kind. See memory project_ecom_count_completer_dead_in_prod.
             from bitgn_contest_agent.refless_count_override import (
                 compute_refless_count as _refless_cnt,
+                compute_refless_count_from_spec as _refless_cnt_spec,
                 is_enabled as _refless_on,
                 looks_like_refless_count as _looks_refless_count,
             )
+            _ts_for_count = getattr(fn, "task_spec", None)
             if _refless_on() and (
-                getattr(getattr(fn, "task_spec", None), "kind", "none")
-                == "count_per_store"
+                getattr(_ts_for_count, "kind", "none") == "count_per_store"
                 or _looks_refless_count(task_text or "")
             ):
                 from bitgn_contest_agent.adapter.ecom import Req_Exec as _Req_Exec_C
@@ -1382,8 +1383,20 @@ class AgentLoop:
                     except Exception:
                         return None
 
+                # PRIMARY: spec-based path — consumes the LLM's adaptive parse
+                # (task_spec.products + store_descriptor) + robust
+                # resolve_store_id, so it survives per-world phrasing variance
+                # that defeats the raw-text parser. Falls back to text-parsing
+                # only if no usable products in the spec. Both abstain on
+                # ambiguity. See memory project_ecom_count_completer_dead_in_prod.
                 try:
-                    refless_n = _refless_cnt(_run_sql_refless, task_text or "")
+                    refless_n = None
+                    if getattr(_ts_for_count, "products", None):
+                        refless_n = _refless_cnt_spec(
+                            _ts_for_count, _run_sql_refless, task_text or ""
+                        )
+                    if refless_n is None:
+                        refless_n = _refless_cnt(_run_sql_refless, task_text or "")
                 except Exception:
                     refless_n = None
                 if refless_n is not None:

@@ -16,10 +16,19 @@ from pathlib import Path
 
 import pytest
 
+import types
+
 from bitgn_contest_agent.refless_count_override import (
     compute_refless_count,
+    compute_refless_count_from_spec,
     looks_like_refless_count,
 )
+
+
+def _P(brand, model, series="", **attrs):
+    o = types.SimpleNamespace()
+    o.brand, o.model, o.series, o.attributes, o.name = brand, model, series, attrs, ""
+    return o
 
 ROOT = Path(__file__).resolve().parents[1]
 SNAP = ROOT / "artifacts" / "ws_snapshots"
@@ -137,6 +146,55 @@ def test_text_detector_fires_on_template_independent_of_kind():
     assert not looks_like_refless_count(
         "how many of these products are available in the Brno store"
     )
+
+
+def test_spec_based_resolver_uses_llm_parse():
+    # The PROD-robust path: consume task_spec.products + store_descriptor
+    # (LLM adaptive parse) instead of regex-parsing raw text. resolve_store_id
+    # handles varying store phrasings; exact attr matching avoids 500≈5000.
+    if not (SNAP / "t45_real2" / "sql_schema.sql").exists():
+        pytest.skip("no faithful snapshots")
+    conn45 = _build_db(SNAP / "t45_real2")
+    spec45 = types.SimpleNamespace(
+        store_descriptor="Wilten PowerTool store in Innsbruck",
+        products=[
+            _P("Fiskars", "1CD-A3X", power_source="battery"),
+            _P("Mobil", "1ZE-TCR", volume_ml="5000", viscosity="15W-40"),
+            _P("Keter", "2OO-VJU", storage_type="parts case", color_family="Yellow", volume_l="8"),
+            _P("Engelbert Strauss", "37H-N9K", color_family="Black"),
+            _P("Sika", "28T-UV8", sealant_type="hybrid sealant", color_family="Gray", volume_ml="300"),
+            _P("Sonax", "304-ZK0", length_mm="450"),
+        ],
+    )
+    assert compute_refless_count_from_spec(spec45, _make_run_sql(conn45), "fewer than 4") == 4
+
+    conn16 = _build_db(SNAP / "t16_real2")
+    spec16 = types.SimpleNamespace(
+        store_descriptor="Veveri PowerTool shop in Brno",
+        products=[
+            _P("Honeywell", "KJB-LZD", size="XL", color_family="Orange", protection_class="cut-3"),
+            _P("Gorilla", "HL7-T2E", product_type="masking tape"),
+            _P("Hager", "29D-PDT", color_family="White", length_m="2"),
+            _P("Sonax", "300-EAF", length_mm="600"),
+            _P("Mellerud", "BO7-35J", cleaner_type="glass cleaner", volume_ml="500"),
+            _P("AlcaPlast", "33F-7U9", connector_type="shower hose", diameter_mm="12"),
+        ],
+    )
+    assert compute_refless_count_from_spec(spec16, _make_run_sql(conn16), "at least 1") == 3
+
+
+def test_spec_based_abstains_on_unresolvable_product():
+    # A product whose attributes match no variant must ABSTAIN (return None),
+    # NOT be silently treated as 0-available (which would falsely count it on
+    # a "fewer than" task).
+    if not (SNAP / "t45_real2" / "sql_schema.sql").exists():
+        pytest.skip("no faithful snapshot")
+    conn = _build_db(SNAP / "t45_real2")
+    spec = types.SimpleNamespace(
+        store_descriptor="Wilten PowerTool store in Innsbruck",
+        products=[_P("Fiskars", "1CD-A3X", power_source="NONSENSE")],
+    )
+    assert compute_refless_count_from_spec(spec, _make_run_sql(conn), "fewer than 4") is None
 
 
 def test_abstains_on_empty_db():

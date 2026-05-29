@@ -213,6 +213,145 @@ def _available(
     return 0
 
 
+def compute_refless_count_from_spec(
+    task_spec, run_sql: Callable[[str], str | None], task_text: str
+) -> int | None:
+    """Spec-based refless count — the PROD-robust path.
+
+    Consumes the LLM's ADAPTIVE structured parse (``task_spec.products`` +
+    ``store_descriptor``) instead of re-parsing the raw task text. This
+    fixes the v145 text-parser's PROD failure: it abstained because store/
+    attribute PHRASING VARIES PER WORLD ("Vienna Meidling hardware branch" ≠
+    the rigid "the X PowerTool shop in Y" regex). The LLM already normalised
+    those into task_spec, and ``resolve_store_id`` (token-based) handles the
+    varying descriptors. Deterministic SQL then counts qualifying products
+    with the direction parsed from task_text (reliable: "fewer than"/"at
+    least"). Refless + count-token-only (no ref parity risk). Abstains on any
+    ambiguity. See memory project_ecom_count_completer_dead_in_prod.
+    """
+    if task_spec is None:
+        return None
+    pred = _parse_threshold(task_text)
+    if pred is None:
+        return None
+    products = getattr(task_spec, "products", None) or []
+    if not products:
+        return None
+    try:
+        from bitgn_contest_agent.sku_completer import (
+            _detect_schema,
+            _sql_quote,
+            resolve_store_id,
+        )
+    except Exception:
+        return None
+    sch = _detect_schema(run_sql)
+    if sch is None:
+        return None
+    store_id = resolve_store_id(
+        getattr(task_spec, "store_descriptor", "") or "", run_sql
+    )
+    if store_id is None:
+        return None
+
+    count = 0
+    for p in products:
+        brand = getattr(p, "brand", "") or ""
+        model = getattr(p, "model", "") or ""
+        series = getattr(p, "series", "") or ""
+        attrs = dict(getattr(p, "attributes", {}) or {})
+        if not brand:
+            return None
+        model_code = model.split()[-1] if model else ""
+        line_filter = ""
+        if model_code:
+            line_filter = f" AND p.model LIKE '%{_sql_quote(model_code)}%'"
+        elif series:
+            line_filter = f" AND p.series LIKE '%{_sql_quote(series)}%'"
+        # Candidate variants on this line at the store (NO attr filter in
+        # SQL — _attr_filter matches loosely, e.g. 500≈5000; we match attrs
+        # EXACTLY in Python via _phrase_satisfied below). LEFT JOIN so a
+        # variant with no inventory row → 0 (out of stock); 0 candidate rows
+        # → line unresolvable → abstain.
+        sql = (
+            f"SELECT p.\"{sch['sku']}\", COALESCE(i.{sch['inv_avail']}, 0) "
+            f"FROM {sch['tbl']} p "
+            f"LEFT JOIN {sch['inv_tbl']} i ON i.{sch['inv_sku']} = "
+            f"p.\"{sch['sku']}\" AND i.{sch['inv_store']} = "
+            f"'{_sql_quote(store_id)}' "
+            f"WHERE p.brand = '{_sql_quote(brand)}' COLLATE NOCASE"
+            f"{line_filter} LIMIT 50;"
+        )
+        out = run_sql(sql)
+        if out is None:
+            return None
+        avail_by_sku: dict[str, int] = {}
+        for ln in _unwrap_sql_local(out).splitlines():
+            s = ln.strip()
+            if not s or s.startswith("[") or s.lower().startswith(sch["sku"].lower()):
+                continue
+            cols = [c.strip() for c in (s.split("|") if "|" in s else s.split(","))]
+            if not cols or not cols[0]:
+                continue
+            av = cols[-1]
+            avail_by_sku[cols[0]] = int(av) if av.lstrip("-").isdigit() else 0
+        if not avail_by_sku:
+            return None  # line unresolvable → abstain
+        # EXACT attribute match in Python (reuse _phrase_satisfied, which does
+        # exact-numeric + textual containment, so "500 ml" ≠ volume_ml 5000).
+        propmap = _fetch_props_bulk(run_sql, sch, list(avail_by_sku))
+        matched = [
+            sku for sku in avail_by_sku
+            if all(
+                _phrase_satisfied(f"{k} {v}", propmap.get(sku, {}))
+                for k, v in attrs.items()
+            )
+        ]
+        if not matched:
+            return None  # attributes resolve no variant → abstain
+        sides = {bool(pred(avail_by_sku[sku])) for sku in matched}
+        if len(sides) != 1:
+            return None  # matched variants disagree on threshold side → abstain
+        if sides == {True}:
+            count += 1
+    return count
+
+
+def _fetch_props_bulk(run_sql, sch, skus):
+    """{sku: {prop_key_lower: value_lower}} for the given SKUs (PROD schema)."""
+    from bitgn_contest_agent.sku_completer import _sql_quote
+    if not skus:
+        return {}
+    in_list = ",".join(f"'{_sql_quote(s)}'" for s in skus)
+    out = run_sql(
+        f"SELECT {sch['props_sku']}, {sch['props_key']}, "
+        f"property_value_text, property_value_number "
+        f"FROM {sch['props_tbl']} WHERE {sch['props_sku']} IN ({in_list});"
+    )
+    props: dict[str, dict[str, str]] = {}
+    if out is None:
+        return props
+    for ln in _unwrap_sql_local(out).splitlines():
+        s = ln.strip()
+        if not s or s.startswith("[") or s.lower().startswith(sch["props_sku"].lower()):
+            continue
+        cols = [c.strip() for c in (s.split("|") if "|" in s else s.split(","))]
+        if len(cols) < 2:
+            continue
+        sku, key = cols[0], cols[1].lower()
+        text_v = cols[2] if len(cols) > 2 else ""
+        num_v = cols[3] if len(cols) > 3 else ""
+        val = text_v if text_v not in ("", "None", "null") else num_v
+        if val not in ("", "None", "null"):
+            props.setdefault(sku, {})[key] = str(val).lower()
+    return props
+
+
+def _unwrap_sql_local(out: str) -> str:
+    from bitgn_contest_agent.sku_completer import _unwrap_sql as _u
+    return _u(out)
+
+
 def compute_refless_count(
     run_sql: Callable[[str], str | None], task_text: str
 ) -> int | None:
