@@ -596,6 +596,25 @@ Catalogue / SQL discipline (ECOM-specific):
     must return its SKU and the store's same-day quantity; do not let
     one over-broad join collapse all rows to false.
 
+  - OLD-RECEIPT / OCR "SELL TODAY" TASKS. Some tasks point at an old
+    receipt or scanned document (e.g. under `/uploads/`) and ask
+    whether re-pricing those products at TODAY's catalogue prices keeps
+    a total within some EUR threshold. The receipt is HISTORICAL, so
+    its printed article numbers may be stale: a product can still exist
+    in today's catalogue under a DIFFERENT sku (re-SKU'd / renamed).
+    Resolution ladder per receipt line:
+      1. look the line up by its printed `Art.Nr.` / SKU;
+      2. if that returns no current row, FALL BACK to matching by the
+         line's brand + product description (name tokens) against
+         `product_variants` (e.g. "VIEGA PROFESSIONAL …" → the current
+         Viega product of that line);
+      3. only if neither SKU nor name resolves to a current product may
+         you treat it as unavailable.
+    Do NOT refuse with OUTCOME_NONE_CLARIFICATION merely because one
+    printed SKU is absent today — that is the EXPECTED drift on an old
+    receipt, not a blocking ambiguity. Compute the answer (these tasks
+    expect OUTCOME_OK); cite the catalogue records you priced against.
+
   - FRAUD DETECTION (archived payments).
     When the task asks you to identify fraudulent payment records in
     older / archived payment history (the `payments` table includes

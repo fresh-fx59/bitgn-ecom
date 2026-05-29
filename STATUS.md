@@ -27,10 +27,33 @@ grader `score_detail` (ground truth):
 The 4 fixes are grader-confirmed (the grader literally names the missing
 refs the fixes restore). t01/t16 are deterministic: the completer was
 adding the ref and the verifier was wrongly stripping it; the fix stops
-the strip so the ref survives. Expected post-fix: 46 → ~50/53. Reaching
-53/53 needs the fraud-precision + count-ambiguity work (voting per
-`project_ecom_variance_ceiling`), which cannot be validated on synthetic
-local snapshots (`feedback_local_ab_variance_ceiling`).
+the strip so the ref survives.
+
+### DEV run result (run-22Rnqv, v0.1.122, gpt-5.3-codex)
+
+**48/53 mean 0.9360** (was 46/53 0.8937). Confirmed on leaderboard:
+- **t01, t26, t47 → 1.0** (the three fixes landed) ✓
+- t48 0.42 → **0.67** (variance, harder content improved)
+- t16 still 0.0 — but a DIFFERENT failure this run: agent UNDER-counted
+  (qty=0, missed the qualifying shelving SKU STO-CXX5J9QY). 0 REFS_DROP
+  → NOT a verifier regression; count_per_store resolution variance. The
+  v0.1.120 fix correctly addressed the over-strip mode; this position
+  swings between over-strip and under-count across seeds.
+- t45 still 0.0 (count under-spec ambiguity, unfixed)
+- t40 0.94 (fraud FPs, unchanged)
+- **t53 (OCR) 1.0 → 0.0**: this run's receipt had a discontinued item
+  (Viega PLB-1IQ5623P, absent today); agent searched by stale SKU only,
+  found nothing, and refused NONE_CLARIFICATION. NOT caused by the code
+  changes — a content-variance edge. v0.1.123 adds an old-receipt
+  name-fallback prompt rule (UNVALIDATED locally — OCR replay needs the
+  Viega current record which the agent never queried).
+
+Net: +3 confirmed fixes, −1 OCR variance, +1 fraud variance gain.
+Remaining gap (t16, t45, t40, t48, t53) is variance / under-spec
+ambiguity / OCR-drift — none cleanly reproducible on local snapshots
+(`feedback_local_ab_variance_ceiling`); 53/53 needs self-consistency
+voting (`project_ecom_variance_ceiling`), a large change whose lift
+cannot be measured locally.
 
 ---
 
