@@ -1,0 +1,106 @@
+{
+  "ts": "20260529T175644Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t16_real2",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/automotive/wiper_blades/fam_automotive_wiper_blades_0005_2rcco0bw/AUT-39TYC7F4.json",
+        "/proc/catalog/cleaning/cleaning_liquids/fam_cleaning_cleaning_liquids_0013_1rn3tgz0/CLN-10BI74OI.json",
+        "/proc/catalog/plumbing/valves_connectors/fam_plumbing_valves_connectors_0017_xp2iglo1/PLB-231GEAQI.json",
+        "/proc/stores/README.md"
+      ],
+      "message": "result 3",
+      "steps": 12,
+      "wall_sec": 160.69473152887076
+    },
+    {
+      "snapshot": "t16_real2",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/stores/README.md",
+        "/proc/catalog/automotive/wiper_blades/fam_automotive_wiper_blades_0005_2rcco0bw/AUT-39TYC7F4.json",
+        "/proc/catalog/cleaning/cleaning_liquids/fam_cleaning_cleaning_liquids_0013_1rn3tgz0/CLN-10BI74OI.json",
+        "/proc/catalog/plumbing/valves_connectors/fam_plumbing_valves_connectors_0017_xp2iglo1/PLB-231GEAQI.json"
+      ],
+      "message": "result 3",
+      "steps": 10,
+      "wall_sec": 129.29329069703817
+    },
+    {
+      "snapshot": "t16_real2",
+      "run_index": 2,
+      "passed": false,
+      "detail": "expected answer fragment not found: 'result 3'",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/cleaning/cleaning_liquids/fam_cleaning_cleaning_liquids_0013_1rn3tgz0/CLN-10BI74OI.json",
+        "/proc/catalog/plumbing/valves_connectors/fam_plumbing_valves_connectors_0017_xp2iglo1/PLB-231GEAQI.json",
+        "/proc/stores/README.md",
+        "/proc/catalog/automotive/wiper_blades/fam_automotive_wiper_blades_0005_2rcco0bw/AUT-39TYC7F4.json"
+      ],
+      "message": "result 2",
+      "steps": 11,
+      "wall_sec": 284.3048484250903
+    },
+    {
+      "snapshot": "t16_real2",
+      "run_index": 3,
+      "passed": false,
+      "detail": "expected answer fragment not found: 'result 3'",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/stores/README.md",
+        "/proc/catalog/automotive/wiper_blades/fam_automotive_wiper_blades_0005_2rcco0bw/AUT-39TYC7F4.json",
+        "/proc/catalog/cleaning/cleaning_liquids/fam_cleaning_cleaning_liquids_0013_1rn3tgz0/CLN-10BI74OI.json",
+        "/proc/catalog/plumbing/valves_connectors/fam_plumbing_valves_connectors_0017_xp2iglo1/PLB-231GEAQI.json"
+      ],
+      "message": "result 2",
+      "steps": 11,
+      "wall_sec": 178.35537997819483
+    },
+    {
+      "snapshot": "t16_real2",
+      "run_index": 4,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/automotive/wiper_blades/fam_automotive_wiper_blades_0005_2rcco0bw/AUT-39TYC7F4.json",
+        "/proc/catalog/cleaning/cleaning_liquids/fam_cleaning_cleaning_liquids_0013_1rn3tgz0/CLN-10BI74OI.json",
+        "/proc/catalog/plumbing/valves_connectors/fam_plumbing_valves_connectors_0017_xp2iglo1/PLB-231GEAQI.json",
+        "/proc/stores/README.md"
+      ],
+      "message": "result 3",
+      "steps": 12,
+      "wall_sec": 302.04714629240334
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t16_real2": {
+        "passed": 3,
+        "runs": 5,
+        "rate": 0.6,
+        "fail_details": [
+          "expected answer fragment not found: 'result 3'",
+          "expected answer fragment not found: 'result 3'"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 3,
+      "runs": 5,
+      "rate": 0.6
+    }
+  }
+}

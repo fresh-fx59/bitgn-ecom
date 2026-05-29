@@ -307,6 +307,99 @@ def _get_reactive_router() -> ReactiveRouter:
     return _REACTIVE_ROUTER_SINGLETON
 
 
+class _CaptureAdapter:
+    """Wraps the real EcomAdapter, delegating everything EXCEPT
+    submit_terminal — which it captures (does NOT submit). Used by
+    in-trial self-consistency voting: run the loop K times capturing
+    each post-enforcer answer, vote, then submit ONCE via the real
+    adapter. Validated: t16 count token is non-deterministic per-world
+    (3 correct x3, 2 wrong x2 over 5 runs) → majority vote recovers the
+    correct answer. Research: self-consistency / cross-family
+    verification (arxiv 2506.01369, 2604.08401)."""
+
+    def __init__(self, real):
+        object.__setattr__(self, "_real", real)
+        object.__setattr__(self, "captured", [])
+
+    def __getattr__(self, name):
+        return getattr(object.__getattribute__(self, "_real"), name)
+
+    def submit_terminal(self, completion):
+        from bitgn_contest_agent.adapter.ecom import ToolResult
+        object.__getattribute__(self, "captured").append(completion)
+        return ToolResult(
+            ok=True, content="", refs=tuple(completion.grounding_refs),
+            error=None, error_code=None, wall_ms=0,
+        )
+
+
+def _count_token(msg):
+    import re
+    m = re.search(r"\d+", msg or "")
+    return m.group(0) if m else None
+
+
+def _vote_completions(comps):
+    """Pick a self-consistent representative: majority outcome, then
+    (for count tasks) majority count token. Returning a whole run's
+    completion (message + refs together) avoids the count-cite mismatch
+    that a synthetic per-ref merge caused in the v0.1.139 override."""
+    from collections import Counter
+    outcomes = Counter(c.outcome for c in comps)
+    best_outcome = outcomes.most_common(1)[0][0]
+    same = [c for c in comps if c.outcome == best_outcome]
+    cnts = Counter(
+        _count_token(c.message) for c in same if _count_token(c.message) is not None
+    )
+    if cnts:
+        best_cnt = cnts.most_common(1)[0][0]
+        reps = [c for c in same if _count_token(c.message) == best_cnt]
+        if reps:
+            return reps[0]
+    return same[0]
+
+
+def _run_with_voting(
+    *, cfg, backend, adapter, writer, cancel_event, inflight_semaphore,
+    metrics, router, reactive_router, task_id, task_text, k,
+):
+    """Run the agent loop k times (capturing, not submitting), then
+    submit the majority-voted answer once. Only count_per_store /
+    yes_no_sku tasks pay the kx cost — after run 1, other shapes submit
+    immediately (no measured in-trial variance there)."""
+    cap = _CaptureAdapter(adapter)
+    comps = []
+    last_result = None
+    for i in range(k):
+        object.__setattr__(cap, "captured", [])
+        vloop = AgentLoop(
+            backend=backend, adapter=cap, writer=writer,
+            max_steps=cfg.max_steps,
+            llm_http_timeout_sec=float(cfg.llm_http_timeout_sec),
+            cancel_event=cancel_event,
+            backend_backoff_ms=cfg.rate_limit_backoff_ms,
+            inflight_semaphore=inflight_semaphore, metrics=metrics,
+            router=router, reactive_router=reactive_router,
+        )
+        last_result = vloop.run(task_id=task_id, task_text=task_text)
+        captured = object.__getattribute__(cap, "captured")
+        if not captured:
+            continue
+        comps.append(captured[-1])
+        if i == 0:
+            kind = getattr(getattr(captured[-1], "task_spec", None), "kind", "none")
+            if kind not in ("count_per_store", "yes_no_sku"):
+                adapter.submit_terminal(captured[-1])  # no voting benefit
+                return last_result
+        if cancel_event is not None and cancel_event.is_set():
+            break
+    if not comps:
+        return last_result
+    voted = _vote_completions(comps)
+    adapter.submit_terminal(voted)
+    return last_result
+
+
 def _run_single_task(
     *,
     cfg: AgentConfig,
@@ -415,10 +508,19 @@ def _run_single_task(
             router=router,
             reactive_router=reactive_router,
         )
-        result: AgentLoopResult = loop.run(
-            task_id=effective_task_id,
-            task_text=started.instruction,
-        )
+        vote_k = int(os.environ.get("BITGN_VOTE_K", "1") or "1")
+        if vote_k > 1:
+            result = _run_with_voting(
+                cfg=cfg, backend=backend, adapter=adapter, writer=writer,
+                cancel_event=cancel_event, inflight_semaphore=inflight_semaphore,
+                metrics=metrics, router=router, reactive_router=reactive_router,
+                task_id=effective_task_id, task_text=started.instruction, k=vote_k,
+            )
+        else:
+            result = loop.run(
+                task_id=effective_task_id,
+                task_text=started.instruction,
+            )
         writer.close()
 
         score, detail = harness.end_task(started)

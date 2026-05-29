@@ -270,16 +270,42 @@ def _run_one(
         writer.append_task(task_id=snap.name, task_text=snap.instruction)
 
         t0 = time.monotonic()
-        loop = AgentLoop(
-            backend=backend,
-            adapter=adapter,
-            writer=writer,
-            max_steps=max_steps,
-            llm_http_timeout_sec=llm_http_timeout_sec,
-            cancel_event=threading.Event(),
-        )
+        vote_k = int(os.environ.get("BITGN_VOTE_K", "1") or "1")
+        voted = None
         try:
-            result = loop.run(task_id=snap.name, task_text=snap.instruction)
+            if vote_k > 1:
+                from bitgn_contest_agent.cli import (
+                    _CaptureAdapter, _vote_completions,
+                )
+                cap = _CaptureAdapter(adapter)
+                comps = []
+                result = None
+                for i in range(vote_k):
+                    object.__setattr__(cap, "captured", [])
+                    vloop = AgentLoop(
+                        backend=backend, adapter=cap, writer=writer,
+                        max_steps=max_steps,
+                        llm_http_timeout_sec=llm_http_timeout_sec,
+                        cancel_event=threading.Event(),
+                    )
+                    result = vloop.run(task_id=snap.name, task_text=snap.instruction)
+                    capd = object.__getattribute__(cap, "captured")
+                    if capd:
+                        comps.append(capd[-1])
+                        if i == 0:
+                            kind = getattr(getattr(capd[-1], "task_spec", None), "kind", "none")
+                            if kind not in ("count_per_store", "yes_no_sku"):
+                                comps = [capd[-1]]
+                                break
+                voted = _vote_completions(comps) if comps else None
+            else:
+                loop = AgentLoop(
+                    backend=backend, adapter=adapter, writer=writer,
+                    max_steps=max_steps,
+                    llm_http_timeout_sec=llm_http_timeout_sec,
+                    cancel_event=threading.Event(),
+                )
+                result = loop.run(task_id=snap.name, task_text=snap.instruction)
         except Exception as exc:
             writer.close()
             return TrialResult(
@@ -291,10 +317,15 @@ def _run_one(
         writer.close()
         wall = time.monotonic() - t0
 
-        report = _last_report(trace_path)
-        outcome = report.get("outcome") or result.reported
-        refs = list(report.get("grounding_refs") or [])
-        msg = report.get("message") or ""
+        if voted is not None:
+            outcome = voted.outcome
+            refs = list(voted.grounding_refs)
+            msg = voted.message or ""
+        else:
+            report = _last_report(trace_path)
+            outcome = report.get("outcome") or result.reported
+            refs = list(report.get("grounding_refs") or [])
+            msg = report.get("message") or ""
 
         passed, detail = _grade(snap, outcome, refs, msg)
         return TrialResult(
