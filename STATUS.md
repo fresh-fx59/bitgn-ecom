@@ -106,6 +106,15 @@ raw 100%-recall output — better than the deterministic filter). FRAUD IS
 A PROVEN CEILING: deterministic enforcers regress it; the agent's
 adaptive detection is best. Re-ran v0.1.135 to restore the ~50/53 standing.
 
+### v0.1.135 restore-run: 49/53 mean 0.9549 — fraud revert CONFIRMED
+
+t40 back to 0.94 (was 0.47 under the revived filter) — the revert
+restored the agent's raw fraud detection. t48 0.66. Residual this seed:
+t45 (under-spec count), t07 (yes_no content variance). Validated band is
+**48-50/53**; fraud (t40/t48) + per-seed count/yes_no variance are the
+irreducible ceiling. Deterministic fraud enforcers PROVEN net-negative
+(regress recall) — kept no-op.
+
 ### Honest ceiling
 
 Validated band ~47-49/53. 5 of 7 original failures have grader-confirmed
