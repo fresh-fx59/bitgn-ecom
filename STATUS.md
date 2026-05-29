@@ -93,6 +93,19 @@ checkoutable" selection harder), not a regression. Session arc:
 46 → 48 → 47 → 49 → **50/53** as the revived completers + discount-cap +
 name-attr + OCR fixes landed; fraud (t40/t48) is the persistent ceiling.
 
+
+### DEV run v0.1.134 (revived fraud enforcers): 44/53 — REGRESSION, reverted
+
+Tried reviving the fraud enforcers (also dead on the legacy `payments`
+schema). REGRESSED: t40 recall ~100%→~47%, t39 ~45% — the canonical
+time-cluster+multi-device SQL UNDERFITS PROD's broader seeded fraud set,
+so the filter over-prunes true positives. Local t40_real3 matched the
+canonical 22 (false-positive local validation). Reverted in v0.1.135;
+fraud enforcers kept no-op (dead-but-harmless gives t40=0.88, the agent's
+raw 100%-recall output — better than the deterministic filter). FRAUD IS
+A PROVEN CEILING: deterministic enforcers regress it; the agent's
+adaptive detection is best. Re-ran v0.1.135 to restore the ~50/53 standing.
+
 ### Honest ceiling
 
 Validated band ~47-49/53. 5 of 7 original failures have grader-confirmed
