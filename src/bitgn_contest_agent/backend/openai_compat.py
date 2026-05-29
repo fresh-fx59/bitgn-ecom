@@ -106,6 +106,14 @@ _TRANSIENT_MESSAGE_SUBSTRINGS: tuple[str, ...] = (
     "upstream connect timeout",
     "upstream_connection_refused",
     "upstream connection refused",
+    # linkapi.ai (2026-05-29): per-account concurrency cap surfaces as
+    # bare `openai.APIError` "Concurrency limit exceeded for account,
+    # please retry later". It is explicitly transient (the proxy tells
+    # you to retry) — a single sequential retry with backoff clears it.
+    # Without this, parallel prepass/classifier+agent calls crash the
+    # trial mid-run (local t16 2026-05-29: outcome=None at step 2).
+    "concurrency limit exceeded",
+    "please retry later",
 )
 
 

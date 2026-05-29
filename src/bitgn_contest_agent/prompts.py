@@ -558,6 +558,22 @@ Catalogue / SQL discipline (ECOM-specific):
     exhausting the spec vocabulary may you conclude the combination
     does not exist and answer accordingly.
 
+    ATTRIBUTE MAY LIVE IN THE PRODUCT NAME, NOT THE PROPERTY TABLE.
+    Some variant-distinguishing attributes are encoded ONLY in
+    `product_name`, not as a `product_variant_properties` / json
+    `properties` value (commonly length/size on wiper blades, cables,
+    fasteners — e.g. variants "… Wiper Blade 600mm", "… 650mm" share
+    one model and differ only by the size token in the name). If a
+    spec attribute returns NULL/absent for EVERY variant of the line
+    when you query the property table, do NOT conclude "no match" —
+    the attribute is in the name. Re-match it there:
+        ... AND product_name LIKE '%600mm%'   (try the value with and
+        without the unit space: '600 mm' and '600mm')
+    Missing this drops a product that genuinely qualifies and
+    under-counts (v-2026-05 t16: the Sonax 600 mm wiper-blade variant
+    was in stock but its length lived in product_name, so the
+    property-only filter returned nothing and the count was 2 not 3).
+
     This rule applies INDEPENDENTLY per product. If the task lists
     several products with attributes each, run one
     attribute-filtered lookup per product (or one UNION ALL across
