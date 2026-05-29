@@ -115,6 +115,10 @@ t45 (under-spec count), t07 (yes_no content variance). Validated band is
 irreducible ceiling. Deterministic fraud enforcers PROVEN net-negative
 (regress recall) — kept no-op.
 
+### FINAL: score is SEED-VARIANCE-DOMINATED (44-50/53 band, identical code)
+
+Nine PROD runs of the proven stack: 46, 48, 47, 49, 50, (44 fraud-revival), (47 count-override), 49, 47. The override-OFF "restore" stack alone scored 50/53 (run-22Rotahx) AND 47/53 (run-22RqTuM) — SAME code, different seeds. The count family (t13/t16/t45/t47) churns +/-4 per seed and fraud (t40 0.88-0.94, t48 0.06-0.71) swings widely, because failures are WORLD-SPECIFIC content difficulty, not fixable by deterministic post-passes. 53/53 is a lucky-seed event (all ~8 variance-prone tasks aligning at 1.0 simultaneously), not a deterministic target; brute-forcing seeds is forbidden by the contest rate limits + no-overfitting rule. Deterministic levers exhausted; two (fraud revival, count override) measured net-negative and reverted. Validated capability ~48-50/53 on typical seeds.
+
 ### Honest ceiling
 
 Validated band ~47-49/53. 5 of 7 original failures have grader-confirmed
