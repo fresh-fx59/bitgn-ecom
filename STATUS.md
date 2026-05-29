@@ -80,6 +80,19 @@ REVERTED — it over-matched (33 SKUs/product) because model exact-match
 fell through to a brand-only flood. See memory
 `project_ecom_count_completer_dead_in_prod` for the safe-rewrite spec.
 
+
+### DEV run-22Rotahx (v0.1.130): 50/53 mean 0.9705 — BEST
+
+The t26 subtotal-dependent discount-cap fix closed t26; t45 passed
+(at-least content + revived completer). Remaining: t40 (0.88) / t48
+(0.56) fraud, and t50 (0.0) — "put through the one I started most
+recently; don't force unavailable": agent checked out basket_037, grader
+required basket_123. t50 passed in the 48/53 and 49/53 runs (same code),
+so this is content variance (this run's baskets made "most recent
+checkoutable" selection harder), not a regression. Session arc:
+46 → 48 → 47 → 49 → **50/53** as the revived completers + discount-cap +
+name-attr + OCR fixes landed; fraud (t40/t48) is the persistent ceiling.
+
 ### Honest ceiling
 
 Validated band ~47-49/53. 5 of 7 original failures have grader-confirmed
