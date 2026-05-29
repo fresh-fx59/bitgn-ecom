@@ -43,21 +43,28 @@ def is_enabled() -> bool:
     ).strip() == "1"
 
 
-_FRAUD_MARKERS = (
-    "fraud incident",
-    "fraud incidents",
-    "part of the incident",
-    "classify as fraud",
-)
 _ANOMALY_FLOOR = 15      # min payments on the dominant fingerprint to act
 _DOMINANCE_RATIO = 2.0   # top count must be >= this x the runner-up
 
 
 def looks_like_sql_fraud_task(task_text: str) -> bool:
+    """Match the SQL fraud-incident task across PROD phrasing variants.
+
+    The contest changed a couple of task texts (2026-05-29 update): t40 went
+    from "confirmed fraud incident ... classify as fraud" to "confirmed a
+    known fraud HIT ... MARK as fraud". A narrow literal matcher missed the
+    new wording (the completer never fired). Broadened to: mentions fraud +
+    payment records, is NOT the /archive .tsv file task (t48). Broadening the
+    GATE is safe — the completer still abstains unless a single fingerprint
+    dominates the archived payments, so firing on a non-fraud payment task is
+    a no-op.
+    """
     t = (task_text or "").lower()
-    if "archive" in t and ".tsv" in t:
+    if ".tsv" in t:
         return False  # t48-style file task, not SQL
-    return any(m in t for m in _FRAUD_MARKERS)
+    if "fraud" not in t:
+        return False
+    return ("payment" in t) or ("archiv" in t)
 
 
 def _rows(run_sql: Callable[[str], str | None], sql: str) -> list[list[str]]:
