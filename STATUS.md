@@ -518,3 +518,32 @@ locally (unobservable seeded set) and deterministic enforcers regress it.
 Realistic max ≈ 51/53; clean 53/53 needs a lucky fraud seed. t50 passes 8/9
 (not a real gap). NEXT: focused local A/B of both levers (in progress), then
 one DEV run with both ON vs the 50/53 baseline.
+
+## v0.1.149 FINAL — deterministic levers PROD-ineffective; default config = 50/53 baseline (2026-05-29)
+
+Three PROD A/B runs CLOSED the deterministic-lever avenue:
+- voting K=3 → 47/53 (stabilizes count but breaks 4 non-count tasks)
+- refless override (kind-gated) → 41/53, fired NOWHERE (LLM left kind=None)
+- all-levers (override text-gated + quote + fraud completer + t48 hint) →
+  38/53. Firings: override NOWHERE (resolver abstains — store/attr PHRASING
+  VARIES PER WORLD, e.g. "Vienna Meidling hardware branch" ≠ the rigid
+  "the X PowerTool shop in Y" regex); quote completer fired on t47 (still
+  0.0); fraud completer NOWHERE; **t48 hint fired and REGRESSED t48 0.43→0.0**.
+
+CONCLUSION (empirical, re-confirms feedback_enforcer_cannot_replace_adaptive_llm):
+deterministic post-pass parsers either ABSTAIN on varying PROD phrasings
+(safe but useless) or would MIS-RESOLVE (regress). The LLM's adaptive
+per-world parsing is strictly better for the count/fraud/quote families.
+Local *_real2 snapshot validation FALSE-POSITIVED for PROD efficacy every
+time. Score is seed-variance-dominated (band now 38-50 over many runs).
+
+**RECOMMENDED CONFIG = DEFAULT (no BITGN_USE_* experimental flags) = the
+proven 50/53 baseline.** All v145-149 levers stay env-gated default-OFF;
+the default agent path was NOT regressed. The session's lasting value:
+(1) the local_bench UNGRADED false-pass FIX; (2) derived ORACLES (t40
+connected-component, t47 store-identity+exactness, t48 multi-customer rings,
+count attribute-matching) that map the failure structure; (3) empirical
+proof the enforcer avenue is closed. 53/53 remains seed-bound — reachable
+only on a lucky seed with the default config; rate limits + no-overfitting
+forbid brute-forcing it. DO NOT re-attempt deterministic count/fraud
+enforcers or re-enable voting / the t48 hint.
