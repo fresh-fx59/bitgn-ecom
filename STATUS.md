@@ -1,3 +1,39 @@
+# Status — BitGN ECOM contest agent, v0.1.120 (53-task surface)
+
+## v0.1.118-120: harness batch-scoring + 4 grader-confirmed fixes (2026-05-29)
+
+Contest grew to **53 tasks** (3 OCR receipt tasks t51-t53 added —
+already 1.0, no change needed). Harness now **batches scores**: released
+only after `submit_run` + eval (`end_trial` returns
+`score_available=False`), so our offline bench artifacts read 0.0 even
+when the leaderboard scored fine. Read real scores via
+`scripts/fetch_run_scores.py <run_id>` and per-trial grader verdicts via
+`scripts/fetch_trial_detail.py <trial_id>` (both read-only, no run cost;
+PROD now rate-limited 10 runs/30min).
+
+Baseline run-22RjQ (v0.1.117): **46/53 mean 0.8937**. Failing set +
+grader `score_detail` (ground truth):
+
+| Task | grader verdict | fix | confidence |
+|---|---|---|---|
+| t01 | missing ref STO-2R84BSHQ | sku_verifier stripped correct SKU on series-name token (`stackable` ∈ "Festool Stackable") — **fixed, unit-tested, deterministic** | high |
+| t16 | missing ref ELC-2CE5QWCH | sku_verifier cross-product contamination (`ip rating` from a DIFFERENT product's spec) — **fixed via per-product spec scoping, unit-tested, deterministic** | high |
+| t26 | missing ref basket_043 | "last CHECKOUTABLE basket" treated as superlative not filter → refused instead of falling through — **prompt rule** | med-high |
+| t47 | missing ref WRK-KFWV30AJ | SQL joined display-name `product_name` on short type → all rows false — **prompt rule** | med |
+| t45 | invalid ref Bondex PNT-3APVSF7J | under-specified spec (color omitted) matched 0-stock variant; line shouldn't qualify for "<4" — **count_per_store ambiguity, unresolved** | — |
+| t40 | 0.94: ~100% recall, up to 10 FPs | fraud precision; cluster_filter under-prunes — **unresolved (ceiling)** | — |
+| t48 | 0.42: 61% recall, >10 FPs, amount mismatch | fraud recall+precision+value — **unresolved (ceiling)** | — |
+
+The 4 fixes are grader-confirmed (the grader literally names the missing
+refs the fixes restore). t01/t16 are deterministic: the completer was
+adding the ref and the verifier was wrongly stripping it; the fix stops
+the strip so the ref survives. Expected post-fix: 46 → ~50/53. Reaching
+53/53 needs the fraud-precision + count-ambiguity work (voting per
+`project_ecom_variance_ceiling`), which cannot be validated on synthetic
+local snapshots (`feedback_local_ab_variance_ceiling`).
+
+---
+
 # Status — BitGN ECOM contest agent, v0.1.117 milestone
 
 ## Headline
