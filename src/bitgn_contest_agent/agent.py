@@ -1348,6 +1348,59 @@ class AgentLoop:
                         }
                     )
 
+            # v0.1.147 fraud-ring completer (t40 SQL fraud-incident task).
+            # The agent detects the incident by device clustering and catches
+            # most of it but under-cites the ring members on a secondary
+            # device/method (t40 ≈0.94 = 24/26). This recomputes the
+            # device∪method connected component and UNIONS the missed
+            # members' refs. ADD-ONLY (never removes — unlike the v0.1.133
+            # FILTER that over-pruned to 44/53); conservative (abstains
+            # without a single dominant anomalous fingerprint). Validated
+            # against the t40 oracle; see tests/test_fraud_component_completer.py
+            # + memory project_ecom_fraud_structure. Env-gated default-off;
+            # A/B a single DEV run before trusting (fraud local validation
+            # can false-positive — feedback_local_ab_variance_ceiling).
+            from bitgn_contest_agent.fraud_component_completer import (
+                complete_fraud_refs as _complete_fraud_refs,
+                is_enabled as _fraud_comp_enabled,
+            )
+            if _fraud_comp_enabled():
+                from bitgn_contest_agent.adapter.ecom import Req_Exec as _Req_Exec_F
+
+                def _run_sql_fraud_comp(sql: str) -> str | None:
+                    try:
+                        tr = self._adapter.dispatch(
+                            _Req_Exec_F(
+                                tool="exec", path="/bin/sql", args=[], stdin=sql
+                            )
+                        )
+                        return tr.content if tr.ok else None
+                    except Exception:
+                        return None
+
+                try:
+                    fraud_added = _complete_fraud_refs(
+                        _run_sql_fraud_comp, task_text or "",
+                        list(fn.grounding_refs),
+                    )
+                except Exception:
+                    fraud_added = []
+                if fraud_added:
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP,
+                        at_step=None,
+                        details=(
+                            f"fraud_component_completer added "
+                            f"{len(fraud_added)} ref(s): {fraud_added}"
+                        ),
+                    )
+                    fn = fn.model_copy(
+                        update={
+                            "grounding_refs": list(fn.grounding_refs)
+                            + fraud_added
+                        }
+                    )
+
             # Step 1c-bis (v0.1.117-pre): refund payment back-completer.
             # When the task is refund family and the agent cited a
             # /proc/returns/ret_NNN.json, chain to the linked
