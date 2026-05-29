@@ -158,26 +158,27 @@ def _fetch_rows(
     # they are restricted to [\w\-] (see _PAY_PATH) — no SQL
     # injection risk, but quote anyway for SQLite's sake.
     quoted = ", ".join(f"'{pid}'" for pid in pay_ids)
-    # NOTE: the ECOM payments table primary key is `id`, not `pay_id`
-    # (see contest schema; verified via the agent's own SQL queries
-    # in t40 trace). The /proc/payments/<id>.json filename uses the
-    # full `id` value (e.g. "pay_20210428T143838Z_FJT4ktFYHA").
+    from bitgn_contest_agent.fraud_recall_completer import detect_payments_schema
+    s = detect_payments_schema(run_sql)
+    if s is None:
+        return None
     sql = (
-        "SELECT id, customer_id, store_id, created_at "
-        "FROM payments WHERE id IN (" + quoted + ");"
+        f"SELECT {s['id']} AS id, customer_id, store_id, {s['created']} AS created_at "
+        f"FROM {s['tbl']} WHERE {s['id']} IN (" + quoted + ");"
     )
     out = run_sql(sql)
     if out is None:
         return None
     rows: list[PaymentRow] = []
-    for line in out.splitlines():
-        s = line.strip()
-        if not s or s.startswith("["):
+    body = _unwrap_sql_output(out)
+    delim = "|" if ("|" in body and "," not in body) else ","
+    reader = csv.reader(io.StringIO(body), delimiter=delim)
+    for parts in reader:
+        if not parts:
             continue
-        # Skip a header row if present (column names).
-        if s.startswith("id|") or s.startswith("pay_id|"):
-            continue
-        parts = [p.strip() for p in s.split("|")]
+        parts = [p.strip() for p in parts]
+        if parts[0] in {"id", "pay_id", "payment_id"}:
+            continue  # header
         if len(parts) != 4:
             continue
         pay_id, cust, store, ts = parts
@@ -227,73 +228,74 @@ def _fetch_multi_pattern_signals(
     if not pay_ids:
         return {}
     quoted = ", ".join(f"'{pid}'" for pid in pay_ids)
+    from bitgn_contest_agent.fraud_recall_completer import detect_payments_schema
+    sc = detect_payments_schema(run_sql)
+    if sc is None:
+        return None
+    T, A, ID, CR = sc["tbl"], sc["arch"], sc["id"], sc["created"]
+    LAT, LON, SLAT, SLON = sc["lat"], sc["lon"], sc["store_lat"], sc["store_lon"]
     sql = (
-        "WITH ap AS (SELECT * FROM payments WHERE basket_archived = 1),\n"
-        " p1 AS (SELECT p.id FROM ap p JOIN ("
+        f"WITH ap AS (SELECT * FROM {T} WHERE {A} = 1),\n"
+        f" p1 AS (SELECT p.{ID} AS id FROM ap p JOIN ("
         "  SELECT payment_method_fingerprint FROM ap"
         "  GROUP BY payment_method_fingerprint"
         "  HAVING COUNT(DISTINCT customer_id) >= 3"
         " ) s USING(payment_method_fingerprint)),\n"
-        " p2 AS (SELECT p.id FROM ap p JOIN ("
+        f" p2 AS (SELECT p.{ID} AS id FROM ap p JOIN ("
         "  SELECT device_fingerprint FROM ap"
         "  GROUP BY device_fingerprint"
         "  HAVING COUNT(DISTINCT customer_id) >= 3"
         " ) s USING(device_fingerprint)),\n"
-        " p3 AS (SELECT p.id FROM ap p JOIN ("
+        f" p3 AS (SELECT p.{ID} AS id FROM ap p JOIN ("
         "  SELECT payment_method_fingerprint, device_fingerprint"
         "  FROM ap"
         "  GROUP BY payment_method_fingerprint, device_fingerprint"
         "  HAVING COUNT(DISTINCT customer_id) >= 2"
         " ) s USING(payment_method_fingerprint, device_fingerprint)),\n"
         " p4 AS ("
-        "  SELECT DISTINCT p1.id FROM ap p1 JOIN ap p2"
+        f"  SELECT DISTINCT p1.{ID} AS id FROM ap p1 JOIN ap p2"
         "   ON p1.customer_id=p2.customer_id"
-        "   AND p1.id<>p2.id"
+        f"   AND p1.{ID}<>p2.{ID}"
         "   AND p1.store_id<>p2.store_id"
-        "   AND ABS(strftime('%s',p1.created_at)-strftime('%s',p2.created_at)) < 1800"
+        f"   AND ABS(strftime('%s',p1.{CR})-strftime('%s',p2.{CR})) < 1800"
         "  UNION"
-        "  SELECT DISTINCT p2.id FROM ap p1 JOIN ap p2"
+        f"  SELECT DISTINCT p2.{ID} AS id FROM ap p1 JOIN ap p2"
         "   ON p1.customer_id=p2.customer_id"
-        "   AND p1.id<>p2.id"
+        f"   AND p1.{ID}<>p2.{ID}"
         "   AND p1.store_id<>p2.store_id"
-        "   AND ABS(strftime('%s',p1.created_at)-strftime('%s',p2.created_at)) < 1800"
+        f"   AND ABS(strftime('%s',p1.{CR})-strftime('%s',p2.{CR})) < 1800"
         " ),\n"
         " p5 AS ("
-        "  SELECT p.id FROM ap p"
+        f"  SELECT p.{ID} AS id FROM ap p"
         "  JOIN ("
-        "    SELECT ROUND(observed_lat,4) AS rlat,"
-        "           ROUND(observed_lon,4) AS rlon"
+        f"    SELECT ROUND({LAT},4) AS rlat,"
+        f"           ROUND({LON},4) AS rlon"
         "    FROM ap"
-        "    GROUP BY ROUND(observed_lat,4), ROUND(observed_lon,4)"
+        f"    GROUP BY ROUND({LAT},4), ROUND({LON},4)"
         "    HAVING COUNT(DISTINCT customer_id) >= 3"
-        "  ) g ON ROUND(p.observed_lat,4)=g.rlat"
-        "      AND ROUND(p.observed_lon,4)=g.rlon"
+        f"  ) g ON ROUND(p.{LAT},4)=g.rlat"
+        f"      AND ROUND(p.{LON},4)=g.rlon"
         "  WHERE NOT EXISTS ("
         "    SELECT 1 FROM stores s"
-        "     WHERE ROUND(s.lat,2)=ROUND(p.observed_lat,2)"
-        "       AND ROUND(s.lon,2)=ROUND(p.observed_lon,2)"
+        f"     WHERE ROUND(s.{SLAT},2)=ROUND(p.{LAT},2)"
+        f"       AND ROUND(s.{SLON},2)=ROUND(p.{LON},2)"
         "  )"
         " )\n"
-        "SELECT ap.id, "
-        "  (CASE WHEN ap.id IN (SELECT id FROM p1) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN ap.id IN (SELECT id FROM p2) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN ap.id IN (SELECT id FROM p3) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN ap.id IN (SELECT id FROM p4) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN ap.id IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS n_patterns,"
-        "  (CASE WHEN ap.id IN (SELECT id FROM p1) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN ap.id IN (SELECT id FROM p2) THEN 1 ELSE 0 END) +"
-        "  (CASE WHEN ap.id IN (SELECT id FROM p3) THEN 1 ELSE 0 END) AS n_id_share,"
-        "  (CASE WHEN ap.id IN (SELECT id FROM p4) THEN 1 ELSE 0 END) AS in_time_cluster,"
-        "  (CASE WHEN ap.id IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS in_coord_cluster,"
-        # Distinct devices the customer uses WITHIN the time-cluster only
-        # — not across all-time archived history. cust_025 in PROD likely
-        # has other archived payments outside the fraud burst with
-        # different devices, so all-time COUNT would inflate. Scoping to
-        # p4 (time-impossible cluster members) isolates the burst.
+        f"SELECT ap.{ID} AS id, "
+        f"  (CASE WHEN ap.{ID} IN (SELECT id FROM p1) THEN 1 ELSE 0 END) +"
+        f"  (CASE WHEN ap.{ID} IN (SELECT id FROM p2) THEN 1 ELSE 0 END) +"
+        f"  (CASE WHEN ap.{ID} IN (SELECT id FROM p3) THEN 1 ELSE 0 END) +"
+        f"  (CASE WHEN ap.{ID} IN (SELECT id FROM p4) THEN 1 ELSE 0 END) +"
+        f"  (CASE WHEN ap.{ID} IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS n_patterns,"
+        f"  (CASE WHEN ap.{ID} IN (SELECT id FROM p1) THEN 1 ELSE 0 END) +"
+        f"  (CASE WHEN ap.{ID} IN (SELECT id FROM p2) THEN 1 ELSE 0 END) +"
+        f"  (CASE WHEN ap.{ID} IN (SELECT id FROM p3) THEN 1 ELSE 0 END) AS n_id_share,"
+        f"  (CASE WHEN ap.{ID} IN (SELECT id FROM p4) THEN 1 ELSE 0 END) AS in_time_cluster,"
+        f"  (CASE WHEN ap.{ID} IN (SELECT id FROM p5) THEN 1 ELSE 0 END) AS in_coord_cluster,"
         "  (SELECT COUNT(DISTINCT ap2.device_fingerprint) FROM ap ap2"
         "    WHERE ap2.customer_id = ap.customer_id"
-        "      AND ap2.id IN (SELECT id FROM p4)) AS cust_device_count "
-        "FROM ap WHERE ap.id IN (" + quoted + ");"
+        f"      AND ap2.{ID} IN (SELECT id FROM p4)) AS cust_device_count "
+        f"FROM ap WHERE ap.{ID} IN (" + quoted + ");"
     )
     out = run_sql(sql)
     if out is None:
