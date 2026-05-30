@@ -831,8 +831,11 @@ def _cmd_run_benchmark(args: argparse.Namespace) -> int:
         # code revision that produced the run. Iterations are still
         # disambiguated server-side by run_id, not by name.
         _model_slug = cfg.model.rsplit("/", 1)[-1].replace(":", "-")
-        LEADERBOARD_RUN_NAME = (
-            f"@ai_engineer_helper DEV-ECOM1 {_git_commit_short()} {_model_slug}"
+        # Reflect the ACTUAL benchmark (e.g. ECOM1-PROD vs ECOM1-DEV), and
+        # allow a descriptive override via BITGN_RUN_NAME for the dashboard.
+        _bench_slug = cfg.benchmark.rsplit("/", 1)[-1].upper()
+        LEADERBOARD_RUN_NAME = os.environ.get("BITGN_RUN_NAME", "").strip() or (
+            f"@ai_engineer_helper {_bench_slug} {_git_commit_short()} {_model_slug}"
         )
 
         def tasks_for_iteration(run_index: int) -> List[TaskSpec]:
