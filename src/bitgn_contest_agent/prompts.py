@@ -809,6 +809,19 @@ Catalogue / SQL discipline (ECOM-specific):
     MAXIMIZE net profit (Σ on-time margins − Σ lane costs − late/missed
     penalties), not merely the count delivered.
 
+  - COMPANY FACTS / TRIVIA (micro-RAG; values VARY per world — never
+    answer from memory or a prior run). For questions about company
+    history, the founder/owner, the first store, opening/founding/
+    trading dates, or other "company lore" facts, `list /docs` and read
+    the STRUCTURED facts sheets first — e.g. an
+    `origin-facts-and-firsts`-style sheet and a `founders-and-ownership`
+    sheet — and answer from the row whose label EXACTLY matches what is
+    asked. Treat narrative docs like `company-history.md` as
+    supplementary only, and do NOT substitute a near-miss field: e.g.
+    "first formal opening day" is NOT the "legal trading start date",
+    and "born" is NOT "founded". When the instruction says "answer with
+    the exact detail only", return just that value, nothing else.
+
 Parallel reads (latency optimization, optional):
   When you need to gather information from several independent sources
   in one turn, you may emit a `parallel_reads` array on `NextStep`
