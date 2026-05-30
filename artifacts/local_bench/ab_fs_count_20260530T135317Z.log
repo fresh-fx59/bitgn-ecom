@@ -1,0 +1,16 @@
+# A/B 1 snapshot(s) x 4 runs | candidate={'BITGN_USE_FS_REDERIVE_COUNT': '1'}
+# model=gpt-5.4 effort=medium
+  [baseline][PASS] t16_prod#0 outcome=OUTCOME_OK steps=9 243s :: passed all checks
+  [baseline][PASS] t16_prod#1 outcome=OUTCOME_OK steps=10 293s :: passed all checks
+  [baseline][FAIL] t16_prod#2 outcome=OUTCOME_OK steps=8 241s :: expected answer fragment not found: 'result 3'
+  [baseline][PASS] t16_prod#3 outcome=OUTCOME_OK steps=8 259s :: passed all checks
+  [candidate][PASS] t16_prod#0 outcome=OUTCOME_OK steps=8 133s :: passed all checks
+  [candidate][PASS] t16_prod#1 outcome=OUTCOME_OK steps=9 166s :: passed all checks
+  [candidate][PASS] t16_prod#2 outcome=OUTCOME_OK steps=10 187s :: passed all checks
+  [candidate][PASS] t16_prod#3 outcome=OUTCOME_OK steps=8 135s :: passed all checks
+
+# RESULTS  (baseline -> candidate)
+  t16_prod                          75% ->   100%  (+lift)
+
+# baseline mean 75.0%  candidate mean 100.0%
+# no regressions
