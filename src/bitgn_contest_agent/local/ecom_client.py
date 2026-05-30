@@ -846,7 +846,27 @@ class LocalEcomClient:
         fed via stdin. Agents are expected to use SQL queries
         against the ``sqlite_schema`` virtual table instead:
             SELECT name, sql FROM sqlite_schema WHERE type='table';
+
+        BITGN_LOCAL_SQL_UNAVAILABLE=1: emulate PROD's no-/bin/sql state
+        (data lives in filesystem, not a SQL cluster). Returns exit_code=1
+        with a PROD-shaped "sql backend unavailable" error so the agent's
+        filesystem-fallback paths are exercised locally. Default (flag
+        unset) = normal SQLite-backed behaviour.
         """
+        if os.environ.get("BITGN_LOCAL_SQL_UNAVAILABLE") == "1":
+            self.ops_log.append({
+                "op": "exec", "path": "/bin/sql", "args": args,
+                "exit_code": 1, "rejected": "sql_unavailable",
+            })
+            return ecom_pb2.ExecResponse(
+                exit_code=1,
+                stderr=(
+                    "sql backend unavailable: no SQL cluster reachable "
+                    "in this environment; use filesystem paths under "
+                    "/proc/ instead\n"
+                ),
+            )
+
         body = stdin.strip()
         # PROD /bin/sql rejects sqlite dot-commands the same way the
         # raw sqlite engine does when fed `.schema` as if it were SQL.
