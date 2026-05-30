@@ -1,0 +1,12 @@
+{
+  "instruction": "How many of these products have at least 3 items available in Bratislava Stare Mesto hardware branch today: the Nut Bolt and Washer from Heco in the Heco Zinc Plated HECO 3DW-64B Nut Bolt and Washer line that has fastener type bolt and diameter 10 mm,the Cleaning Liquid from Ajax in the Ajax Eco Classic 25C-DXE Cleaning Liquid line that has cleaner type floor cleaner,the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type drywall screw,the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type wood screw and diameter 3 mm,the Nut Bolt and Washer from Heco in the Heco Zinc Plated HECO 3DW-64B Nut Bolt and Washer line that has fastener type threaded rod,the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type wood screw and diameter 6 mm? Answer in exactly format \"count : %d\" (no quotes)",
+  "context_date": "2025-06-22T09:13:19Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "rebuilt from bench_20260525T231018Z on 2026-05-27",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 4 files / 0 dirs from 30 dump records. Window: started_at=2026-05-25T23:13:05.537889+00:00. Trial outcome was unknown with score 1.0; score_detail=[]. Identity: actor='anonymous' roles='GUEST'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

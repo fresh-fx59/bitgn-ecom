@@ -1,0 +1,13 @@
+{
+  "instruction": "We have a confirmed fraud incident in archived payment history. Find the payment records that are part of the incident. Do not modify anything; cite each payment record you classify as fraud.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "variance-pack variant 0 for t40 — workspace symlinked from /home/claude-developer/bitgn-ecom/artifacts/ws_snapshots/t40_en/run_0/workspace",
+  "variance_pack_index": 0,
+  "variance_pack_size": 2
+}

@@ -1,0 +1,33 @@
+{
+  "id": "pay-0035",
+  "order_id": "order-0035",
+  "basket_id": "basket-0074",
+  "customer_id": "cust-0145",
+  "store_id": "store-linz-hafen",
+  "amount_cents": 26980,
+  "currency": "EUR",
+  "status": "requires_3ds_action",
+  "created_at": "2026-06-28T06:49:37Z",
+  "payment_method_fingerprint": "pm-card-00",
+  "device_fingerprint": "dev-commerce-00",
+  "observed_lat": 47.61949444444445,
+  "observed_lon": 12.382150000000001,
+  "lines": [
+    {
+      "sku": "PT-GRD-BOS-GWS1400-150",
+      "quantity": 1,
+      "unit_price_cents": 11990
+    },
+    {
+      "sku": "PT-GRD-BOS-GWS1400-CASE",
+      "quantity": 1,
+      "unit_price_cents": 14990
+    }
+  ],
+  "three_ds": {
+    "status": "3ds-status1",
+    "attempts": 2,
+    "max_attempts": 4,
+    "retry_after": "2026-08-21T10:04:37Z"
+  }
+}

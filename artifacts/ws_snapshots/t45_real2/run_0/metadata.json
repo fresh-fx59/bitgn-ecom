@@ -1,0 +1,30 @@
+{
+ "task_id": "t45",
+ "instruction": "How many of these products have fewer than 4 items available in the Wilten PowerTool store in Innsbruck today: the Chainsaw from Fiskars in the Fiskars Battery X 1CD-A3X Chainsaw line that has power source battery,the Engine Oil from Mobil in the Mobil All Season Super 1ZE-TCR Engine Oil line that has volume 5000 ml and viscosity 15W-40,the Storage Bin and Organizer from Keter in the Keter Deep Stack 2OO-VJU Storage Bin and Organizer line that has storage type parts case, color family Yellow, and volume 8 l,the Work Trousers from Engelbert Strauss in the Engelbert Strauss Classic e.s. 37H-N9K Work Trousers line that has color family Black,the Sealant from Sika in the Sika Professional Sika 28T-UV8 Sealant line that has sealant type hybrid sealant, color family Gray, and volume 300 ml,the Wiper Blade from Sonax in the Sonax Premium Gloss 304-ZK0 Wiper Blade line that has length 450 mm? Answer in exactly format \"<COUNT:%d>\" (no quotes)",
+ "bin_id": "user: anonymous\nroles: GUEST",
+ "bin_date": "2025-10-08T16:53:18Z",
+ "tables": {
+  "product_categories": 14,
+  "product_kinds": 34,
+  "product_families": 34,
+  "product_variants": 100,
+  "product_variant_properties": 481,
+  "stores": 10,
+  "store_inventory": 348,
+  "customer_accounts": 100,
+  "employee_accounts": 50,
+  "employee_role_assignments": 230,
+  "shopping_baskets": 280,
+  "shopping_basket_items": 280,
+  "payment_transactions": 1105,
+  "payment_transaction_items": 1233,
+  "return_requests": 20
+ },
+ "actor_id": "anonymous",
+ "roles": "GUEST",
+ "context_date": "2025-10-08T16:53:18Z",
+ "expected_outcome": "OUTCOME_OK",
+ "expected_answer": "<COUNT:4>",
+ "required_refs": [],
+ "intent": "count_per_store"
+}

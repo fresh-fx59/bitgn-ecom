@@ -1,0 +1,12 @@
+{
+  "instruction": "What `city` is recorded for puntigam tools place in the store record? Return only the exact city.",
+  "context_date": "2026-12-23T11:28:21Z",
+  "actor_id": "emp-0050",
+  "roles": "RoleEmployee, RoleInventoryViewer, RoleFulfillmentViewer",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 2 files / 5 dirs from 15 dump records. Window: started_at=2026-05-30T09:10:34.715288+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0050' roles='RoleEmployee, RoleInventoryViewer, RoleFulfillmentViewer'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

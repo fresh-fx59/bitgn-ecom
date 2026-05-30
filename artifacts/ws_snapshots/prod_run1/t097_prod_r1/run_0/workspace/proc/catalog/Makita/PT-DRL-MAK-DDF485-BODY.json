@@ -1,0 +1,22 @@
+{
+  "id": 4,
+  "sku": "PT-DRL-MAK-DDF485-BODY",
+  "name": "Makita DDF485 LXT cordless drill body",
+  "brand": "Makita",
+  "category_id": "cat-power-tools",
+  "kind_id": "kind-cordless-drills",
+  "family_id": "fam-makita-ddf485-lxt",
+  "price_cents": 10990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "battery_platform": "Makita LXT 18V",
+    "brushless": true,
+    "chuck_mm": 13,
+    "kit": "body only",
+    "max_torque_nm": 50,
+    "power_source": "cordless",
+    "speed_count": 2,
+    "voltage_v": 18
+  }
+}

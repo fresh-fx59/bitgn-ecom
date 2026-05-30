@@ -1,0 +1,12 @@
+{
+  "instruction": "How many of these products have at least 3 items available in Bratislava Stare Mesto hardware branch today: the Work Top from Engelbert Strauss in the Engelbert Strauss e.s.vision e.s. 150-ZC6 Work Top line that has garment type polo shirt,the Pipe Fitting from Viega in the Viega Professional Sanpress 2OG-ENN Pipe Fitting line that has fitting type compression coupler and diameter 12 mm,the Wiper Blade from Sonax in the Sonax Premium Gloss 304-ZK0 Wiper Blade line that has length 650 mm,the Cordless Drill Driver from Metabo in the Metabo Brushless BS 1OW-IK5 Cordless Drill Driver line that has voltage 18 V, battery platform 18v-system, and kit contents case,the Extension Cable from Schneider Electric in the Schneider Electric Heavy Duty Merten 214-ZHY Extension Cable line that has color family White and length 5 m,the LED Bulb from Philips in the Philips Professional Hue 3JS-MSN LED Bulb line that has wattage 10 W and luminous flux 1521 lm? Answer in exactly format \"%d\" (no quotes)",
+  "context_date": "2025-10-08T16:53:18Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "rebuilt from bench_20260525T231018Z on 2026-05-27",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 2 files / 0 dirs from 33 dump records. Window: started_at=2026-05-25T23:13:06.882789+00:00. Trial outcome was unknown with score 0.0; score_detail=['Answer should be \"2\"']. Identity: actor='anonymous' roles='GUEST'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

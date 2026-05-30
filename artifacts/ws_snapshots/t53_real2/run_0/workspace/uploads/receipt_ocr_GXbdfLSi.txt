@@ -1,0 +1,50 @@
+         POWERTOOL VIENNA MEIDLING
+             mach ich selbst
+--------------------------------------
+
+ P0WERT00L V1ENNA ME1DL1NG Handels GmbH
+           Werkzeugstrasse 28
+                 V1ENNA
+
+                QUITTUNG
+#DT  3576    
+#ORD 2593  - POS-cFP. 2-   06.06.2023
+ANZ  ARTIKEL                  BETRAG
+                                EUR
+ 1 MELLERUD BIO MEL 233-M.     10,00
+   Art.Nr. CLN-G49YK0ZE        
+   inkl. MwSt 20,00%          2,00
+   ....................
+ 3 Fischer SX SX 7UY-G03 .    131,97
+   Einzelpreis EUR                43,99
+   Art.Nr. FST-WY12PHPB        
+   inkl. MwSt 20,00%         26,39
+ 1 Holzmann Compact D 327.A  1829,99
+   Art.Nr. MAC-28R9X4AP        
+   inkl. MwSt 20,00%        365,99
+ 2 Raaco Professional Car.A   683,98
+   Einzelpreis EUR               341,99
+   Art.Nr. STO-1IL9J3GJ        
+   inkl. MwSt 20,00%        136,79
+   .............................
+ 3 Heco Unix HEC0 2VD-VNA.A   132,00
+   Einzelpreis EUR                44,00
+   Art.Nr. F5T-I5OZWLK7        
+   inkl. MwSt 20,00%         26,40
+   ...........................
+
+Total (exkl. MwSt)       EUR  2787,94
+MwSt                     EUR   557,57
+Total (inkl. MwSt)       EUR  3345,51
+Gegeben KARTE            EUR  3345,51
+
+St. Nr. 753/685/82251
+          SATZ    NETTO   BRUTTO   MWST
+Inkl. MwSt:   20,00%  2787,94  3345,51 557,57
+
+Vielen Dank
+fuer Ihren Einkauf!
+Tel. 0309-429-7228
+
+* Preise ohne MwSt; Steueranteil je Artikel ausgewiesen.
+Beleg PT-wZZLi5nR / Kundenkopie

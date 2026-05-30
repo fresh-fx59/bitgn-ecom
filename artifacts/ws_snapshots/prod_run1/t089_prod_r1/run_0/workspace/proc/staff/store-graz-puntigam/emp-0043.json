@@ -1,0 +1,12 @@
+{
+  "id": "emp-0043",
+  "display_name": "Nora Linke",
+  "email": "nora.linke.graz.042@staff.powertools.example",
+  "title": "Order Desk Associate",
+  "store_id": "store-graz-puntigam",
+  "roles": [
+    "employee",
+    "order_viewer",
+    "fulfillment_viewer"
+  ]
+}

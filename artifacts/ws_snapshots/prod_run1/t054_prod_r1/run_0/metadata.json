@@ -1,0 +1,12 @@
+{
+  "instruction": "What exact `store_id` is recorded for my basket basket-0023? Answer only the field value.",
+  "context_date": "2026-02-24T11:26:18Z",
+  "actor_id": "cust-0039",
+  "roles": "customer",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 2 files / 0 dirs from 13 dump records. Window: started_at=2026-05-30T08:56:43.325996+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='cust-0039' roles='customer'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

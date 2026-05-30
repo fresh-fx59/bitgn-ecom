@@ -1,0 +1,26 @@
+{
+ "task_id": "t45",
+ "instruction": "hey can u check the old-town Bratislava PowerTool store today and tell me how many of these have 2 or more ready: the Wiper Blade from Sonax in the Sonax Premium Gloss 304-ZK0 Wiper Blade line that has length 500 mm,the Nut Bolt and Washer from Heco in the Heco Unix HECO 2VD-VNA Nut Bolt and Washer line that has fastener type threaded rod,the Safety Eyewear from 3M in the 3M Ventilated SecureFit 2CE-B35 Safety Eyewear line that has lens color Yellow,the Extension Cable from Schneider Electric in the Schneider Electric Heavy Duty Merten 214-ZHY Extension Cable line that has color family White and length 5 m,the Wiper Blade from Sonax in the Sonax Premium Gloss 304-ZK0 Wiper Blade line that has length 450 mm,the Work Trousers from Engelbert Strauss in the Engelbert Strauss Classic e.s. 37H-N9K Work Trousers line that has color family Blue? Answer in exactly format \"%d\" (no quotes)",
+ "bin_id": "user: anonymous\nroles: GUEST",
+ "bin_date": "2025-10-08T16:53:18Z",
+ "tables": {
+  "product_categories": 14,
+  "product_kinds": 34,
+  "product_families": 34,
+  "product_variants": 100,
+  "product_variant_properties": 481,
+  "stores": 10,
+  "store_inventory": 348,
+  "customer_accounts": 100,
+  "employee_accounts": 50,
+  "employee_role_assignments": 230,
+  "shopping_baskets": 280,
+  "shopping_basket_items": 280,
+  "payment_transactions": 1105,
+  "payment_transaction_items": 1233,
+  "return_requests": 20
+ },
+ "actor_id": "anonymous",
+ "roles": "GUEST",
+ "context_date": "2025-10-08T16:53:18Z"
+}

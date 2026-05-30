@@ -1,0 +1,14 @@
+{
+  "instruction": "How many of these products have at least 3 items available in the west-side Vienna PowerTool shop today: the Work Gloves from Ansell in the Ansell HyFlex ActivArmr 1DI-VG8 Work Gloves line that has size M, color family Clear, and protection class basic,the Nut Bolt and Washer from Fischer in the Fischer Outdoor SX NT9-HP1 Nut Bolt and Washer line that has fastener type bolt and diameter 10 mm,the Cleaning Liquid from Ajax in the Ajax Concentrate Fresh 252-QRO Cleaning Liquid line that has cleaner type degreaser and volume 250 ml,the Workshop Drill Grinder and Sander from Bosch in the Bosch Universal BBS LS3-D02 Workshop Drill Grinder and Sander line that has machine type belt sander, voltage 230 V, and power 750 W,the Cleaning Liquid from Ajax in the Ajax Concentrate Fresh 252-QRO Cleaning Liquid line that has cleaner type degreaser and volume 250 ml,the Respiratory Protection from Moldex in the Moldex Comfort Classic 1HX-XWP Respiratory Protection line that has mask type disposable respirator and protection class ffp3? Answer in exactly format \"%d\" (no quotes)",
+  "context_date": "2024-07-17T20:49:48Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "rebuilt from bench_20260525T231018Z on 2026-05-27",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 3 files / 0 dirs from 38 dump records. Window: started_at=2026-05-25T23:13:16.260437+00:00. Trial outcome was unknown with score 0.0; score_detail=[\"answer missing required reference '/proc/catalog/safety_gear/respiratory_protection/SFE-24OC48TO.json'\"]. Identity: actor='anonymous' roles='GUEST'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [
+    "/proc/catalog/safety_gear/respiratory_protection/SFE-24OC48TO.json"
+  ],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

@@ -1,0 +1,248 @@
+{
+  "id": "store-graz-puntigam",
+  "name": "PowerTools Graz Puntigam",
+  "address_line_1": "Triester Strasse 391",
+  "postal_code": "8055",
+  "city": "Graz",
+  "country_code": "AT",
+  "is_open": true,
+  "lat": 47.0334,
+  "lon": 15.4232,
+  "inventory": [
+    {
+      "sku": "PT-IMP-MIL-M18FID3-BODY",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-IMP-MIL-M18FID3-2AH",
+      "on_hand": 4,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-IMP-MIL-M18FID3-5AH",
+      "on_hand": 12,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-GRD-MET-W18-125-BODY",
+      "on_hand": 3,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-GRD-MET-W18-125-4AH",
+      "on_hand": 2,
+      "reserved": 2
+    },
+    {
+      "sku": "PT-GRD-MET-W18-125-FLAT",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 8,
+          "arrival_in_days": 2
+        }
+      ]
+    },
+    {
+      "sku": "PT-GRD-BOS-GWS1400-125",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 8,
+          "arrival_in_days": 12
+        }
+      ]
+    },
+    {
+      "sku": "PT-SND-BOS-GEX125-BOX",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-SND-BOS-GEX125-CASE",
+      "on_hand": 8,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-SND-BOS-GEX125-DUST",
+      "on_hand": 5,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-SND-EIN-TERS18-BODY",
+      "on_hand": 3,
+      "reserved": 2
+    },
+    {
+      "sku": "PT-SND-EIN-TERS18-25",
+      "on_hand": 5,
+      "reserved": 5
+    },
+    {
+      "sku": "PT-SND-EIN-TERS18-40",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 3,
+          "arrival_in_days": 3
+        }
+      ]
+    },
+    {
+      "sku": "PT-CMP-AIR-CA240-6",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 6,
+          "arrival_in_days": 6
+        }
+      ]
+    },
+    {
+      "sku": "PT-MOW-EIN-GECM36-2X5",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-HDG-STI-HSA50-BODY",
+      "on_hand": 3,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-HDG-STI-HSA50-AK10",
+      "on_hand": 13,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-HDG-STI-HSA50-AK20",
+      "on_hand": 2,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-HDG-BOS-UHC18-50-BODY",
+      "on_hand": 1,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-HDG-BOS-UHC18-50-25",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 3,
+          "arrival_in_days": 2
+        }
+      ]
+    },
+    {
+      "sku": "PT-HDG-BOS-UHC18-50-40",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 4,
+          "arrival_in_days": 13
+        }
+      ]
+    },
+    {
+      "sku": "PT-BIT-ALP-HSS-COBALT",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-BIT-ALP-HSS-13",
+      "on_hand": 9,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-BIT-ALP-HSS-41",
+      "on_hand": 13,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-BIT-ALP-HSS-REDUCED",
+      "on_hand": 2,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-BIT-BOS-CYL9-7",
+      "on_hand": 2,
+      "reserved": 2
+    },
+    {
+      "sku": "PT-BIT-BOS-CYL9-10",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 3,
+          "arrival_in_days": 1
+        }
+      ]
+    },
+    {
+      "sku": "PT-BIT-BOS-CYL9-15",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 5,
+          "arrival_in_days": 4
+        }
+      ]
+    },
+    {
+      "sku": "PT-SAFE-3M-SF400-CLEAR",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-SAFE-3M-SF400-SMOKE",
+      "on_hand": 13,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-SAFE-3M-SF400-10PK",
+      "on_hand": 9,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-SAFE-3M-SF400-AMBER",
+      "on_hand": 1,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-SAFE-3M-SF400-READER",
+      "on_hand": 3,
+      "reserved": 3
+    },
+    {
+      "sku": "PT-SAFE-3M-SF400-GASKET",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 8,
+          "arrival_in_days": 2
+        }
+      ]
+    },
+    {
+      "sku": "PT-SAFE-UVEX-PHEOS-CLEAR",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 8,
+          "arrival_in_days": 13
+        }
+      ]
+    }
+  ]
+}

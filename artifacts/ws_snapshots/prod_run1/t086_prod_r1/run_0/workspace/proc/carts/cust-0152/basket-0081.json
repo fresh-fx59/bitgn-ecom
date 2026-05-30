@@ -1,0 +1,13 @@
+{
+  "id": "basket-0081",
+  "customer_id": "cust-0152",
+  "store_id": "store-innsbruck-ost",
+  "status": "checked_out",
+  "created_at": "2026-02-26T15:35:14Z",
+  "lines": [
+    {
+      "sku": "PT-IMP-MIL-M18FID3-5AH",
+      "quantity": 1
+    }
+  ]
+}

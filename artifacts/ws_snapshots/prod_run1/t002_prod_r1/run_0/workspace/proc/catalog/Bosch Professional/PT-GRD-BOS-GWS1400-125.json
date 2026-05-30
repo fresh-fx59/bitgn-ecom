@@ -1,0 +1,21 @@
+{
+  "id": 16,
+  "sku": "PT-GRD-BOS-GWS1400-125",
+  "name": "Bosch Professional GWS 1400 angle grinder 125 mm",
+  "brand": "Bosch Professional",
+  "category_id": "cat-power-tools",
+  "kind_id": "kind-angle-grinders",
+  "family_id": "fam-bosch-gws-1400",
+  "price_cents": 9990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "battery_platform": "corded",
+    "disc_mm": 125,
+    "motor_power_w": 1400,
+    "power_source": "corded",
+    "restart_protection": true,
+    "speed_rpm": 11000,
+    "voltage_v": 230
+  }
+}

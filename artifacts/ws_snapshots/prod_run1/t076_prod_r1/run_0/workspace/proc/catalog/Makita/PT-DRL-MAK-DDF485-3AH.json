@@ -1,0 +1,22 @@
+{
+  "id": 5,
+  "sku": "PT-DRL-MAK-DDF485-3AH",
+  "name": "Makita DDF485 LXT drill kit 2x3.0Ah",
+  "brand": "Makita",
+  "category_id": "cat-power-tools",
+  "kind_id": "kind-cordless-drills",
+  "family_id": "fam-makita-ddf485-lxt",
+  "price_cents": 21990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "battery_platform": "Makita LXT 18V",
+    "brushless": true,
+    "chuck_mm": 13,
+    "kit": "2x3.0Ah batteries and charger",
+    "max_torque_nm": 50,
+    "power_source": "cordless",
+    "speed_count": 2,
+    "voltage_v": 18
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "emp-0039",
+  "display_name": "Thijs Smit",
+  "email": "thijs.smit.graz.038@staff.powertools.example",
+  "title": "Fulfillment Operator",
+  "store_id": "store-graz-puntigam",
+  "roles": [
+    "employee",
+    "fulfillment_viewer",
+    "fulfillment_operator"
+  ]
+}

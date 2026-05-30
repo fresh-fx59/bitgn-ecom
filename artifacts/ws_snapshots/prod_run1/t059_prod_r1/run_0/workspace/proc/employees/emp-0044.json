@@ -1,0 +1,13 @@
+{
+  "id": "emp-0044",
+  "display_name": "Stefania Serra",
+  "email": "stefania.serra.graz.043@staff.powertools.example",
+  "title": "Store Manager",
+  "store_id": "store-graz-eggenberg",
+  "roles": [
+    "employee",
+    "store_manager",
+    "order_viewer",
+    "discount_manager"
+  ]
+}

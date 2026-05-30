@@ -1,0 +1,12 @@
+{
+  "instruction": "Customer wants 'outdoor tool shed planning video bundle and has duration minutes 80'. Does such product exist?",
+  "context_date": "2026-12-23T11:28:21Z",
+  "actor_id": "emp-0098",
+  "roles": "RoleEmployee, RoleDiscountRequester, RoleOrderViewer",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 2 files / 0 dirs from 17 dump records. Window: started_at=2026-05-30T08:41:48.946800+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0098' roles='RoleEmployee, RoleDiscountRequester, RoleOrderViewer'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

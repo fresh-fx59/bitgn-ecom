@@ -1,0 +1,24 @@
+{
+ "task_id": "t47",
+ "instruction": "I'm preparing a quote for a customer from this pasted product list. Check each row against our exact catalogue and my store's same-day availability.\n\nInput format:\nRowID\tdescription\tquantity\n\nReturn exactly this tab-separated output table, including the header, with rows in the same order:\nRowID\tSKU\tin_stock\tmatch\n\nIf the description is not an exact catalogue product, leave SKU and in_stock empty and set match=false. If the product exists, set in_stock to the quantity available today in my store (reference all matched SKUs in response). set `match` field true only when the exact product exists and in_stock is at least the requested quantity.\n\nRows:\n2vXFx\tthe Workshop Saw and Cutter from Record Power in the Record Power Professional BS 4YQ-EUK Workshop Saw and Cutter line that has machine type tile cutter, voltage 230 V, and power 3000 W\t1\nV15X5\tthe Corded Angle Grinder from DeWalt in the DeWalt Professional DCG 2BH-302 Corded Angle Grinder line that has disc diameter 125 mm and power 1100 W and has power 850 W\t2\nRYBEc\tthe Sealant from Bostik in the Bostik Flexible Fix 3S9-FF7 Sealant line that has sealant type acrylic sealant, color family White, and volume 300 ml and has sealant type hybrid sealant\t1\nWzPZ3\tthe Metal and Concrete Paint from Hammerite in the Hammerite Quick Dry HAM 22B-SYZ Metal and Concrete Paint line that has product type facade paint\t3\nagu4c\tthe Wood Stain and Deck Oil from Helios in the Helios Exterior Belton 24Z-YPO Wood Stain and Deck Oil line that has product type deck oil\t2\nAf1ox\tthe Safety Eyewear from Uvex in the Uvex Industrial x-fit 3MR-QL3 Safety Eyewear line that has lens color Blue and size S\t6",
+ "bin_id": "user: emp_006\nroles: employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+ "bin_date": "2024-07-17T20:49:48Z",
+ "tables": {
+  "product_categories": 14,
+  "product_kinds": 45,
+  "product_families": 101,
+  "product_variants": 101,
+  "product_variant_properties": 101,
+  "stores": 10,
+  "store_inventory": 101,
+  "customer_accounts": 100,
+  "employee_accounts": 50,
+  "employee_role_assignments": 101,
+  "shopping_baskets": 101,
+  "shopping_basket_items": 101,
+  "payment_transactions": 101,
+  "payment_transaction_items": 101,
+  "return_requests": 20
+ },
+ "schema_apply_error": "near \"sql\": syntax error"
+}

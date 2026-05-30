@@ -1,0 +1,32 @@
+{
+ "task_id": "t01",
+ "instruction": "Can you check whether the Tool Box and Bag from Festool in the Festool Stackable SYS 3JJ-9LM Tool Box and Bag line that has storage type parts case is in the catalogue?",
+ "bin_id": "user: anonymous\nroles: GUEST",
+ "bin_date": "2025-06-22T09:13:19Z",
+ "tables": {
+  "product_categories": 3,
+  "product_kinds": 4,
+  "product_families": 4,
+  "product_variants": 10,
+  "product_variant_properties": 53,
+  "stores": 10,
+  "store_inventory": 34,
+  "customer_accounts": 100,
+  "employee_accounts": 50,
+  "employee_role_assignments": 230,
+  "shopping_baskets": 280,
+  "shopping_basket_items": 280,
+  "payment_transactions": 1108,
+  "payment_transaction_items": 1239,
+  "return_requests": 20
+ },
+ "actor_id": "anonymous",
+ "roles": "GUEST",
+ "context_date": "2025-06-22T09:13:19Z",
+ "expected_outcome": "OUTCOME_OK",
+ "expected_answer": "<YES>",
+ "required_refs": [
+  "/proc/catalog/STO-2R84BSHQ.json"
+ ],
+ "intent": "yes_no_sku"
+}

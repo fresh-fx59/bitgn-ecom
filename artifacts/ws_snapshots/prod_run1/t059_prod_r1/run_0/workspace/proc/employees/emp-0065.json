@@ -1,0 +1,13 @@
+{
+  "id": "emp-0065",
+  "display_name": "Renato Piras",
+  "email": "renato.piras.linz.064@staff.powertools.example",
+  "title": "Store Manager",
+  "store_id": "store-linz-urfahr",
+  "roles": [
+    "employee",
+    "store_manager",
+    "order_viewer",
+    "discount_manager"
+  ]
+}

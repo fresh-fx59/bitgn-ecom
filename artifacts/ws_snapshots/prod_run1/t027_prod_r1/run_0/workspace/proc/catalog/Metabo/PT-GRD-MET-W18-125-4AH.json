@@ -1,0 +1,21 @@
+{
+  "id": 14,
+  "sku": "PT-GRD-MET-W18-125-4AH",
+  "name": "Metabo W 18 LTX 125 angle grinder kit 2x4.0Ah",
+  "brand": "Metabo",
+  "category_id": "cat-power-tools",
+  "kind_id": "kind-angle-grinders",
+  "family_id": "fam-metabo-w-18-ltx-125",
+  "price_cents": 29990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "battery_platform": "Metabo CAS 18V",
+    "disc_mm": 125,
+    "motor_power_w": 0,
+    "power_source": "cordless",
+    "restart_protection": true,
+    "speed_rpm": 8000,
+    "voltage_v": 18
+  }
+}

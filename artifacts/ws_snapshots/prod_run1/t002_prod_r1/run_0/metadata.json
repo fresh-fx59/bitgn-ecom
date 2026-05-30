@@ -1,0 +1,12 @@
+{
+  "instruction": "Do you have 20 of 'bosch gws 1400 125mm case detail missing' (but not PT-GRD-BOS-GWS1400-125) in stock in liebenau tools place?",
+  "context_date": "2026-12-23T11:28:21Z",
+  "actor_id": "cust-0153",
+  "roles": "customer",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 5 files / 5 dirs from 20 dump records. Window: started_at=2026-05-30T08:40:49.236034+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='cust-0153' roles='customer'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

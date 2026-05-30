@@ -1,0 +1,34 @@
+                           BAUPRO TENDER DESK
+                            PURCHASE REQUEST
+ ======. =====:===========.===-============-====.:=======:======-======
+Request PR-H53YQVCH        Date 2026-08-20 Time 11:01
+Buyer   Site Procurement
+PowerTools target branch: PowerTools Vienna Meidling
+Target area: Schoenbrunner Strasse 245 Vienna
+- - - - - - - - - . . - - - . - - - - - - - - - - - - - - : - - _ - - - 
+Line Qty   Competitor         Requested item / properties
+___-____:______________::________________________-__________________-___
+1    3     CMP-CC5EHL         Makita DDF485 LXT drill kit
+                              2x3.0Ah
+      specs: battery platform=Makita LXT 18V; kit=2x3.0Ah batteries and
+             charger; power source=cordless; speed count=2; voltage v=18
+2    1     CMP-VB74NR         Einhell TE-AC 270/50 workshop compressor
+                              kit
+      specs: max bar=10; noise db=96; oil free=false; tank l=50;
+             wheels=true
+3    9     CMP-F4A9JB         Bosch UniversalAquatak 135 pressure
+                              washer
+      specs: detergent system=high-pressure foam nozzle; flow l h=410;
+             hose m=8; power w=1900; pump material=metal
+      note:  verify exact specification before substituting
+4    4     CMP-CCCAJK         Stihl RMA 235 lawn mower set AK
+                              30
+      specs: battery platform=Stihl AK; collection l=30; cut width
+             cm=33; mulching=false; power source=cordless
+ - - _ - - - - - - - - - - - - -   - - - - - - : - - - - - - -   - - -
+Total requested lines: 4
+Total requested units: 17
+Memo: Competitor codes are not PowerTools SKUs.
+Memo: Serve only exact same specification where possible.
+_____-____________.__.________________________._______________________
+            OCR SOURCE: CUSTOMER SUPPLIED COMPETITOR REQUEST

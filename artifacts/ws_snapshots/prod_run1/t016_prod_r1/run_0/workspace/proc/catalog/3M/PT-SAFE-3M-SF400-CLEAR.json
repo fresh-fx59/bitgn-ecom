@@ -1,0 +1,21 @@
+{
+  "id": 78,
+  "sku": "PT-SAFE-3M-SF400-CLEAR",
+  "name": "3M SecureFit 400 clear safety glasses",
+  "brand": "3M",
+  "category_id": "cat-hardware-consumables",
+  "kind_id": "kind-safety-gear",
+  "family_id": "fam-3m-securefit-400",
+  "price_cents": 990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "adjustable": false,
+    "anti_fog": true,
+    "certification": "EN166",
+    "lens_style": "clear",
+    "pack_count": 1,
+    "protection_type": "eye",
+    "size": "universal"
+  }
+}

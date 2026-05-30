@@ -1,0 +1,21 @@
+{
+  "id": 23,
+  "sku": "PT-SAW-MAK-DHS680-BLADE",
+  "name": "Makita DHS680 LXT circular saw laminate blade bundle",
+  "brand": "Makita",
+  "category_id": "cat-workshop-site",
+  "kind_id": "kind-circular-saws",
+  "family_id": "fam-makita-dhs680-lxt",
+  "price_cents": 24990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "battery_platform": "Makita LXT 18V",
+    "blade_mm": 165,
+    "cut_depth_90_mm": 57,
+    "kit": "body and laminate blade pack",
+    "power_source": "cordless",
+    "rail_compatible": true,
+    "voltage_v": 18
+  }
+}

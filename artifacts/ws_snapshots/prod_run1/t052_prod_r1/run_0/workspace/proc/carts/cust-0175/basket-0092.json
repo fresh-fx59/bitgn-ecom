@@ -1,0 +1,13 @@
+{
+  "id": "basket-0092",
+  "customer_id": "cust-0175",
+  "store_id": "store-graz-puntigam",
+  "status": "active",
+  "created_at": "2026-06-12T20:13:01Z",
+  "lines": [
+    {
+      "sku": "PT-DIG-PLAN-GARDEN-SHED",
+      "quantity": 1
+    }
+  ]
+}

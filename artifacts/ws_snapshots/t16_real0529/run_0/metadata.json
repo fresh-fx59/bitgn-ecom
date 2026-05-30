@@ -1,0 +1,24 @@
+{
+ "task_id": "t16",
+ "instruction": "How many of these products have at least 3 items available in the Linz Hauptplatz PowerTool shop today: the LED Bulb from Schneider Electric in the Schneider Electric Merten Resi 33R-VDS LED Bulb line that has wattage 12 W and luminous flux 806 lm,the Manual Garden Tool from Gardena in the Gardena PowerMax PowerMax 1FG-OQ5 Manual Garden Tool line that has tool type soil cultivator,the Pipe Fitting from Geberit in the Geberit Professional Silent 2DR-1PY Pipe Fitting line that has fitting type seal ring and diameter 50 mm,the Corded Angle Grinder from Metabo in the Metabo LiHD W 26F-57D Corded Angle Grinder line that has disc diameter 115 mm and power 2600 W,the Chainsaw from Makita in the Makita Eco DDF WR1-TFW Chainsaw line that has power source petrol and bar length 25 cm,the Work Trousers from Mascot in the Mascot Stretch ADV C8A-4DN Work Trousers line that has color family Blue and size L? Answer in exactly format \"Count: %d\" (no quotes)",
+ "bin_id": "user: anonymous\nroles: GUEST",
+ "bin_date": "2021-08-09T16:52:43Z",
+ "tables": {
+  "product_categories": 14,
+  "product_kinds": 45,
+  "product_families": 101,
+  "product_variants": 101,
+  "product_variant_properties": 101,
+  "stores": 10,
+  "store_inventory": 101,
+  "customer_accounts": 100,
+  "employee_accounts": 50,
+  "employee_role_assignments": 101,
+  "shopping_baskets": 101,
+  "shopping_basket_items": 101,
+  "payment_transactions": 101,
+  "payment_transaction_items": 101,
+  "return_requests": 20
+ },
+ "schema_apply_error": "near \"sql\": syntax error"
+}

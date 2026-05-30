@@ -1,0 +1,15 @@
+CREATE TABLE "product_categories" ("product_category_id" TEXT, "product_category_name" TEXT, "product_department" TEXT);
+CREATE TABLE "product_kinds" ("product_kind_id" TEXT, "product_category_id" TEXT, "product_kind_name" TEXT);
+CREATE TABLE "product_families" ("product_family_id" TEXT, "product_category_id" TEXT, "product_kind_id" TEXT, "brand" TEXT, "series" TEXT, "model" TEXT, "product_family_name" TEXT, "properties" TEXT);
+CREATE TABLE "product_variants" ("product_sku" TEXT, "record_path" TEXT, "product_category_id" TEXT, "product_kind_id" TEXT, "product_family_id" TEXT, "brand" TEXT, "series" TEXT, "model" TEXT, "product_name" TEXT, "price_cents" INTEGER, "price_currency" TEXT, "properties" TEXT);
+CREATE TABLE "product_variant_properties" ("product_sku" TEXT, "property_key" TEXT, "property_value_text" TEXT, "property_value_number" REAL);
+CREATE TABLE "stores" ("store_id" TEXT, "record_path" TEXT, "store_name" TEXT, "city" TEXT, "is_open" INTEGER, "latitude" REAL, "longitude" REAL);
+CREATE TABLE "store_inventory" ("store_id" TEXT, "product_sku" TEXT, "on_hand_quantity" INTEGER, "reserved_quantity" INTEGER, "available_today_quantity" INTEGER, "incoming_quantity" INTEGER, "next_arrival_in_days" INTEGER);
+CREATE TABLE "customer_accounts" ("customer_id" TEXT, "record_path" TEXT, "customer_display_name" TEXT, "customer_email" TEXT, "home_city" TEXT, "home_latitude" REAL, "home_longitude" REAL);
+CREATE TABLE "employee_accounts" ("employee_id" TEXT, "record_path" TEXT, "employee_display_name" TEXT, "employee_email" TEXT, "job_title" TEXT, "store_id" TEXT);
+CREATE TABLE "employee_role_assignments" ("employee_id" TEXT, "role_code" TEXT);
+CREATE TABLE "shopping_baskets" ("basket_id" TEXT, "record_path" TEXT, "customer_id" TEXT, "store_id" TEXT, "basket_status" TEXT, "basket_created_at" TEXT, "discount_percent" INTEGER, "discount_reason_code" TEXT, "discount_issuer_employee_id" TEXT);
+CREATE TABLE "shopping_basket_items" ("basket_id" TEXT, "line_number" INTEGER, "product_sku" TEXT, "requested_quantity" INTEGER);
+CREATE TABLE "payment_transactions" ("payment_id" TEXT, "record_path" TEXT, "basket_id" TEXT, "is_archived_basket_reference" INTEGER, "customer_id" TEXT, "store_id" TEXT, "payment_amount_cents" INTEGER, "payment_currency" TEXT, "payment_status" TEXT, "payment_created_at" TEXT, "payment_method_fingerprint" TEXT, "device_fingerprint" TEXT, "observed_latitude" REAL, "observed_longitude" REAL, "three_ds_status" TEXT, "three_ds_failure_reason" TEXT, "three_ds_attempts" INTEGER, "three_ds_max_attempts" INTEGER);
+CREATE TABLE "payment_transaction_items" ("payment_id" TEXT, "line_number" INTEGER, "product_sku" TEXT, "purchased_quantity" INTEGER, "item_unit_price_cents" INTEGER);
+CREATE TABLE "return_requests" ("return_id" TEXT, "record_path" TEXT, "basket_id" TEXT, "customer_id" TEXT, "payment_id" TEXT, "return_status" TEXT, "return_reason_code" TEXT, "return_created_at" TEXT);

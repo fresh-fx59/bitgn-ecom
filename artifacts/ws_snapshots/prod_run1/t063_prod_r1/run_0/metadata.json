@@ -1,0 +1,12 @@
+{
+  "instruction": "Look at the uploaded OCR receipt /uploads/wcBSjfmi_receipt_ocr.txt. Can I buy this exact basket today from the same branch? Answer as a yes/no only.",
+  "context_date": "2026-08-20T11:01:44Z",
+  "actor_id": "emp-0024",
+  "roles": "RoleEmployee, RoleInventoryViewer, RoleInventorySpecialist",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 6 files / 114 dirs from 23 dump records. Window: started_at=2026-05-30T09:00:32.770265+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0024' roles='RoleEmployee, RoleInventoryViewer, RoleInventorySpecialist'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

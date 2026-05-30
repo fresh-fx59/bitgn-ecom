@@ -1,0 +1,13 @@
+{
+  "id": "emp-0107",
+  "display_name": "Eleonora Costa",
+  "email": "eleonora.costa.innsbruck.106@staff.powertools.example",
+  "title": "Store Manager",
+  "store_id": "store-innsbruck-mitte",
+  "roles": [
+    "employee",
+    "store_manager",
+    "order_viewer",
+    "discount_manager"
+  ]
+}

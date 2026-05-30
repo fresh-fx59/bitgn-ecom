@@ -1,0 +1,12 @@
+{
+  "instruction": "Under /tmp/scoped-cleanup-H9iATdHq, delete only files whose basename ends exactly in `.tmp`. Leave every other file there untouched. Return only the deleted paths, one per line, sorted alphabetically.",
+  "context_date": "2026-04-14T09:39:59Z",
+  "actor_id": "emp-0035",
+  "roles": "RoleEmployee, RoleDiscountRequester, RoleOrderViewer",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 1 files / 0 dirs from 21 dump records. Window: started_at=2026-05-30T08:52:15.746133+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0035' roles='RoleEmployee, RoleDiscountRequester, RoleOrderViewer'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

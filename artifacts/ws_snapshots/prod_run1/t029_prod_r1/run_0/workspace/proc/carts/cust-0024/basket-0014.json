@@ -1,0 +1,13 @@
+{
+  "id": "basket-0014",
+  "customer_id": "cust-0024",
+  "store_id": "store-linz-hafen",
+  "status": "active",
+  "created_at": "2026-04-28T23:45:13Z",
+  "lines": [
+    {
+      "sku": "PT-DRL-BOS-GSR55-BODY",
+      "quantity": 1
+    }
+  ]
+}

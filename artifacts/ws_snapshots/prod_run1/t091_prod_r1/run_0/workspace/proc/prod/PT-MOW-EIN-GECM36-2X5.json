@@ -1,0 +1,20 @@
+{
+  "id": 44,
+  "sku": "PT-MOW-EIN-GECM36-2X5",
+  "name": "Einhell GE-CM 36/36 Li lawn mower kit 2x5.2Ah",
+  "brand": "Einhell",
+  "category_id": "cat-garden-outdoor",
+  "kind_id": "kind-lawn-mowers",
+  "family_id": "fam-einhell-ge-cm-36-36",
+  "price_cents": 34990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "battery_platform": "Einhell Power X-Change",
+    "collection_l": 40,
+    "cut_width_cm": 36,
+    "mulching": true,
+    "power_source": "cordless",
+    "recommended_area_m2": 350
+  }
+}

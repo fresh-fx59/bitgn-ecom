@@ -1,0 +1,13 @@
+{
+  "instruction": "How many Extension Cable products should I report today? Answer in exactly format \"<COUNT:%d>\" (no quotes).",
+  "context_date": "2024-07-17T20:49:48Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "variance-pack variant 0 for t11 — workspace symlinked from /home/claude-developer/bitgn-ecom/artifacts/ws_snapshots/t11_en/run_0/workspace",
+  "variance_pack_index": 0,
+  "variance_pack_size": 5
+}

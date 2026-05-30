@@ -1,0 +1,41 @@
+                         BAUPRO TENDER DESK
+                         PROCUREMENT REQUEST
+.----------------_--------------:----_----------------------.---:-
+Request PR-EDCOEEUM        Date 2026-04-28 Time 14:45
+BUYER   FACILITIES BUYER
+PowerTools target branch: PowerTools Graz Liebenau
+Target area: Liebenauer Hauptstrasse 123 Graz
+-----_------------.----------------------------_------.:--- ---------
+  ...............................
+Line Qty   Competitor         Requested item / properties
+ - - - - - . - . - - - - - - - - - - - - - - - - - -   - - - - - - - 
+1    5     CMP-FCBTC1         Makita DHS680 LXT circular saw
+                              body
+      specs: cut depth 90 mm=57; kit=body only; power
+             source=cordless; rail compatible=false
+      note:  verify exact specification before substituting
+2    4     CMP-G7UACS         Aircraft Compact-Air 240/24 compressor
+  ......................
+                              accessory set
+      specs: intake l min=240; max bar=8; wheels=true
+  ..................
+3    1     CMP-9MYQSR         Bosch Professional GSR 18V-55 drill
+                              kit 2x2.0Ah
+      specs: brushless=true; max torque nm=55; power
+             source=cordless; speed count=2
+4    8     CMP-B3GZ39         Stihl RMA 235 cordless lawn mower
+                              BODY
+      specs: battery platform=Stihl AK; collection l=30;
+             mulching=false; power source=cordless; recommended area
+             m2=200
+5    2     CMP-YAVWY6         Einhell TE-AC 270/50
+                              compressor
+      specs: intake l min=270; noise db=96; oil free=false; tank
+             l=50; wheels=true
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Total requested lines: 5
+Total requested units: 20
+Memo: Competitor codes are not PowerTools SKUs.
+Memo: Serve only exact same specification where possible.
+=====-===-======================-==-=====:===:===:====-=====..======-
+          OCR SOURCE: CUSTOMER SUPPLIED COMPETITOR REQUEST

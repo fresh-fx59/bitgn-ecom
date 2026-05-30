@@ -1,0 +1,12 @@
+{
+  "instruction": "Risk Ops is reviewing a two-year-old archive export. The records in this export are standalone historical text rows and are not mirrored into current payment records.\n\nRead /archive/payment_batch_export_ULMwJ3mFFo.tsv, identify the archived payment rows that belong to fraud incidents, and do not modify files.\n\nAnswer message must contain only the total fraudulent payment amount, formatted exactly as:\n\nEUR %d.%02d\n\nDo not put row IDs in the message.\n\nFor grounding refs, cite every fraud row using exactly this row-ref format:\n\n/archive/payment_batch_export_ULMwJ3mFFo.tsv#row=<RowID>",
+  "context_date": "2026-08-20T11:01:44Z",
+  "actor_id": "emp-0109",
+  "roles": "RoleEmployee, RoleFulfillmentViewer, RoleFulfillmentOperator",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 2 files / 0 dirs from 14 dump records. Window: started_at=2026-05-30T08:44:10.145400+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0109' roles='RoleEmployee, RoleFulfillmentViewer, RoleFulfillmentOperator'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

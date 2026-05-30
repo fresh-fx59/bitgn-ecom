@@ -1,0 +1,12 @@
+{
+  "instruction": "Plan the dispatch wave described in /ops/dispatch/wave-ApdgNmry/dispatch.md.",
+  "context_date": "2026-08-21T09:14:37Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 5 files / 0 dirs from 16 dump records. Window: started_at=2026-05-30T09:00:49.094150+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='anonymous' roles='GUEST'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

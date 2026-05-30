@@ -1,0 +1,20 @@
+{
+  "id": 88,
+  "sku": "PT-DIG-COURSE-GRINDER-SAFETY",
+  "name": "PowerTools angle grinder safety online course",
+  "brand": "PowerTools Academy",
+  "category_id": "cat-digital-learning-plans",
+  "kind_id": "kind-online-courses",
+  "family_id": "fam-powertools-academy-tool-skills",
+  "price_cents": 5990,
+  "fulfillment_type": 2,
+  "return_policy": 2,
+  "properties": {
+    "access_policy": "12_months",
+    "delivery_mode": "streaming",
+    "duration_minutes": 120,
+    "file_format": "video course",
+    "related_tool_kind": "kind-angle-grinders",
+    "skill_level": "intermediate"
+  }
+}

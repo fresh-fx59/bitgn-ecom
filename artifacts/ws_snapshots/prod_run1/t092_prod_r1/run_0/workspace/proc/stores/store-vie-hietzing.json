@@ -1,0 +1,248 @@
+{
+  "id": "store-vie-hietzing",
+  "name": "PowerTools Vienna Hietzing",
+  "address_line_1": "Hietzinger Hauptstrasse 86",
+  "postal_code": "1130",
+  "city": "Vienna",
+  "country_code": "AT",
+  "is_open": false,
+  "lat": 48.1864,
+  "lon": 16.2833,
+  "inventory": [
+    {
+      "sku": "PT-IMP-DEW-DCF887-2AH",
+      "on_hand": 1,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-IMP-DEW-DCF887-5AH",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 6,
+          "arrival_in_days": 2
+        }
+      ]
+    },
+    {
+      "sku": "PT-IMP-MIL-M18FID3-BODY",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 4,
+          "arrival_in_days": 11
+        }
+      ]
+    },
+    {
+      "sku": "PT-IMP-MIL-M18FID3-2AH",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-IMP-MIL-M18FID3-5AH",
+      "on_hand": 9,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-GRD-MET-W18-125-BODY",
+      "on_hand": 12,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-GRD-MET-W18-125-4AH",
+      "on_hand": 1,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-SAW-DEW-DWE575K-FINE",
+      "on_hand": 2,
+      "reserved": 2
+    },
+    {
+      "sku": "PT-SAW-DEW-DWE575K-SITE",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 4,
+          "arrival_in_days": 1
+        }
+      ]
+    },
+    {
+      "sku": "PT-SND-BOS-GEX125-BOX",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 4,
+          "arrival_in_days": 10
+        }
+      ]
+    },
+    {
+      "sku": "PT-SND-BOS-GEX125-CASE",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-SND-BOS-GEX125-DUST",
+      "on_hand": 13,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-SND-EIN-TERS18-BODY",
+      "on_hand": 12,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-SND-EIN-TERS18-25",
+      "on_hand": 3,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-MOW-EIN-GECM36-BODY",
+      "on_hand": 4,
+      "reserved": 4
+    },
+    {
+      "sku": "PT-MOW-EIN-GECM36-2X4",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 4,
+          "arrival_in_days": 3
+        }
+      ]
+    },
+    {
+      "sku": "PT-MOW-EIN-GECM36-2X5",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 8,
+          "arrival_in_days": 8
+        }
+      ]
+    },
+    {
+      "sku": "PT-HDG-STI-HSA50-BODY",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-HDG-STI-HSA50-AK10",
+      "on_hand": 8,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-HDG-STI-HSA50-AK20",
+      "on_hand": 14,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-HDG-BOS-UHC18-50-BODY",
+      "on_hand": 5,
+      "reserved": 3
+    },
+    {
+      "sku": "PT-BIT-ALP-HSS-19",
+      "on_hand": 1,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-BIT-ALP-HSS-25",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 5,
+          "arrival_in_days": 1
+        }
+      ]
+    },
+    {
+      "sku": "PT-BIT-ALP-HSS-COBALT",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 3,
+          "arrival_in_days": 14
+        }
+      ]
+    },
+    {
+      "sku": "PT-BIT-ALP-HSS-13",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-BIT-ALP-HSS-41",
+      "on_hand": 12,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-BIT-ALP-HSS-REDUCED",
+      "on_hand": 9,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-BIT-BOS-CYL9-7",
+      "on_hand": 3,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-BLA-MAK-SPEC-190",
+      "on_hand": 5,
+      "reserved": 5
+    },
+    {
+      "sku": "PT-BLA-MAK-SPEC-METAL",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 5,
+          "arrival_in_days": 2
+        }
+      ]
+    },
+    {
+      "sku": "PT-SAFE-3M-SF400-CLEAR",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 4,
+          "arrival_in_days": 8
+        }
+      ]
+    },
+    {
+      "sku": "PT-SAFE-3M-SF400-SMOKE",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-SAFE-3M-SF400-10PK",
+      "on_hand": 11,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-SAFE-3M-SF400-AMBER",
+      "on_hand": 12,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-SAFE-3M-SF400-READER",
+      "on_hand": 3,
+      "reserved": 2
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "emp-0086",
+  "display_name": "Caterina Vitale",
+  "email": "caterina.vitale.salzburg.085@staff.powertools.example",
+  "title": "Store Manager",
+  "store_id": "store-salzburg-alpenstrasse",
+  "roles": [
+    "employee",
+    "store_manager",
+    "order_viewer",
+    "discount_manager"
+  ]
+}

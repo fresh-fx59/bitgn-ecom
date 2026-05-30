@@ -1,0 +1,27 @@
+{
+  "id": "pay-0013",
+  "order_id": "order-0013",
+  "basket_id": "basket-0052",
+  "customer_id": "cust-0113",
+  "store_id": "store-innsbruck-mitte",
+  "amount_cents": 37980,
+  "currency": "EUR",
+  "status": "paid",
+  "created_at": "2026-03-09T06:20:13Z",
+  "payment_method_fingerprint": "pm-card-03",
+  "device_fingerprint": "dev-commerce-06",
+  "observed_lat": 47.93545,
+  "observed_lon": 13.357734444444446,
+  "lines": [
+    {
+      "sku": "PT-IMP-MIL-M18FID3-2AH",
+      "quantity": 1,
+      "unit_price_cents": 27990
+    },
+    {
+      "sku": "PT-GRD-BOS-GWS1400-125",
+      "quantity": 1,
+      "unit_price_cents": 9990
+    }
+  ]
+}

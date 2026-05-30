@@ -1,0 +1,30 @@
+{
+ "task_id": "t16",
+ "instruction": "How many of these products have at least 1 items available in the Veveri PowerTool shop in Brno today: the Work Gloves from Honeywell in the Honeywell Miller Howard KJB-LZD Work Gloves line that has size XL, color family Orange, and protection class cut-3,the Tape and Foam from Gorilla in the Gorilla Heavy Duty Grip HL7-T2E Tape and Foam line that has product type masking tape,the Extension Cable from Hager in the Hager Workshop Berker 29D-PDT Extension Cable line that has color family White and length 2 m,the Wiper Blade from Sonax in the Sonax Professional XTREME 300-EAF Wiper Blade line that has length 600 mm,the Cleaning Liquid from Mellerud in the Mellerud Universal MEL BO7-35J Cleaning Liquid line that has cleaner type glass cleaner and volume 500 ml,the Valve and Connector from AlcaPlast in the AlcaPlast Flexible A 33F-7U9 Valve and Connector line that has connector type shower hose and diameter 12 mm? Answer in exactly format \"result %d\" (no quotes)",
+ "bin_id": "user: anonymous\nroles: GUEST",
+ "bin_date": "2021-08-09T16:52:43Z",
+ "tables": {
+  "product_categories": 14,
+  "product_kinds": 45,
+  "product_families": 900,
+  "product_variants": 10000,
+  "product_variant_properties": 46853,
+  "stores": 10,
+  "store_inventory": 34940,
+  "customer_accounts": 100,
+  "employee_accounts": 50,
+  "employee_role_assignments": 230,
+  "shopping_baskets": 280,
+  "shopping_basket_items": 280,
+  "payment_transactions": 1107,
+  "payment_transaction_items": 1236,
+  "return_requests": 20
+ },
+ "expected_outcome": "OUTCOME_OK",
+ "expected_answer": "result 3",
+ "context_date": "2021-08-09T16:52:43Z",
+ "actor_id": "anonymous",
+ "roles": "GUEST",
+ "intent": "count_per_store",
+ "notes": "ground-truth count=3 (Sonax/Mellerud/AlcaPlast qualify >=1 at store_brno_veveri). required SKU refs ambiguous (multi-variant); grade on count token + manual ref-parity check."
+}

@@ -1,0 +1,39 @@
+                      WERKMARKT BUSINESS
+                       PURCHASE REQUEST
+========:===== ======_=============_==:============:= ======
+Request PR-9UFTFBJF        Date 2026-06-14 Time 17:13
+BUYER   SITE PROCUREMENT
+PowerTools target branch: PowerTools Graz Eggenberg
+Target area: Eggenberger Allee 38 Graz
+__________.______.__:_________________________:_____________
+Line Qty   Competitor         Requested item / properties
+===================================:_:.=====.====_._=========
+1    4     CMP-YRDPH1         Stihl RMA 235 lawn mower set AK
+                              20
+         OCR REVIEW
+      specs: cut width cm=33; mulching=false; power
+             source=cordless
+   ARCHIVE COPY
+2    7     CMP-S8I6ZY         Makita Specialized saw blade set
+                              165 mm
+       ARCHIVE COPY
+      specs: bore mm=20; carbide=true; piece count=2; tooth
+             range=24-40
+3    7     CMP-FMKESG         MAKITA DHS680 LXT CIRCULAR SAW
+                              kit 2x5.0Ah
+      specs: blade mm=165; kit=guide rail adapter bundle;
+             power source=cordless; rail compatible=true;
+             voltage v=18
+      note:  verify exact specification before substituting
+4    6     CMP-74FMZT         Alpen HSS Sprint cobalt drill
+                              bit set 19-piece
+  ............................
+      specs: material target=stainless steel; piece count=19;
+             shank type=round
+- - - - - - : . - _ - - - - - - - - -   - - - - - - - - - . .
+Total requested lines: 4
+Total requested units: 24
+Memo: Competitor codes are not PowerTools SKUs.
+Memo: Serve only exact same specification where possible.
+-------------_--- --------------------- --:-- ----_------------
+       OCR SOURCE: CUSTOMER SUPPLIED COMPETITOR REQUEST

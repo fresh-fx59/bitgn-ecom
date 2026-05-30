@@ -1,0 +1,22 @@
+{
+  "id": 7,
+  "sku": "PT-IMP-DEW-DCF887-BODY",
+  "name": "DeWalt DCF887 XR impact driver body",
+  "brand": "DeWalt",
+  "category_id": "cat-power-tools",
+  "kind_id": "kind-impact-drivers",
+  "family_id": "fam-dewalt-dcf887-xr",
+  "price_cents": 13990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "battery_platform": "DeWalt XR 18V",
+    "brushless": true,
+    "drive_size": "1/4 inch hex",
+    "impact_rate_ipm": 3800,
+    "kit": "body only",
+    "max_torque_nm": 205,
+    "power_source": "cordless",
+    "voltage_v": 18
+  }
+}

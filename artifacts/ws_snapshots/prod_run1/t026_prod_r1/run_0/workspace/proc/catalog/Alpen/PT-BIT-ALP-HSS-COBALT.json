@@ -1,0 +1,20 @@
+{
+  "id": 61,
+  "sku": "PT-BIT-ALP-HSS-COBALT",
+  "name": "Alpen HSS Sprint cobalt drill bit set 19-piece",
+  "brand": "Alpen",
+  "category_id": "cat-hardware-consumables",
+  "kind_id": "kind-drill-bit-sets",
+  "family_id": "fam-alpen-hss-sprint",
+  "price_cents": 4990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "case_type": "metal cassette",
+    "cobalt": true,
+    "diameter_range_mm": "1-10",
+    "material_target": "stainless steel",
+    "piece_count": 19,
+    "shank_type": "round"
+  }
+}

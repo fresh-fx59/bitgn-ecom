@@ -1,0 +1,13 @@
+{
+  "instruction": "",
+  "context_date": "2025-10-08T16:53:18Z",
+  "actor_id": "emp_021",
+  "roles": "employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [
+    "/proc/stores/store_bratislava_stare_mesto.json"
+  ],
+  "forbidden_refs": [],
+  "source": "converted from artifacts/scans/scan_20260528T205333Z_new/trials/t47"
+}

@@ -1,0 +1,12 @@
+{
+  "instruction": "Apply the maximum applicable damaged_packaging discount to basket basket-0014. Use my employee id as issuer.",
+  "context_date": "2026-08-20T11:01:44Z",
+  "actor_id": "emp-0058",
+  "roles": "RoleEmployee, RoleStoreManager, RoleOrderViewer, RoleDiscountManager",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 8 files / 109 dirs from 34 dump records. Window: started_at=2026-05-30T09:11:42.185215+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0058' roles='RoleEmployee, RoleStoreManager, RoleOrderViewer, RoleDiscountManager'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

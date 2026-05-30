@@ -1,0 +1,22 @@
+{
+  "id": "basket-0021",
+  "customer_id": "cust-0037",
+  "store_id": "store-linz-hafen",
+  "status": "active",
+  "created_at": "2026-08-19T13:01:44Z",
+  "discount": {
+    "percent": 15,
+    "reason_code": "service_recovery",
+    "issuer_id": "emp-0058"
+  },
+  "lines": [
+    {
+      "sku": "PT-DRL-BOS-GSR55-BODY",
+      "quantity": 1
+    },
+    {
+      "sku": "PT-GRD-BOS-GWS1400-125",
+      "quantity": 1
+    }
+  ]
+}

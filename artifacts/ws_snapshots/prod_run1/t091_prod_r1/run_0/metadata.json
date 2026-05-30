@@ -1,0 +1,12 @@
+{
+  "instruction": "Create an inventory CSV export at /exports/inventory-family-C8CfGoxW.csv for favoriten tools place. Include `family_id` `fam-einhell-ge-cm-36-36` and use exactly these columns: `SKU,2026-04-22,2026-04-23,2026-04-24,2026-04-25,2026-04-26,2026-04-27`. Return only the export path.",
+  "context_date": "2026-04-22T15:35:14Z",
+  "actor_id": "emp-0094",
+  "roles": "RoleEmployee, RoleInventoryViewer, RoleInventorySpecialist",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 6 files / 5 dirs from 23 dump records. Window: started_at=2026-05-30T09:10:04.732822+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0094' roles='RoleEmployee, RoleInventoryViewer, RoleInventorySpecialist'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

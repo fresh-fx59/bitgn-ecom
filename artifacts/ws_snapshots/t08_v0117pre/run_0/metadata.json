@@ -1,0 +1,13 @@
+{
+  "instruction": "A support note claims we stock the Adhesive and Glue from Bostik in the Bostik Heavy Duty BST 294-I53 Adhesive and Glue line that has adhesive type tile adhesive and color family White and has use area masonry. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [
+    "/proc/catalog/adhesives_sealants/adhesives_glues/fam_adhesives_sealants_adhesives_glues_0004_3bwx3udp/ADH-13OKOVLP.json"
+  ],
+  "forbidden_refs": [],
+  "source": "converted from artifacts/scans/scan_20260528T205333Z_new/trials/t08"
+}

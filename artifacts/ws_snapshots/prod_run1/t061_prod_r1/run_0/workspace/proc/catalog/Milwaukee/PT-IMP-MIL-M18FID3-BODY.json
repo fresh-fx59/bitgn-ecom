@@ -1,0 +1,22 @@
+{
+  "id": 10,
+  "sku": "PT-IMP-MIL-M18FID3-BODY",
+  "name": "Milwaukee M18 Fuel FID3 impact driver body",
+  "brand": "Milwaukee",
+  "category_id": "cat-power-tools",
+  "kind_id": "kind-impact-drivers",
+  "family_id": "fam-milwaukee-m18-fid3",
+  "price_cents": 16990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "battery_platform": "Milwaukee M18",
+    "brushless": true,
+    "drive_size": "1/4 inch hex",
+    "impact_rate_ipm": 4400,
+    "kit": "body only",
+    "max_torque_nm": 226,
+    "power_source": "cordless",
+    "voltage_v": 18
+  }
+}

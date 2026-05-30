@@ -1,0 +1,13 @@
+{
+  "instruction": "Fraud review says one hit is present in the archived payments. Identify the fraudulent payment records from history. Leave files unchanged and cite every payment record you are marking.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "variance-pack variant 1 for t40 — workspace symlinked from /home/claude-developer/bitgn-ecom/artifacts/ws_snapshots/t40_en/run_0/workspace",
+  "variance_pack_index": 1,
+  "variance_pack_size": 2
+}

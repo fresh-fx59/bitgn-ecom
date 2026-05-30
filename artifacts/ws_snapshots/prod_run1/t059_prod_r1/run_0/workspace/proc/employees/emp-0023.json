@@ -1,0 +1,13 @@
+{
+  "id": "emp-0023",
+  "display_name": "Lorenzo Monti",
+  "email": "lorenzo.monti.vienna.022@staff.powertools.example",
+  "title": "Store Manager",
+  "store_id": "store-vie-favoriten",
+  "roles": [
+    "employee",
+    "store_manager",
+    "order_viewer",
+    "discount_manager"
+  ]
+}

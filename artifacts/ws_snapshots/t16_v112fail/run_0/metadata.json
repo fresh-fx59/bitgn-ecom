@@ -1,0 +1,14 @@
+{
+  "instruction": "How many of these products have at least 2 items available in central Salzburg PowerTool branch today: the Hammer Measuring and Cutting Tool from Bahco in the Bahco Workshop S 10L-JFP Hammer Measuring and Cutting Tool line that has tool type hammer and length 150 mm,the Workshop Drill Grinder and Sander from Makita in the Makita CXT DHS 3GD-XYX Workshop Drill Grinder and Sander line that has machine type drill press, voltage 400 V, and power 500 W,the Extension Cable from Kopp in the Kopp Indoor KOP 1NZ-ACC Extension Cable line that has color family Orange and length 5 m,the Lawn Mower from Ryobi in the Ryobi Eco ONE 1KH-32N Lawn Mower line that has power source corded,the Cordless Drill Driver from Einhell in the Einhell Compact GE 3DD-S4E Cordless Drill Driver line that has voltage 12 V, battery platform 12v-system, and kit contents bare tool,the Valve and Connector from Geberit in the Geberit Chrome Silent QH9-BQY Valve and Connector line that has connector type faucet connector and diameter 20 mm? Answer in exactly format \"%d\" (no quotes)",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "rebuilt from bench_20260525T231018Z on 2026-05-27",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 4 files / 0 dirs from 46 dump records. Window: started_at=2026-05-25T23:13:33.334607+00:00. Trial outcome was unknown with score 0.0; score_detail=[\"answer missing required reference '/proc/catalog/garden_tools/lawn_mowers/fam_garden_tools_lawn_mowers_0014_e50xj5rp/GRD-19J64VHY.json'\"]. Identity: actor='anonymous' roles='GUEST'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [
+    "/proc/catalog/garden_tools/lawn_mowers/fam_garden_tools_lawn_mowers_0014_e50xj5rp/GRD-19J64VHY.json"
+  ],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

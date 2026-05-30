@@ -1,0 +1,22 @@
+{
+  "id": "pay-0022",
+  "order_id": "order-0022",
+  "basket_id": "basket-0061",
+  "customer_id": "cust-0122",
+  "store_id": "store-linz-urfahr",
+  "amount_cents": 36990,
+  "currency": "EUR",
+  "status": "paid",
+  "created_at": "2026-06-28T23:36:44Z",
+  "payment_method_fingerprint": "pm-card-02",
+  "device_fingerprint": "dev-commerce-01",
+  "observed_lat": 47.46148333333333,
+  "observed_lon": 15.054503333333335,
+  "lines": [
+    {
+      "sku": "PT-IMP-MIL-M18FID3-5AH",
+      "quantity": 1,
+      "unit_price_cents": 36990
+    }
+  ]
+}

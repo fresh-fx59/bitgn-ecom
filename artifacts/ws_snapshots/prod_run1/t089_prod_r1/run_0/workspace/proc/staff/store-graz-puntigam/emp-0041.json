@@ -1,0 +1,12 @@
+{
+  "id": "emp-0041",
+  "display_name": "Nino Valente",
+  "email": "nino.valente.graz.040@staff.powertools.example",
+  "title": "Returns Specialist",
+  "store_id": "store-graz-puntigam",
+  "roles": [
+    "employee",
+    "customer_service",
+    "refund_manager"
+  ]
+}

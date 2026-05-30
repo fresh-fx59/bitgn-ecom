@@ -1,0 +1,21 @@
+{
+  "id": 95,
+  "sku": "PT-DIG-VIDEO-OUTDOOR-SHED",
+  "name": "PowerTools outdoor tool shed design video bundle",
+  "brand": "PowerTools Academy",
+  "category_id": "cat-digital-learning-plans",
+  "kind_id": "kind-design-video-bundles",
+  "family_id": "fam-powertools-academy-workshop-design",
+  "price_cents": 4990,
+  "fulfillment_type": 2,
+  "return_policy": 2,
+  "properties": {
+    "access_policy": "12_months",
+    "delivery_mode": "streaming",
+    "duration_minutes": 125,
+    "file_format": "video bundle",
+    "project_area": "garden",
+    "related_tool_kind": "kind-pressure-washers",
+    "skill_level": "advanced"
+  }
+}

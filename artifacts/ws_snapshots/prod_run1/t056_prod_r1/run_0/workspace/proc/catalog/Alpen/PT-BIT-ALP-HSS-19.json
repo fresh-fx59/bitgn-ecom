@@ -1,0 +1,20 @@
+{
+  "id": 59,
+  "sku": "PT-BIT-ALP-HSS-19",
+  "name": "Alpen HSS Sprint drill bit set 19-piece",
+  "brand": "Alpen",
+  "category_id": "cat-hardware-consumables",
+  "kind_id": "kind-drill-bit-sets",
+  "family_id": "fam-alpen-hss-sprint",
+  "price_cents": 2490,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "case_type": "metal cassette",
+    "cobalt": false,
+    "diameter_range_mm": "1-10",
+    "material_target": "metal",
+    "piece_count": 19,
+    "shank_type": "round"
+  }
+}

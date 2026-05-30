@@ -1,0 +1,9 @@
+{
+  "id": "return-0014",
+  "order_id": "order-0014",
+  "customer_id": "cust-0114",
+  "payment_id": "pay-0014",
+  "status": "refund_pending",
+  "reason_code": "wrong_size",
+  "created_at": "2026-07-06T23:36:44Z"
+}

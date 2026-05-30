@@ -1,0 +1,20 @@
+{
+  "id": 34,
+  "sku": "PT-CMP-AIR-CA240-24",
+  "name": "Aircraft Compact-Air 240/24 compressor",
+  "brand": "Aircraft",
+  "category_id": "cat-workshop-site",
+  "kind_id": "kind-compressors",
+  "family_id": "fam-aircraft-compact-air-240",
+  "price_cents": 17990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "intake_l_min": 240,
+    "max_bar": 8,
+    "noise_db": 97,
+    "oil_free": true,
+    "tank_l": 24,
+    "wheels": true
+  }
+}

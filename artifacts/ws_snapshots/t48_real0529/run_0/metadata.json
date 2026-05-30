@@ -1,0 +1,24 @@
+{
+ "task_id": "t48",
+ "instruction": "Risk Ops is reviewing a two-year-old archive export. The records in this export are not present in current /proc/payments or /bin/sql.\n\nRead /archive/payment_batch_export_TZmFQjJX1r.tsv, identify the archived payment rows that belong to fraud incidents, and do not modify files.\n\nAnswer message must contain only the total fraudulent payment amount, formatted exactly as:\n\nEUR %d.%02d\n\nDo not put row IDs in the message.\n\nFor grounding refs, cite every fraud row using exactly this row-ref format:\n\n/archive/payment_batch_export_TZmFQjJX1r.tsv#row=<RowID>",
+ "bin_id": "user: emp_026\nroles: employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+ "bin_date": "2025-10-08T16:53:18Z",
+ "tables": {
+  "product_categories": 14,
+  "product_kinds": 34,
+  "product_families": 34,
+  "product_variants": 100,
+  "product_variant_properties": 101,
+  "stores": 10,
+  "store_inventory": 101,
+  "customer_accounts": 100,
+  "employee_accounts": 50,
+  "employee_role_assignments": 101,
+  "shopping_baskets": 101,
+  "shopping_basket_items": 101,
+  "payment_transactions": 101,
+  "payment_transaction_items": 101,
+  "return_requests": 20
+ },
+ "schema_apply_error": "near \"sql\": syntax error"
+}

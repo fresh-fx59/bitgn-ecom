@@ -1,0 +1,12 @@
+{
+  "instruction": "Customer wants '6-piece reduced-shank Alpen HSS Sprint bit set and has case type metal cassette'. Does such product exist?",
+  "context_date": "2026-04-29T14:45:13Z",
+  "actor_id": "emp-0078",
+  "roles": "RoleEmployee, RoleCustomerService, RoleDiscountRequester",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 5 files / 0 dirs from 22 dump records. Window: started_at=2026-05-30T08:48:52.480800+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0078' roles='RoleEmployee, RoleCustomerService, RoleDiscountRequester'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

@@ -1,0 +1,28 @@
+POWERTOOLS MANUAL SALES SLIP
+PO5 OUTAGE BACKUP - HAND ENTERED
+==:======================= ==============_-=====_=====
+STORE : POWERTOOLS INNSRUCK OST
+Branch: mraser-See-Strasse 56 Innsbruck
+Slip : PT-QofsAMgc Terminl noted: POS-fAV
+Date : 2026-07-01 Time: 11:28
+Staff : Store Desk Initials: SD
+--.-------------------.--------.-------------- -------
+..................................
+Qty Item written on outage form Each Line
+-------.------------------------------------.-_-:--:--
+[1] I DeWalt DeWalt DWE575K circular 199.9O 199.90
+saw fine-cut set
+SCANNED
+SKU / clerk note: PT-5AW-DEW-DWE575K-FINE
+[2] 20 Stihl Stihl H5A 50 hedge trimme 159.90 3198.00
+r boy
+SKU / CLERK NOTE: PT-HDG-STI-HSA50-BODY
+.....   .....  ------------:--:--_--:------_------------_------------
+ .  .  .  ..................................
+Manual subtotal EUR 3397.90
+Tax VAT 20% EUR 679.58
+MANUAL TOTAL EUR 4077.48
+Card authorization later: **** 4283
+Customer signature: ______v__n_Jx__\____x_m_m.
+Manager review: _n/.J.\n\w\.v\n/m-_mJn~nv.w
+Reason: PO5 offline, transaction keyed after service restored

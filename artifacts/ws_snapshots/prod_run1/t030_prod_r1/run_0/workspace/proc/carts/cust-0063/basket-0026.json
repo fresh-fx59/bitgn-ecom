@@ -1,0 +1,13 @@
+{
+  "id": "basket-0026",
+  "customer_id": "cust-0063",
+  "store_id": "store-innsbruck-west",
+  "status": "active",
+  "created_at": "2026-04-28T11:45:13Z",
+  "lines": [
+    {
+      "sku": "PT-SAFE-3M-SF400-GASKET",
+      "quantity": 1
+    }
+  ]
+}

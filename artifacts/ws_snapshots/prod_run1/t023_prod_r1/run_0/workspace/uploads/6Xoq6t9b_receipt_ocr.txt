@@ -1,0 +1,27 @@
+POWERTOOLS MANUAL 5ALES SLIP
+POS OUTAGE BACKUP - HAND ENTERED
+=.-================-.=====-====-= ===========-==
+Store : PowerTools Innsbruck Ost
+Branch: Amraser-See-Strasse 56 Innsbruck
+Slip  : PT-Rneivvpg        Terminal noted: POS-889
+  ..........................
+Date  : 2025-08-25         Time: 14:45
+Staff : Store Desk         Initials: SD
+------------:---------------------- ------.-----
+ Qty  Item written on outage form        Each      Line
+--.-----------.---------------------------------
+[1]  3  3M 3M SecureFit 400 clear safet    79.90   239.70
+        y glasses 10-pack              
+     SKU / clerk note: PT-SAFE-3M-SF400-10PK
+[2]  3  MILWAUKEE MILWAUKEE M18 FUEL FI   279.90   839.70
+        D3 impact driver kit 2x2.0Ah   
+     SKU / clerk note: PT-IMP-MIL-M18FID3-2AH
+--------------------------_------.--------------
+Manual subtotal                      EUR 1079.40
+Tax VAT 20%                           EUR 215.88
+Manual total                         EUR I295.28
+        SCANNED
+Card authorization later: **** 8179
+CUSTOMER SIGNATURE: w___w__________J_n__J__/_v
+Manager review:    ___wn--JwwxJm\wxw_.x/vv-\x-~_
+Reason: POS offline, transaction keyed after service restored

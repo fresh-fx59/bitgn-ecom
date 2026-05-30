@@ -1,0 +1,30 @@
+{
+ "task_id": "t53",
+ "instruction": "Look at the old receipt in /uploads/. If we were to sell these products today, would the total price (excluding VAT) stay within 3 EUR?",
+ "bin_id": "user: emp_011\nroles: employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+ "bin_date": "2025-10-08T16:53:18Z",
+ "tables": {
+  "product_categories": 14,
+  "product_kinds": 34,
+  "product_families": 34,
+  "product_variants": 100,
+  "product_variant_properties": 481,
+  "stores": 10,
+  "store_inventory": 348,
+  "customer_accounts": 100,
+  "employee_accounts": 50,
+  "employee_role_assignments": 230,
+  "shopping_baskets": 280,
+  "shopping_basket_items": 280,
+  "payment_transactions": 1105,
+  "payment_transaction_items": 1233,
+  "return_requests": 20
+ },
+ "actor_id": "emp_011",
+ "roles": "employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+ "context_date": "2025-10-08T16:53:18Z",
+ "expected_outcome": "OUTCOME_OK",
+ "expected_answer": null,
+ "intent": "ocr_receipt_total",
+ "notes": "ground truth: today ex-VAT total=2788.00 vs receipt 2787.94 -> diff 0.06 -> YES within 3 EUR. Heco SKU F5T-I5OZWLK7 is OCR-garbled = real FST-1S0ZWLK7 (44.00); must name-match + price-disambiguate among 3 Heco 2VD-VNA variants. Original PROD failure: agent refused NONE_CLARIFICATION on missing SKU. Gate: must reach OUTCOME_OK."
+}

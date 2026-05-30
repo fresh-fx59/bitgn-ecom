@@ -1,0 +1,12 @@
+{
+  "instruction": "At puntigam tools place, how many staff records include role `store_manager`? Answer with a number only, and cite the branch record plus every employee record counted.",
+  "context_date": "2026-06-16T17:13:01Z",
+  "actor_id": "emp-0009",
+  "roles": "RoleEmployee, RoleStoreManager, RoleOrderViewer, RoleDiscountManager",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 9 files / 22 dirs from 24 dump records. Window: started_at=2026-05-30T09:07:44.525270+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0009' roles='RoleEmployee, RoleStoreManager, RoleOrderViewer, RoleDiscountManager'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

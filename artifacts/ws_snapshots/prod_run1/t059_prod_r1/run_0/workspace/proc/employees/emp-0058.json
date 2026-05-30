@@ -1,0 +1,13 @@
+{
+  "id": "emp-0058",
+  "display_name": "Johanna Schäfer",
+  "email": "johanna.schaefer.linz.057@staff.powertools.example",
+  "title": "Store Manager",
+  "store_id": "store-linz-hafen",
+  "roles": [
+    "employee",
+    "store_manager",
+    "order_viewer",
+    "discount_manager"
+  ]
+}

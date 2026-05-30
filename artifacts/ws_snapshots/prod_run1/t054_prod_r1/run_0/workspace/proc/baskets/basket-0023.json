@@ -1,0 +1,22 @@
+{
+  "id": "basket-0023",
+  "customer_id": "cust-0039",
+  "store_id": "store-linz-kleinmuenchen",
+  "status": "active",
+  "created_at": "2026-02-23T11:26:18Z",
+  "discount": {
+    "percent": 25,
+    "reason_code": "damaged_packaging",
+    "issuer_id": "emp-0072"
+  },
+  "lines": [
+    {
+      "sku": "PT-DRL-MAK-DDF485-3AH",
+      "quantity": 1
+    },
+    {
+      "sku": "PT-DRL-MAK-DDF485-5AH",
+      "quantity": 1
+    }
+  ]
+}

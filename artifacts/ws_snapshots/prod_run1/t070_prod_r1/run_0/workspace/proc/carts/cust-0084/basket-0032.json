@@ -1,0 +1,13 @@
+{
+  "id": "basket-0032",
+  "customer_id": "cust-0084",
+  "store_id": "store-graz-center",
+  "status": "active",
+  "created_at": "2026-08-19T02:01:44Z",
+  "lines": [
+    {
+      "sku": "PT-GRD-MET-W18-125-FLAT",
+      "quantity": 2
+    }
+  ]
+}

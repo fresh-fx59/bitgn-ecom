@@ -1,0 +1,32 @@
+P0WERTOOLS MANUAL SALES SLIP
+POS OUTAGE BACKUP - HAND ENTERED
+=====================================================
+Store : PowerTools Linz Kleinmuenchen
+Branch: Wiener Strasse 320 Linz
+  ..........................
+Slip  : PT-evrLfW2u        Terminal noted: POS-X88
+Date  : 2025-10-05         Time: 11:26
+5taff : Store Desk         Initials: SD
+-----------------------------------------------------
+ Qty  Item written on outage form        Each      Line
+-----------------------------------------------------
+[1]  1  Stihl Stihl RMA 235 lawn mower    389.90   389.90
+        set AK 30                      
+     SKU / clerk note: PT-MOW-STI-RMA235-AK30
+[2]  1  Karcher Karcher K4 Power Contro   329.90   329.90
+        l Premium hose reel set        
+     SKU / CLERK NOTE: PT-WASH-KAR-K4-PREMIUM
+[3]  3  Karcher Karcher K4 Power Contro   379.90  1139.70
+        l pipe cleaning set            
+     SKU / CLERK NOTE: PT-WASH-KAR-K4-PIPE
+[4]  3  Makita Makita DHS680 LXT circul   388.17  1164.51
+        ar saw guide rail bundle       
+     SKU / clerk note: PT-SAW-MAK-DHS680-RAIL
+-----------------------------------------------------
+Manual subtotal                           EUR 3024.01
+Tax VAT 20%                                EUR 604.8O
+Manual total                              EUR 3628.81
+Card authorization later: **** 4961
+Customer signature: __________________________
+Manager review:    __________________________
+Reason: POS offline, transaction keyed after service restored

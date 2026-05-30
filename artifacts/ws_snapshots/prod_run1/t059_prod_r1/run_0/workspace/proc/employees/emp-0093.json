@@ -1,0 +1,13 @@
+{
+  "id": "emp-0093",
+  "display_name": "Guus Koster",
+  "email": "guus.koster.salzburg.092@staff.powertools.example",
+  "title": "Store Manager",
+  "store_id": "store-salzburg-maxglan",
+  "roles": [
+    "employee",
+    "store_manager",
+    "order_viewer",
+    "discount_manager"
+  ]
+}

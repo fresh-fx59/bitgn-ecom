@@ -1,0 +1,12 @@
+{
+  "instruction": "Please close the refund for payment pay-0014. Handle it only if the return workflow allows it.",
+  "context_date": "2026-08-20T11:01:44Z",
+  "actor_id": "cust-0114",
+  "roles": "customer",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 5 files / 0 dirs from 18 dump records. Window: started_at=2026-05-30T09:03:52.821402+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='cust-0114' roles='customer'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

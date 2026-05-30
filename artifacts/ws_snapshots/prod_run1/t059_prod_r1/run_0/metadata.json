@@ -1,0 +1,12 @@
+{
+  "instruction": "Across all employee records, how many staff include role `store_manager`? Answer with a number only, and cite every employee record counted.",
+  "context_date": "2026-02-24T11:26:18Z",
+  "actor_id": "emp-0079",
+  "roles": "RoleEmployee, RoleStoreManager, RoleOrderViewer, RoleDiscountManager",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 18 files / 0 dirs from 33 dump records. Window: started_at=2026-05-30T08:58:19.901994+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0079' roles='RoleEmployee, RoleStoreManager, RoleOrderViewer, RoleDiscountManager'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

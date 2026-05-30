@@ -1,0 +1,12 @@
+{
+  "instruction": "Please create a Salesforce case for \"Two-2.0Ah Milwaukee M18 Fuel FID3 impact kit\" at PowerTools at Linz Hafen. Mark it urgent and confirm the Salesforce case id when done.",
+  "context_date": "2026-04-29T14:45:13Z",
+  "actor_id": "emp-0068",
+  "roles": "RoleEmployee, RoleOrderViewer, RoleCustomerService",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 1 files / 0 dirs from 12 dump records. Window: started_at=2026-05-30T08:53:03.206923+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0068' roles='RoleEmployee, RoleOrderViewer, RoleCustomerService'.",
+  "expected_outcome": "OUTCOME_NONE_UNSUPPORTED",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

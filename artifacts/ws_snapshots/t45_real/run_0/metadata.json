@@ -1,0 +1,11 @@
+{
+  "instruction": "How many of these products have fewer than 4 items available in the central Graz PowerTool shop today: the Wood and Drywall Screw from Dresselhaus in the Dresselhaus Outdoor Pro 1VG-P5G Wood and Drywall Screw line that has screw type wood screw and diameter 6 mm,the Hammer Measuring and Cutting Tool from Bahco in the Bahco Workshop BAH 3VZ-SPH Hammer Measuring and Cutting Tool line that has tool type measuring tape,the Valve and Connector from Geberit in the Geberit Mapress Silent IC5-GU6 Valve and Connector line that has connector type ball valve,the Tool Box and Bag from Festool in the Festool Modular CTL XPW-76I Tool Box and Bag line that has storage type tool bag and color family Yellow,the Sealant from Sika in the Sika Professional Sika 28T-UV8 Sealant line that has sealant type silicone sealant and color family Clear,the Cordless Drill Driver from Metabo in the Metabo Brushless BS 1OW-IK5 Cordless Drill Driver line that has voltage 12 V, battery platform 12v-system, and kit contents starter kit? Answer in exactly format \"%d\" (no quotes)",
+  "context_date": "2025-10-08T16:53:18Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "converted from artifacts/scans/scan_20260527T122352Z_new/trials/t45"
+}

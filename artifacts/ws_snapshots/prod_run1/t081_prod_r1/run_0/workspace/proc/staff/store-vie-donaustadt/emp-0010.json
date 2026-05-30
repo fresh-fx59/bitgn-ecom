@@ -1,0 +1,12 @@
+{
+  "id": "emp-0010",
+  "display_name": "Sarah Neumann",
+  "email": "sarah.neumann.vienna.009@staff.powertools.example",
+  "title": "Inventory Specialist",
+  "store_id": "store-vie-donaustadt",
+  "roles": [
+    "employee",
+    "inventory_viewer",
+    "inventory_specialist"
+  ]
+}

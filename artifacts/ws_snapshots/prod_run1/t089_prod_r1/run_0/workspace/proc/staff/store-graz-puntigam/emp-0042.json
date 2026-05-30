@@ -1,0 +1,12 @@
+{
+  "id": "emp-0042",
+  "display_name": "Pieter van der Linden",
+  "email": "pieter.van.der.linden.graz.041@staff.powertools.example",
+  "title": "Sales Associate",
+  "store_id": "store-graz-puntigam",
+  "roles": [
+    "employee",
+    "discount_requester",
+    "order_viewer"
+  ]
+}

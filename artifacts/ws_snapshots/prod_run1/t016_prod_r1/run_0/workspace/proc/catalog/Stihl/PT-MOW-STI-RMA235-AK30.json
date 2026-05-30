@@ -1,0 +1,20 @@
+{
+  "id": 41,
+  "sku": "PT-MOW-STI-RMA235-AK30",
+  "name": "Stihl RMA 235 lawn mower set AK 30",
+  "brand": "Stihl",
+  "category_id": "cat-garden-outdoor",
+  "kind_id": "kind-lawn-mowers",
+  "family_id": "fam-stihl-rma-235",
+  "price_cents": 38990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "battery_platform": "Stihl AK",
+    "collection_l": 30,
+    "cut_width_cm": 33,
+    "mulching": false,
+    "power_source": "cordless",
+    "recommended_area_m2": 260
+  }
+}

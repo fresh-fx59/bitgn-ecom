@@ -1,0 +1,20 @@
+{
+  "id": 97,
+  "sku": "PT-DIG-GUIDE-SAW-BLADES",
+  "name": "PowerTools saw blade tooth-count digital guide",
+  "brand": "PowerTools Guides",
+  "category_id": "cat-digital-learning-plans",
+  "kind_id": "kind-digital-guides",
+  "family_id": "fam-powertools-guides-field-guides",
+  "price_cents": 1490,
+  "fulfillment_type": 2,
+  "return_policy": 2,
+  "properties": {
+    "access_policy": "lifetime",
+    "delivery_mode": "download",
+    "file_format": "PDF/EPUB",
+    "guide_topic": "saw blade selection",
+    "related_tool_kind": "kind-saw-blade-sets",
+    "skill_level": "beginner"
+  }
+}

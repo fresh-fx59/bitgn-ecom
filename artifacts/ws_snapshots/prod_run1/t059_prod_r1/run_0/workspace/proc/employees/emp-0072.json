@@ -1,0 +1,13 @@
+{
+  "id": "emp-0072",
+  "display_name": "Stijn Kuiper",
+  "email": "stijn.kuiper.linz.071@staff.powertools.example",
+  "title": "Store Manager",
+  "store_id": "store-linz-kleinmuenchen",
+  "roles": [
+    "employee",
+    "store_manager",
+    "order_viewer",
+    "discount_manager"
+  ]
+}

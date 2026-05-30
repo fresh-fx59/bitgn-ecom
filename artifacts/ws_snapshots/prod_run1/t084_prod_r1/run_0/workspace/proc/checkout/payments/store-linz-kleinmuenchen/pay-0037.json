@@ -1,0 +1,33 @@
+{
+  "id": "pay-0037",
+  "order_id": "order-0037",
+  "basket_id": "basket-0076",
+  "customer_id": "cust-0147",
+  "store_id": "store-linz-kleinmuenchen",
+  "amount_cents": 56980,
+  "currency": "EUR",
+  "status": "requires_3ds_action",
+  "created_at": "2026-06-28T00:49:37Z",
+  "payment_method_fingerprint": "pm-card-02",
+  "device_fingerprint": "dev-commerce-02",
+  "observed_lat": 47.473413333333326,
+  "observed_lon": 15.03157,
+  "lines": [
+    {
+      "sku": "PT-IMP-DEW-DCF887-BODY",
+      "quantity": 1,
+      "unit_price_cents": 13990
+    },
+    {
+      "sku": "PT-SAW-MAK-DHS680-5AH",
+      "quantity": 1,
+      "unit_price_cents": 42990
+    }
+  ],
+  "three_ds": {
+    "status": "3ds-status2",
+    "failure_reason": "customer left the issuer challenge before completion",
+    "attempts": 1,
+    "max_attempts": 4
+  }
+}

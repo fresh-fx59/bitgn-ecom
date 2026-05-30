@@ -1,0 +1,28 @@
+POWERTOOLS MANUAL SALES SLIP
+POS OUTAGE BACKUP - HAND ENTERED
+===================================================
+Store : PowerTools Innsbruck Mitte
+Branch: Museumstrasse 18 Innsbruck
+SLIP  : PT-DTKYC4ZW        TERMINAL NOTED: POS-N7U
+DATE  : 2026-03-08         TIME: 17:13
+Staff : Store Desk         Initials: SD
+---------------------------------------------------
+ QTY  ITEM WRITTEN ON OUTAGE FORM        EACH      LINE
+---------------------------------------------------
+[1]  1  Stihl Stihl HSA 50 hedge trimme   249.90   249.90
+        r set AK 10                    
+     SKU / clerk note: PT-HDG-STI-HSA50-AK1O
+[2]  8  Bosch Professional Bosch CYL-9     14.90   119.20
+        MultiConstruction drill bit st.
+     SKU / clerk note: PT-BIT-BOS-CYL9-4
+[3]  1  Bosch Home and Garden Bosch Uni   119.90   119.90
+        versalHedgeCut 18V-50 hedge tr.
+     SKU / clerk note: PT-HDG-BOS-UHC18-S0-BODY
+---------------------------------------------------
+Manual subtotal                          EUR 489.00
+Tax VAT 20%                               EUR 97.80
+Manual total                             EUR 586.80
+Card authorization later: **** 0772
+Customer signature: __________________________
+Manager review:    __________________________
+Reason: POS offline, transaction keyed after service restored

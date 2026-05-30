@@ -1,0 +1,12 @@
+{
+  "instruction": "Customer wants 'angle grinder safety class access '. Does such product exist?",
+  "context_date": "2026-06-16T17:13:01Z",
+  "actor_id": "emp-0051",
+  "roles": "RoleEmployee, RoleStoreManager, RoleOrderViewer, RoleDiscountManager",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 2 files / 0 dirs from 16 dump records. Window: started_at=2026-05-30T08:54:22.877759+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0051' roles='RoleEmployee, RoleStoreManager, RoleOrderViewer, RoleDiscountManager'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

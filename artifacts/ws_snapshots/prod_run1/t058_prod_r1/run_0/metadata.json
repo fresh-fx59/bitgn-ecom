@@ -1,0 +1,12 @@
+{
+  "instruction": "Please move refund approval forward for payment pay-0005. Use the return workflow rules.",
+  "context_date": "2026-06-16T17:13:01Z",
+  "actor_id": "emp-0005",
+  "roles": "RoleEmployee, RoleCustomerService, RoleRefundManager",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 5 files / 0 dirs from 18 dump records. Window: started_at=2026-05-30T08:58:00.722977+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0005' roles='RoleEmployee, RoleCustomerService, RoleRefundManager'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

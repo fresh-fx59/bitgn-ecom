@@ -1,0 +1,35 @@
+{
+  "task_id": "t47",
+  "instruction": "I'm preparing a quote for a customer from this pasted product list. Check each row against our exact catalogue and my store's same-day availability.\n\nInput format:\nRowID\tdescription\tquantity\n\nReturn exactly this tab-separated output table, including the header, with rows in the same order:\nRowID\tSKU\tin_stock\tmatch\n\nIf the description is not an exact catalogue product, leave SKU and in_stock empty and set match=false. If the product exists, set in_stock to the quantity available today in my store (reference all matched SKUs in response). set `match` field true only when the exact product exists and in_stock is at least the requested quantity.\n\nRows:\n8E6JY\tthe Corded Angle Grinder from Milwaukee in the Milwaukee Professional M18 5AB-LER Corded Angle Grinder line that has disc diameter 125 mm and power 1100 W\t1\nHMN3V\tthe Wood Stain and Deck Oil from Rust-Oleum in the Rust-Oleum Exterior RO 38D-69D Wood Stain and Deck Oil line that has product type primer\t6\n47bUd\tthe Workshop Saw and Cutter from Bosch in the Bosch Workshop GSR 3JW-ULH Workshop Saw and Cutter line that has machine type band saw, voltage 400 V, and power 500 W and has voltage 110 V\t1\nYe7Yo\tthe Wood and Drywall Screw from Spax in the Spax Outdoor T-Star 1GS-NEI Wood and Drywall Screw line that has screw type wood screw and diameter 3 mm\t3\ngvP3B\tthe Cloth Mop and Wipe from Leifheit in the Leifheit Fresh Profi NBC-KFA Cloth Mop and Wipe line that has cleaning type mop system and pack count 5 pcs\t7",
+  "bin_id": "user: emp_016\nroles: employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+  "bin_date": "2024-07-17T20:49:48Z",
+  "tables": {
+    "product_categories": 14,
+    "product_kinds": 45,
+    "product_families": 106,
+    "product_variants": 1000,
+    "product_variant_properties": 4681,
+    "stores": 10,
+    "store_inventory": 3487,
+    "customer_accounts": 100,
+    "employee_accounts": 50,
+    "employee_role_assignments": 230,
+    "shopping_baskets": 280,
+    "shopping_basket_items": 280,
+    "payment_transactions": 1102,
+    "payment_transaction_items": 1242,
+    "return_requests": 20
+  },
+  "actor_id": "emp_016",
+  "roles": "employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+  "context_date": "2024-07-17T20:49:48Z",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [
+    "/proc/catalog/power_tools/corded_angle_grinder/PWR-1ALYVIXX.json",
+    "/proc/catalog/paints_finishes/wood_stain_oil/PNT-1CJQ9WWP.json",
+    "/proc/catalog/fasteners/wood_drywall_screws/FST-1GZ71C60.json",
+    "/proc/catalog/cleaning/cloths_mops_wipes/CLN-3066WM0S.json"
+  ],
+  "oracle_tsv": "RowID\tSKU\tin_stock\tmatch\n8E6JY\tPWR-1ALYVIXX\t1\ttrue\nHMN3V\tPNT-1CJQ9WWP\t3\tfalse\n47bUd\t\t\tfalse\nYe7Yo\tFST-1GZ71C60\t0\tfalse\ngvP3B\tCLN-3066WM0S\t6\tfalse",
+  "oracle_note": "my store=store_graz_lend (emp_016); required_refs = all 4 exact-match SKUs (under-matching = the failure mode). See memory project_ecom_t47_tsv_oracle."
+}

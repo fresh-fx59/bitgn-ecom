@@ -1,0 +1,13 @@
+{
+  "instruction": "",
+  "context_date": "2024-07-17T20:49:48Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [
+    "/proc/catalog/paints_finishes/metal_concrete_paint/PNT-2VEAWKY6.json"
+  ],
+  "forbidden_refs": [],
+  "source": "converted from artifacts/scans/scan_20260528T205333Z_new/trials/t15"
+}

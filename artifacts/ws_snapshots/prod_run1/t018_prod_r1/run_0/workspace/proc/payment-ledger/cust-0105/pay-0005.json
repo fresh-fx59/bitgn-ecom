@@ -1,0 +1,27 @@
+{
+  "id": "pay-0005",
+  "order_id": "order-0005",
+  "basket_id": "basket-0044",
+  "customer_id": "cust-0105",
+  "store_id": "store-graz-puntigam",
+  "amount_cents": 64980,
+  "currency": "EUR",
+  "status": "paid",
+  "created_at": "2026-11-03T03:03:21Z",
+  "payment_method_fingerprint": "pm-card-00",
+  "device_fingerprint": "dev-commerce-05",
+  "observed_lat": 47.19339111111111,
+  "observed_lon": 12.73945,
+  "lines": [
+    {
+      "sku": "PT-IMP-MIL-M18FID3-2AH",
+      "quantity": 1,
+      "unit_price_cents": 27990
+    },
+    {
+      "sku": "PT-IMP-MIL-M18FID3-5AH",
+      "quantity": 1,
+      "unit_price_cents": 36990
+    }
+  ]
+}

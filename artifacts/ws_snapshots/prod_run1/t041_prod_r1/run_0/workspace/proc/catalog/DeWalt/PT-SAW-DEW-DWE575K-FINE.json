@@ -1,0 +1,21 @@
+{
+  "id": 25,
+  "sku": "PT-SAW-DEW-DWE575K-FINE",
+  "name": "DeWalt DWE575K circular saw fine-cut set",
+  "brand": "DeWalt",
+  "category_id": "cat-workshop-site",
+  "kind_id": "kind-circular-saws",
+  "family_id": "fam-dewalt-dwe575k",
+  "price_cents": 19990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "battery_platform": "corded",
+    "blade_mm": 190,
+    "cut_depth_90_mm": 67,
+    "kit": "case and fine blade",
+    "power_source": "corded",
+    "rail_compatible": false,
+    "voltage_v": 230
+  }
+}

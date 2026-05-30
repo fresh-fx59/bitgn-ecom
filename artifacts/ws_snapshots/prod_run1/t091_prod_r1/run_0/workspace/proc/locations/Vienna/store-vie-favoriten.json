@@ -1,0 +1,248 @@
+{
+  "id": "store-vie-favoriten",
+  "name": "PowerTools Vienna Favoriten",
+  "address_line_1": "Favoritenstrasse 221",
+  "postal_code": "1100",
+  "city": "Vienna",
+  "country_code": "AT",
+  "is_open": true,
+  "lat": 48.1527,
+  "lon": 16.3825,
+  "inventory": [
+    {
+      "sku": "PT-DRL-BOS-GSR55-5AH",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 8,
+          "arrival_in_days": 1
+        }
+      ]
+    },
+    {
+      "sku": "PT-DRL-MAK-DDF485-BODY",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 7,
+          "arrival_in_days": 5
+        }
+      ]
+    },
+    {
+      "sku": "PT-DRL-MAK-DDF485-3AH",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-DRL-MAK-DDF485-5AH",
+      "on_hand": 6,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-IMP-DEW-DCF887-BODY",
+      "on_hand": 3,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-IMP-DEW-DCF887-2AH",
+      "on_hand": 3,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-IMP-DEW-DCF887-5AH",
+      "on_hand": 5,
+      "reserved": 5
+    },
+    {
+      "sku": "PT-SAW-MAK-DHS680-3AH",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 8,
+          "arrival_in_days": 2
+        }
+      ]
+    },
+    {
+      "sku": "PT-SAW-MAK-DHS680-RAIL",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 10,
+          "arrival_in_days": 11
+        }
+      ]
+    },
+    {
+      "sku": "PT-SAW-MAK-DHS680-5AH",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-SAW-MAK-DHS680-BLADE",
+      "on_hand": 4,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-SAW-DEW-DWE575K-BASE",
+      "on_hand": 15,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-SAW-DEW-DWE575K-FINE",
+      "on_hand": 3,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-SAW-DEW-DWE575K-SITE",
+      "on_hand": 2,
+      "reserved": 2
+    },
+    {
+      "sku": "PT-CMP-EIN-TEAC270-50S",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 5,
+          "arrival_in_days": 3
+        }
+      ]
+    },
+    {
+      "sku": "PT-CMP-EIN-TEAC270-50KIT",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 5,
+          "arrival_in_days": 9
+        }
+      ]
+    },
+    {
+      "sku": "PT-MOW-STI-RMA235-BODY",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-MOW-STI-RMA235-AK20",
+      "on_hand": 5,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-MOW-STI-RMA235-AK30",
+      "on_hand": 8,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-MOW-EIN-GECM36-BODY",
+      "on_hand": 5,
+      "reserved": 3
+    },
+    {
+      "sku": "PT-MOW-EIN-GECM36-2X4",
+      "on_hand": 1,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-WASH-KAR-K4-PREMIUM",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 5,
+          "arrival_in_days": 3
+        }
+      ]
+    },
+    {
+      "sku": "PT-WASH-KAR-K4-PIPE",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 5,
+          "arrival_in_days": 8
+        }
+      ]
+    },
+    {
+      "sku": "PT-WASH-BOS-UA135",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-WASH-BOS-UA135-PATIO",
+      "on_hand": 4,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-WASH-BOS-UA135-CAR",
+      "on_hand": 7,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-BIT-ALP-HSS-19",
+      "on_hand": 5,
+      "reserved": 3
+    },
+    {
+      "sku": "PT-BIT-ALP-HSS-25",
+      "on_hand": 1,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-BIT-BOS-CYL9-12",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 7,
+          "arrival_in_days": 1
+        }
+      ]
+    },
+    {
+      "sku": "PT-BLA-BOS-EXPWOOD-160",
+      "on_hand": 0,
+      "reserved": 0,
+      "incoming": [
+        {
+          "quantity": 3,
+          "arrival_in_days": 14
+        }
+      ]
+    },
+    {
+      "sku": "PT-BLA-BOS-EXPWOOD-190",
+      "on_hand": 0,
+      "reserved": 0
+    },
+    {
+      "sku": "PT-BLA-BOS-EXPWOOD-216",
+      "on_hand": 8,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-BLA-MAK-SPEC-165",
+      "on_hand": 6,
+      "reserved": 1
+    },
+    {
+      "sku": "PT-BLA-MAK-SPEC-190",
+      "on_hand": 4,
+      "reserved": 3
+    },
+    {
+      "sku": "PT-BLA-MAK-SPEC-METAL",
+      "on_hand": 3,
+      "reserved": 3
+    }
+  ]
+}

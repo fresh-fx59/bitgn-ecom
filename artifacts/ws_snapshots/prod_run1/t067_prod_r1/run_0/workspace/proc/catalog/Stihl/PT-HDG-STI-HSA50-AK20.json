@@ -1,0 +1,20 @@
+{
+  "id": 47,
+  "sku": "PT-HDG-STI-HSA50-AK20",
+  "name": "Stihl HSA 50 hedge trimmer set AK 20",
+  "brand": "Stihl",
+  "category_id": "cat-garden-outdoor",
+  "kind_id": "kind-hedge-trimmers",
+  "family_id": "fam-stihl-hsa-50",
+  "price_cents": 28990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "battery_platform": "Stihl AK",
+    "blade_cm": 50,
+    "kit": "AK 20 battery and charger",
+    "power_source": "cordless",
+    "tooth_spacing_mm": 30,
+    "weight_kg": "2.9"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "instruction": "Look at the uploaded OCR receipt at /storage/ZqWrQrXD/receipt_ocr.txt. If I bought the exact same line items today from the same PowerTools branch, would the current catalogue subtotal excluding VAT stay within EUR 3.00 of the old receipt subtotal excluding VAT? Answer yes/no only, and cite the receipt, branch record, and every product record you used.",
+  "context_date": "2026-02-24T11:26:18Z",
+  "actor_id": "emp-0004",
+  "roles": "RoleEmployee, RoleOrderViewer, RoleCustomerService",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 7 files / 0 dirs from 20 dump records. Window: started_at=2026-05-30T09:04:59.509658+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0004' roles='RoleEmployee, RoleOrderViewer, RoleCustomerService'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

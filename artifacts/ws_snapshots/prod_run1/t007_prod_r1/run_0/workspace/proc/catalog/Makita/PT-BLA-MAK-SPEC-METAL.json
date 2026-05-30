@@ -1,0 +1,20 @@
+{
+  "id": 77,
+  "sku": "PT-BLA-MAK-SPEC-METAL",
+  "name": "Makita Specialized metal cutting blade set 185 mm",
+  "brand": "Makita",
+  "category_id": "cat-hardware-consumables",
+  "kind_id": "kind-saw-blade-sets",
+  "family_id": "fam-makita-specialized-blades",
+  "price_cents": 5990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "blade_diameter_mm": 185,
+    "bore_mm": 30,
+    "carbide": true,
+    "material_target": "thin metal",
+    "piece_count": 2,
+    "tooth_range": "48-60"
+  }
+}

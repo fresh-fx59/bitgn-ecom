@@ -1,0 +1,12 @@
+{
+  "instruction": "I need metabo w18 125 standard head grinder under EUR 297.07. How many matching SKUs do you have? Answer with number only",
+  "context_date": "2026-04-29T14:45:13Z",
+  "actor_id": "cust-0107",
+  "roles": "customer",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 4 files / 0 dirs from 18 dump records. Window: started_at=2026-05-30T08:49:04.667964+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='cust-0107' roles='customer'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

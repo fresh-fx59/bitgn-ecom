@@ -1,0 +1,24 @@
+{
+ "task_id": "t01",
+ "instruction": "Do you have the Nut Bolt and Washer from Heco in the Heco Zinc Plated HECO 3DW-64B Nut Bolt and Washer line that has fastener type bolt and diameter 8 mm in the catalogue?",
+ "bin_id": "user: anonymous\nroles: GUEST",
+ "bin_date": "2025-06-22T09:13:19Z",
+ "tables": {
+  "product_categories": 3,
+  "product_kinds": 4,
+  "product_families": 4,
+  "product_variants": 10,
+  "product_variant_properties": 53,
+  "stores": 10,
+  "store_inventory": 34,
+  "customer_accounts": 100,
+  "employee_accounts": 50,
+  "employee_role_assignments": 101,
+  "shopping_baskets": 101,
+  "shopping_basket_items": 101,
+  "payment_transactions": 101,
+  "payment_transaction_items": 101,
+  "return_requests": 20
+ },
+ "schema_apply_error": "near \"sql\": syntax error"
+}

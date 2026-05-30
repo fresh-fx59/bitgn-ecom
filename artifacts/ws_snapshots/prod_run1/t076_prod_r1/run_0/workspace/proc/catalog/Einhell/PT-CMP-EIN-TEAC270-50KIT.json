@@ -1,0 +1,20 @@
+{
+  "id": 38,
+  "sku": "PT-CMP-EIN-TEAC270-50KIT",
+  "name": "Einhell TE-AC 270/50 workshop compressor kit",
+  "brand": "Einhell",
+  "category_id": "cat-workshop-site",
+  "kind_id": "kind-compressors",
+  "family_id": "fam-einhell-te-ac-270-50",
+  "price_cents": 31990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "intake_l_min": 270,
+    "max_bar": 10,
+    "noise_db": 96,
+    "oil_free": false,
+    "tank_l": 50,
+    "wheels": true
+  }
+}

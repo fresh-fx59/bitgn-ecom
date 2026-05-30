@@ -1,0 +1,22 @@
+{
+  "id": 1,
+  "sku": "PT-DRL-BOS-GSR55-BODY",
+  "name": "Bosch Professional GSR 18V-55 cordless drill body",
+  "brand": "Bosch Professional",
+  "category_id": "cat-power-tools",
+  "kind_id": "kind-cordless-drills",
+  "family_id": "fam-bosch-gsr-18v-55",
+  "price_cents": 11990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "battery_platform": "Bosch Professional 18V",
+    "brushless": true,
+    "chuck_mm": 13,
+    "kit": "body only",
+    "max_torque_nm": 55,
+    "power_source": "cordless",
+    "speed_count": 2,
+    "voltage_v": 18
+  }
+}

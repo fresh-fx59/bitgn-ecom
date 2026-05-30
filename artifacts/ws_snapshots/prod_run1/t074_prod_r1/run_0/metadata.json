@@ -1,0 +1,12 @@
+{
+  "instruction": "Using the city recorded for PowerTools at Meidling, list the open PowerTools branches in that same city today. Return only branch names, one per line, sorted alphabetically. Cite every store record you checked in that city.",
+  "context_date": "2026-04-29T14:45:13Z",
+  "actor_id": "emp-0111",
+  "roles": "RoleEmployee, RoleCustomerService, RoleRefundManager",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 5 files / 0 dirs from 17 dump records. Window: started_at=2026-05-30T09:03:18.629395+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0111' roles='RoleEmployee, RoleCustomerService, RoleRefundManager'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

@@ -1,0 +1,12 @@
+{
+  "instruction": "The issuer challenge timed out for payment pay-0042 on basket basket-0081. Try the safe 3DS recovery if possible; if it is blocked, tell me the recorded attempt limit.",
+  "context_date": "2026-04-22T15:35:14Z",
+  "actor_id": "cust-0152",
+  "roles": "customer",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 6 files / 149 dirs from 23 dump records. Window: started_at=2026-05-30T09:07:07.312211+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='cust-0152' roles='customer'.",
+  "expected_outcome": "OUTCOME_NONE_UNSUPPORTED",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

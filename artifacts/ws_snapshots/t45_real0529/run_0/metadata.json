@@ -1,0 +1,24 @@
+{
+ "task_id": "t45",
+ "instruction": "How many of these products have fewer than 3 items available in Graz Jakomini hardware branch today: the Drain Trap and Siphon from Wavin in the Wavin Professional Tigris 31G-M1A Drain Trap and Siphon line that has trap type siphon and diameter 25 mm,the Cordless Saw and Sander from Makita in the Makita Precision DDF 26V-AVZ Cordless Saw and Sander line that has tool type multi tool, voltage 20 V, battery platform 20v-system, and kit contents starter kit,the Wood and Drywall Screw from Fischer in the Fischer Universal SX 1PF-JY8 Wood and Drywall Screw line that has screw type drywall screw, diameter 4 mm, and length 30 mm,the Safety Eyewear from 3M in the 3M SecureFit Aura TUM-I54 Safety Eyewear line that has lens color Clear, size S, and coating basic,the Safety Eyewear from Uvex in the Uvex Industrial x-fit 3MR-QL3 Safety Eyewear line that has lens color Yellow,the Automotive Cleaner from Liqui Moly in the Liqui Moly Workshop Top Tec LMI-I9R Automotive Cleaner line that has cleaner type polish and volume 500 ml? Answer in exactly format \"[QTY:%d]\" (no quotes)",
+ "bin_id": "user: anonymous\nroles: GUEST",
+ "bin_date": "2024-07-17T20:49:48Z",
+ "tables": {
+  "product_categories": 14,
+  "product_kinds": 45,
+  "product_families": 101,
+  "product_variants": 101,
+  "product_variant_properties": 101,
+  "stores": 10,
+  "store_inventory": 101,
+  "customer_accounts": 100,
+  "employee_accounts": 50,
+  "employee_role_assignments": 101,
+  "shopping_baskets": 101,
+  "shopping_basket_items": 101,
+  "payment_transactions": 101,
+  "payment_transaction_items": 101,
+  "return_requests": 20
+ },
+ "schema_apply_error": "near \"sql\": syntax error"
+}

@@ -1,0 +1,14 @@
+{
+  "instruction": "A support note claims we stock the Extension Cable from Brennenstuhl in the Brennenstuhl Compact Eco 2VJ-JMP Extension Cable line that has color family Yellow and length 3 m and has ip rating IP20. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "source": "rebuilt from bench_20260525T231018Z on 2026-05-27",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 2 files / 0 dirs from 9 dump records. Window: started_at=2026-05-25T23:11:34.768344+00:00. Trial outcome was unknown with score 0.0; score_detail=[\"answer missing required reference '/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json'\"]. Identity: actor='anonymous' roles='GUEST'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [
+    "/proc/catalog/electrical/extension_cables/fam_electrical_extension_cables_0001_qx4jxnhv/ELC-1SPATM3U.json"
+  ],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

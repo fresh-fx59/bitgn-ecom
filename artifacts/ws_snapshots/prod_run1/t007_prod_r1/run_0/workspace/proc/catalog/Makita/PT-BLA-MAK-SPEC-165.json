@@ -1,0 +1,20 @@
+{
+  "id": 75,
+  "sku": "PT-BLA-MAK-SPEC-165",
+  "name": "Makita Specialized saw blade set 165 mm",
+  "brand": "Makita",
+  "category_id": "cat-hardware-consumables",
+  "kind_id": "kind-saw-blade-sets",
+  "family_id": "fam-makita-specialized-blades",
+  "price_cents": 3490,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "blade_diameter_mm": 165,
+    "bore_mm": 20,
+    "carbide": true,
+    "material_target": "wood and laminate",
+    "piece_count": 2,
+    "tooth_range": "24-40"
+  }
+}

@@ -1,0 +1,29 @@
+{
+ "task_id": "t40",
+ "instruction": "We have a confirmed fraud incident in archived payment history. Find the payment records that are part of the incident. Do not modify anything; cite each payment record you classify as fraud.",
+ "bin_id": "user: emp_006\nroles: employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+ "bin_date": "2021-08-09T16:52:43Z",
+ "tables": {
+  "product_categories": 14,
+  "product_kinds": 45,
+  "product_families": 900,
+  "product_variants": 10000,
+  "product_variant_properties": 46853,
+  "stores": 10,
+  "store_inventory": 34940,
+  "customer_accounts": 100,
+  "employee_accounts": 50,
+  "employee_role_assignments": 230,
+  "shopping_baskets": 280,
+  "shopping_basket_items": 280,
+  "payment_transactions": 1107,
+  "payment_transaction_items": 1236,
+  "return_requests": 20
+ },
+ "actor_id": "emp_006",
+ "roles": "employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+ "context_date": "2021-08-09T16:52:43Z",
+ "expected_outcome": "OUTCOME_OK",
+ "expected_answer": null,
+ "notes": "canonical fraud set = 22 payments (cust_031-035,068 geo-impossible burst). Check agent+revived enforcers cite exactly these (recall+precision)."
+}

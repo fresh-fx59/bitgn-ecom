@@ -1,0 +1,12 @@
+{
+  "instruction": "At eggenberg tools place, how many of these SKUs have at least 3 units physically on hand, but fewer than 3 same-day units available after reservations: PT-MOW-STI-RMA235-AK20, PT-MOW-EIN-GECM36-BODY, PT-SAFE-3M-SF400-GASKET, PT-HDG-STI-HSA50-BODY, PT-BLA-MAK-SPEC-165, PT-IMP-MIL-M18FID3-5AH? Answer exactly in format \"%d\" (no quotes).",
+  "context_date": "2026-04-29T14:45:13Z",
+  "actor_id": "emp-0058",
+  "roles": "RoleEmployee, RoleStoreManager, RoleOrderViewer, RoleDiscountManager",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 4 files / 0 dirs from 20 dump records. Window: started_at=2026-05-30T08:47:39.342781+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='emp-0058' roles='RoleEmployee, RoleStoreManager, RoleOrderViewer, RoleDiscountManager'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

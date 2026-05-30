@@ -1,0 +1,47 @@
+                       BAUPRO TENDER DESK
+                       PROCUREMENT REQUEST
+=================.:=========_=============================== ====
+  ........................
+Request PR-67JCTFZS        Date 2026-12-22 Time 11:28
+BUYER   FACILITIES BUYER
+PowerTools target branch: PowerTools Salzburg Maxglan
+  ..............................
+TARGET AREA: MAXGLANER HAUPTSTRASSE 61 SALZBURG
+___________________._______________ _____________________._____
+Line Qty   Competitor         Requested item / properties
+___________________________-__ ____________ ____ ________________
+1    5     CMP-7URC9V         Stihl RMA 235 lawn mower set AK
+                              30
+      specs: battery platform=Stihl AK; mulching=false; power
+             source=cordless; recommended area m2=260
+  .......................
+2    2     CMP-XXG1WE         DeWalt DCF887 XR impact driver
+                              body
+      SPECS: BATTERY PLATFORM=DEWALT XR 18V; KIT=BODY ONLY;
+             voltage v=18
+3    7     CMP-IXEM6F         Milwaukee M18 Fuel FID3 impact
+                              driver body
+      specs: battery platform=Milwaukee M18; brushless=true;
+             impact rate ipm=4400; max torque nm=226
+4    1     CMP-AVFVBS         3M SecureFit 400 clear safety
+                              glasses
+      specs: adjustable=false; anti fog=true;
+             certification=EN166; lens style=clear
+5    6     CMP-SFGFWF         Bosch UniversalAquatak 135
+                              pressure washer
+      specs: detergent system=plug and clean; hose m=7; power
+             w=1900
+      note:  verify exact specification before substituting
+6    3     CMP-FXPFGC         Makita DHS680 LXT circular saw
+                              guide rail bundle
+      specs: blade mm=165; power source=cordless; rail
+             compatible=true; voltage v=18
+  __-____.___________________.___-_________._________________ __
+Total requested lines: 6
+  ................
+Total requested units: 24
+  ......................
+Memo: Competitor codes are not PowerTools SKUs.
+Memo: Serve only exact same specification where possible.
+______________________________._________:__._____________ _______
+         OCR SOURCE: CUSTOMER SUPPLIED COMPETITOR REQUEST

@@ -1,0 +1,13 @@
+{
+  "id": "basket-0005",
+  "customer_id": "cust-0003",
+  "store_id": "store-vie-favoriten",
+  "status": "active",
+  "created_at": "2026-08-20T05:01:44Z",
+  "lines": [
+    {
+      "sku": "PT-IMP-DEW-DCF887-BODY",
+      "quantity": 1
+    }
+  ]
+}

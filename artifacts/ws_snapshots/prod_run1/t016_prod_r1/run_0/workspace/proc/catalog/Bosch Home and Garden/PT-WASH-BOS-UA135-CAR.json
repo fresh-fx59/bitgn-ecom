@@ -1,0 +1,20 @@
+{
+  "id": 58,
+  "sku": "PT-WASH-BOS-UA135-CAR",
+  "name": "Bosch UniversalAquatak 135 car cleaning set",
+  "brand": "Bosch Home and Garden",
+  "category_id": "cat-garden-outdoor",
+  "kind_id": "kind-pressure-washers",
+  "family_id": "fam-bosch-universalaquatak-135",
+  "price_cents": 23990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "detergent_system": "high-pressure foam nozzle",
+    "flow_l_h": 410,
+    "hose_m": 7,
+    "max_bar": 135,
+    "power_w": 1900,
+    "pump_material": "metal"
+  }
+}

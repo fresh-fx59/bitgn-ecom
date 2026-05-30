@@ -1,0 +1,31 @@
+        PowerTools Linz Kleinmuenchen
+                 Linz branch
+              Wiener Strasse 320
+- - - - - - - - - - - - - - - - - - - - - - -
+              CUSTOMER RECEIPT
+- - - - - - - - - - - - - - - - - - - - - -
+RECEIPT PT-ZISXEEDC       TERMINAL POS-NMH
+Date    2026-06-07        Time     11:01
+Cashier Store Desk
+- - - - - - - - - - - - - - - - - - - - - 
+Item                    Qty     Unit    Total
+===========================================
+Bosch Professional Bosc   1   269.90   269.90
+  ..........................
+  SKU PT-DRL-BOS-GSR55-5AH          
+Makita Makita Specializ   1    42.90    42.90
+  SKU PT-BLA-MAK-5PEC-190           
+  ed saw blade set 19O mm           
+Karcher Karcher K4 Powe   1   329.90   329.90
+  SKU PT-WASH-KAR-K4-PREMIUM        
+Stihl Stihl RMA 235 cor  12   2I9.90  2638.80
+  SKU PT-MOW-STI-RMA235-BODY        
+==========================================
+SUBTOTAL EX VAT                   EUR 3281.50
+VAT 20%                            EUR 656.30
+---------------------------------------------
+TOTAL                             EUR 3937.80
+Card **** **** **** 9769
+- - - - - - - - - - - - - - - - - - - - - -
+            scanned customer copy
+barcode:   |||| |||:|:|| . |||||:|.||||||:..:

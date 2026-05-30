@@ -1,0 +1,9 @@
+{
+  "id": "return-0005",
+  "order_id": "order-0005",
+  "customer_id": "cust-0105",
+  "payment_id": "pay-0005",
+  "status": "approved",
+  "reason_code": "late_delivery",
+  "created_at": "2026-05-04T08:48:01Z"
+}

@@ -1,0 +1,20 @@
+{
+  "id": 64,
+  "sku": "PT-BIT-ALP-HSS-REDUCED",
+  "name": "Alpen HSS Sprint reduced-shank drill bit set 6-piece",
+  "brand": "Alpen",
+  "category_id": "cat-hardware-consumables",
+  "kind_id": "kind-drill-bit-sets",
+  "family_id": "fam-alpen-hss-sprint",
+  "price_cents": 4490,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "case_type": "plastic sleeve",
+    "cobalt": false,
+    "diameter_range_mm": "10-13",
+    "material_target": "metal",
+    "piece_count": 6,
+    "shank_type": "reduced round"
+  }
+}

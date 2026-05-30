@@ -1,0 +1,12 @@
+{
+  "instruction": "sku for dewalt dwe575k case saw, fine blade not mentioned pls. sku only.",
+  "context_date": "2026-04-29T14:45:13Z",
+  "actor_id": "cust-0071",
+  "roles": "customer",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 1 files / 0 dirs from 11 dump records. Window: started_at=2026-05-30T08:47:15.996199+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='cust-0071' roles='customer'.",
+  "expected_outcome": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

@@ -1,0 +1,12 @@
+{
+  "id": "emp-0038",
+  "display_name": "Eleonora Costa",
+  "email": "eleonora.costa.graz.037@staff.powertools.example",
+  "title": "Inventory Specialist",
+  "store_id": "store-graz-puntigam",
+  "roles": [
+    "employee",
+    "inventory_viewer",
+    "inventory_specialist"
+  ]
+}

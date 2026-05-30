@@ -1,0 +1,13 @@
+{
+  "id": "emp-0030",
+  "display_name": "Ilse Sanders",
+  "email": "ilse.sanders.graz.029@staff.powertools.example",
+  "title": "Store Manager",
+  "store_id": "store-graz-center",
+  "roles": [
+    "employee",
+    "store_manager",
+    "order_viewer",
+    "discount_manager"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "emp-0037",
+  "display_name": "Helene Graf",
+  "email": "helene.graf.graz.036@staff.powertools.example",
+  "title": "Store Manager",
+  "store_id": "store-graz-puntigam",
+  "roles": [
+    "employee",
+    "store_manager",
+    "order_viewer",
+    "discount_manager"
+  ]
+}

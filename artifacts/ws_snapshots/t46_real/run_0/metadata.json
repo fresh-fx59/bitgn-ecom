@@ -1,0 +1,11 @@
+{
+  "instruction": "For the last checkoutable basket of robert.sauer+cust562@yahoo.com from my store, please add the maximum applicable service_recovery discount.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "emp_021",
+  "roles": "employee, store_manager, discount_manager, refund_manager, inventory_viewer, fulfillment_viewer, customer_service",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "converted from artifacts/scans/scan_20260527T122352Z_new/trials/t46"
+}

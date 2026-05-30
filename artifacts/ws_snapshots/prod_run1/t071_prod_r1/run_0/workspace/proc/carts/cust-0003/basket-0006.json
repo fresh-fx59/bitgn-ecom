@@ -1,0 +1,17 @@
+{
+  "id": "basket-0006",
+  "customer_id": "cust-0003",
+  "store_id": "store-linz-urfahr",
+  "status": "active",
+  "created_at": "2026-08-20T04:01:44Z",
+  "lines": [
+    {
+      "sku": "PT-IMP-MIL-M18FID3-2AH",
+      "quantity": 1
+    },
+    {
+      "sku": "PT-GRD-MET-W18-125-BODY",
+      "quantity": 1
+    }
+  ]
+}

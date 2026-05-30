@@ -1,0 +1,13 @@
+{
+  "id": "emp-0016",
+  "display_name": "Ralf Albers",
+  "email": "ralf.albers.vienna.015@staff.powertools.example",
+  "title": "Store Manager",
+  "store_id": "store-vie-hietzing",
+  "roles": [
+    "employee",
+    "store_manager",
+    "order_viewer",
+    "discount_manager"
+  ]
+}

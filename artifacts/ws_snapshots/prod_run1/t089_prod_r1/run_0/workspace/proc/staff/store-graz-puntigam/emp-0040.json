@@ -1,0 +1,12 @@
+{
+  "id": "emp-0040",
+  "display_name": "Klara Günther",
+  "email": "klara.guenther.graz.039@staff.powertools.example",
+  "title": "Customer Service Lead",
+  "store_id": "store-graz-puntigam",
+  "roles": [
+    "employee",
+    "order_viewer",
+    "customer_service"
+  ]
+}

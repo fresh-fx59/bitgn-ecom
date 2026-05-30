@@ -1,0 +1,12 @@
+{
+  "instruction": "Find this company lore fact for PowerTools: What was PowerTools' legal trading start date? YYYY-MM-DD Answer only with the detail.",
+  "context_date": "2026-06-16T17:13:01Z",
+  "actor_id": "cust-0007",
+  "roles": "customer",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 4 files / 0 dirs from 15 dump records. Window: started_at=2026-05-30T08:54:56.352384+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='cust-0007' roles='customer'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

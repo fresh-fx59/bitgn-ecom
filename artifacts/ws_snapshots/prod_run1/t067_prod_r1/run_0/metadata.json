@@ -1,0 +1,12 @@
+{
+  "instruction": "I need Stihl HSA 50 with the AK 20 set excluded. Battery inclusion remains unspecified. under EUR 193.10. How many matching SKUs do you have? Answer with number only",
+  "context_date": "2026-08-20T11:01:44Z",
+  "actor_id": "cust-0053",
+  "roles": "customer",
+  "source": "rebuilt from bench_20260530T084048Z on 2026-05-30",
+  "notes": "Auto-rebuilt from BITGN_TRACE_RAW_RESPONSES dump. Materialised 4 files / 0 dirs from 18 dump records. Window: started_at=2026-05-30T09:01:38.091897+00:00. Trial outcome was unknown with score 0.0; score_detail=[]. Identity: actor='cust-0053' roles='customer'.",
+  "expected_outcome": "OUTCOME_OK",
+  "required_refs": [],
+  "forbidden_refs": [],
+  "expected_answer": null
+}

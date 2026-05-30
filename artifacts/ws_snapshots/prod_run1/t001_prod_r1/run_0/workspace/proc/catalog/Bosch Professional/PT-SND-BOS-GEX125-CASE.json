@@ -1,0 +1,20 @@
+{
+  "id": 28,
+  "sku": "PT-SND-BOS-GEX125-CASE",
+  "name": "Bosch Professional GEX 125-1 AE sander case set",
+  "brand": "Bosch Professional",
+  "category_id": "cat-workshop-site",
+  "kind_id": "kind-random-orbit-sanders",
+  "family_id": "fam-bosch-gex-125-1-ae",
+  "price_cents": 11990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "dust_extraction": "microfilter box",
+    "kit": "case and 25 discs",
+    "pad_mm": 125,
+    "power_source": "corded",
+    "sander_type": "random orbit",
+    "speed_control": true
+  }
+}

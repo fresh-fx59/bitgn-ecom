@@ -1,0 +1,11 @@
+{
+  "instruction": "A support note claims we stock the Pliers and Wrenches from Gedore in the Gedore Classic RED 1SM-A8X Pliers and Wrenches line that has tool type combination pliers and length 300 mm and has grip type ergonomic. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+  "context_date": "2021-08-09T16:52:43Z",
+  "actor_id": "anonymous",
+  "roles": "GUEST",
+  "expected_outcome": "OUTCOME_OK",
+  "expected_answer": null,
+  "required_refs": [],
+  "forbidden_refs": [],
+  "source": "converted from artifacts/scans/scan_20260527T073813Z_new/trials/t08"
+}

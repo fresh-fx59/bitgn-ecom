@@ -1,0 +1,20 @@
+{
+  "id": 31,
+  "sku": "PT-SND-EIN-TERS18-25",
+  "name": "Einhell TE-RS 18 Li sander starter kit",
+  "brand": "Einhell",
+  "category_id": "cat-workshop-site",
+  "kind_id": "kind-random-orbit-sanders",
+  "family_id": "fam-einhell-te-rs-18-li",
+  "price_cents": 10990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "dust_extraction": "dust box",
+    "kit": "2.5Ah battery and charger",
+    "pad_mm": 125,
+    "power_source": "cordless",
+    "sander_type": "random orbit",
+    "speed_control": true
+  }
+}

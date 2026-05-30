@@ -1,0 +1,13 @@
+{
+  "id": "basket-0007",
+  "customer_id": "cust-0004",
+  "store_id": "store-graz-center",
+  "status": "active",
+  "created_at": "2026-04-29T06:45:13Z",
+  "lines": [
+    {
+      "sku": "PT-DRL-MAK-DDF485-BODY",
+      "quantity": 1
+    }
+  ]
+}
