@@ -338,6 +338,7 @@ class AgentLoop:
         self._current_task_text = task_text
         from bitgn_contest_agent import classifier as _classifier_cov
         from bitgn_contest_agent import count_rederive
+        from bitgn_contest_agent import fs_count_rederive
         _classifier_cov.reset_aux_coverage()
         session = Session()
         messages, decision = _build_initial_messages(
@@ -562,6 +563,94 @@ class AgentLoop:
                             verdict = Verdict(
                                 ok=False,
                                 reasons=[count_rederive.build_bounce_reason(_agent_n, _rr)],
+                            )
+
+                # FILESYSTEM count re-derivation (PROD has no working
+                # /bin/sql — ODBC login-timeout — so the SQL count_rederive
+                # above abstains on PROD). This re-derives count_per_store
+                # by reading the embedded inventory in
+                # /proc/locations/<City>/<store>.json (same-day =
+                # max(on_hand-reserved,0)) + resolving products from
+                # /proc/catalog, reusing count_rederive's matchers. BOUNCES
+                # on disagreement (never rewrites), abstains on ambiguity.
+                # Env-gated default-off (BITGN_USE_FS_REDERIVE_COUNT=1). Only
+                # runs if the SQL pass did not already bounce. See
+                # fs_count_rederive + memory project_ecom_prod_fs_ground_truth.
+                if (
+                    verdict.ok
+                    and fs_count_rederive.is_enabled()
+                    and fn.outcome == "OUTCOME_OK"
+                    and getattr(fn.task_spec, "kind", "none") == "count_per_store"
+                ):
+                    import json as _json_fs
+                    import re as _re_fs
+                    from bitgn_contest_agent.adapter.ecom import (
+                        Req_List as _Req_List_FS,
+                        Req_Read as _Req_Read_FS,
+                        Req_Search as _Req_Search_FS,
+                    )
+
+                    def _read_fs(p: str):
+                        try:
+                            tr = self._adapter.dispatch(_Req_Read_FS(tool="read", path=p))
+                            if not (tr.ok and tr.content):
+                                return None
+                            try:
+                                parsed = _json_fs.loads(tr.content)
+                                if isinstance(parsed, dict) and isinstance(parsed.get("content"), str):
+                                    return parsed["content"]
+                            except (ValueError, AttributeError):
+                                pass
+                            return tr.content
+                        except Exception:
+                            return None
+
+                    def _search_fs(root: str, pattern: str):
+                        try:
+                            tr = self._adapter.dispatch(
+                                _Req_Search_FS(tool="search", root=root, pattern=pattern, limit=50))
+                            if not (tr.ok and tr.content):
+                                return []
+                            obj = _json_fs.loads(tr.content)
+                            return [m.get("path") for m in (obj.get("matches") or []) if m.get("path")]
+                        except Exception:
+                            return []
+
+                    def _list_fs(p: str):
+                        try:
+                            tr = self._adapter.dispatch(_Req_List_FS(tool="list", path=p))
+                            if not (tr.ok and tr.content):
+                                return []
+                            obj = _json_fs.loads(tr.content)
+                            return [e.get("path") for e in (obj.get("entries") or []) if e.get("path")]
+                        except Exception:
+                            return []
+
+                    _fs_text = (
+                        getattr(session, "task_text_en", "")
+                        or self._current_task_text
+                        or task_text
+                    )
+                    try:
+                        _fr = fs_count_rederive.rederive_count_fs(
+                            fn.task_spec, _read_fs, _search_fs, _list_fs, _fs_text)
+                    except Exception:
+                        _fr = None
+                    if _fr is not None and _fr.count is not None:
+                        _mfs = _re_fs.search(r"-?\d+", fn.message or "")
+                        _agent_nfs = int(_mfs.group()) if _mfs else None
+                        if _agent_nfs is not None and _agent_nfs != _fr.count:
+                            emit_arch(
+                                category=ArchCategory.VALIDATOR_T2,
+                                at_step=step_idx,
+                                details=(
+                                    f"fs_count_rederive disagree: agent={_agent_nfs} "
+                                    f"rederived={_fr.count} verdicts={_fr.per_product}"
+                                ),
+                            )
+                            verdict = Verdict(
+                                ok=False,
+                                reasons=[count_rederive.build_bounce_reason(_agent_nfs, _fr)],
                             )
                 if verdict.ok:
                     # Pre-completion verification (spec 2026-04-21).
