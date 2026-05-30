@@ -1,0 +1,6 @@
+{
+  "task_id": "t45",
+  "trial_id": "vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxx",
+  "instruction": "How many of these products have no same-day availability in central Linz hardware branch today: the Pipe Fitting from Viega in the Viega Professional Sanpress 2OG-ENN Pipe Fitting line that has fitting type pipe fitting, diameter 15 mm, and connection type threaded,the Storage Bin and Organizer from Keter in the Keter Deep Stack 2OO-VJU Storage Bin and Organizer line that has storage type parts case, color family Yellow, and volume 8 l,the Work Gloves from Portwest in the Portwest PW3 DX 3TU-ST2 Work Gloves line that has size M,the Workshop Saw and Cutter from Bosch in the Bosch Bench IXO 3JP-JOU Workshop Saw and Cutter line that has machine type table saw and voltage 400 V,the Work Jacket from Mascot in the Mascot Advanced ACC 35W-IIS Work Jacket line that has color family Black,the Wiper Blade from Sonax in the Sonax Premium Gloss 304-ZK0 Wiper Blade line that has length 500 mm? Answer in exactly format \"[QTY:%d]\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxx"
+}

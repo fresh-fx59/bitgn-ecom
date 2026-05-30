@@ -1,0 +1,6 @@
+{
+  "task_id": "t14",
+  "trial_id": "vm2-LxdCFXUzrcMjfcReke9iH93tC9T",
+  "instruction": "How many of these products have at least 2 items available in the PowerTool store near Linz main square today: the Corded Angle Grinder from Bosch in the Bosch Compact PKS 375-EOK Corded Angle Grinder line that has disc diameter 150 mm,the Safety Eyewear from 3M in the 3M Ventilated SecureFit 2CE-B35 Safety Eyewear line that has lens color Clear and size XL,the Pipe Fitting from Viega in the Viega Professional Sanpress 2OG-ENN Pipe Fitting line that has fitting type pipe fitting, diameter 15 mm, and connection type push fit,the LED Bulb from Philips in the Philips Professional Hue 3JS-MSN LED Bulb line that has wattage 12 W,the Pliers and Wrenches from Bahco in the Bahco Comfort Grip BE 1ZR-PGS Pliers and Wrenches line that has tool type side cutter and length 125 mm,the Automotive Cleaner from Sonax in the Sonax Workshop XTREME 218-FC5 Automotive Cleaner line that has cleaner type polish? Answer in exactly format \"[QTY:%d]\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxdCFXUzrcMjfcReke9iH93tC9T"
+}

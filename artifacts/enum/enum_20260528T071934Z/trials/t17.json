@@ -1,0 +1,6 @@
+{
+  "task_id": "t17",
+  "trial_id": "vm2-LxgPn5Grgt725p3ef77r7g2Tpun",
+  "instruction": "I can visit any PowerTool branch in Vienna today. Across every Vienna branch, including branches with 0 availability, how many units of product (the Cleaning Liquid from Ajax in the Ajax Eco Classic 25C-DXE Cleaning Liquid line that has cleaner type degreaser) are available today? Answer exactly as \"%d\" and cite every city store record plus the product record.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPn5Grgt725p3ef77r7g2Tpun"
+}

@@ -1,0 +1,92 @@
+{
+  "benchmark": "bitgn/ecom1-prod",
+  "iter_results": [
+    [
+      "bare .lines[].sku",
+      {
+        "args": [
+          "-r",
+          ".lines[].sku"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\nPWR-1\nPWR-2\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "bare .lines[]",
+      {
+        "args": [
+          "-r",
+          ".lines[]"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\n{\"qty\":1,\"sku\":\"PWR-1\"}\n{\"qty\":3,\"sku\":\"PWR-2\"}\n",
+        "stderr": ""
+      }
+    ],
+    [
+      ".lines",
+      {
+        "args": [
+          "-r",
+          ".lines"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\n[{\"qty\":1,\"sku\":\"PWR-1\"},{\"qty\":3,\"sku\":\"PWR-2\"}]\n",
+        "stderr": ""
+      }
+    ],
+    [
+      ".three_ds",
+      {
+        "args": [
+          "-r",
+          ".three_ds"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\n{\"recovery_allowed\":true}\n",
+        "stderr": ""
+      }
+    ],
+    [
+      ".lines[1].sku",
+      {
+        "args": [
+          "-r",
+          ".lines[1].sku"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\nPWR-2\n",
+        "stderr": ""
+      }
+    ]
+  ],
+  "file_results": [
+    [
+      "read /proc/payments/pay-0014.json",
+      {
+        "ok": false,
+        "head": "__ERR__ read failed: not found"
+      }
+    ],
+    [
+      "read /proc/payments/pay-0014",
+      {
+        "ok": false,
+        "head": "__ERR__ read failed: not found"
+      }
+    ],
+    [
+      "read /proc/payments/README.md",
+      {
+        "ok": false,
+        "head": "__ERR__ read failed: not found"
+      }
+    ]
+  ],
+  "run_id": "run-22RyNABotRyMQ9BkrbWNgLkm7",
+  "task": "t017",
+  "instr": "Finish the customer refund workflow tied to payment pay-0013. Do not skip the refund policy.",
+  "agents_md_head": "\n\n# ECOM1 Production Workspace\n\nUse the files under `/proc/catalog` as the source of truth for product catalogue. Stores are under `/proc/locations`. Employees are under `/proc/staff`. Baskets are under `/proc/carts`. Payments are under `/proc/payment-ledger`. Returns are under `/proc/return-workflows`.\n\nMake sure to scan nested directories for AGENTS.MD and README.MD alike.\n\nBinaries are mounted under `/bin`.\n\n\nWhen loading, make sure to scan through all docs under `/docs` for any rules\nspecifi"
+}

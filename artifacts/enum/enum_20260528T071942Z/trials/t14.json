@@ -1,0 +1,6 @@
+{
+  "task_id": "t14",
+  "trial_id": "vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxR",
+  "instruction": "How many of these products have at least 2 items available in the Linz Hauptplatz PowerTool shop today: the Sealant from Sika in the Sika Professional Sika 28T-UV8 Sealant line that has sealant type silicone sealant and color family Clear,the Metal and Concrete Paint from Helios in the Helios Professional Helios 29A-FTE Metal and Concrete Paint line that has product type metal paint and color family Green,the Shelving and Cabinet from Raaco in the Raaco Professional CarryLite 3CS-7A9 Shelving and Cabinet line that has storage type stacking box,the Adhesive and Glue from Gorilla in the Gorilla Crystal Grip 2ZQ-D83 Adhesive and Glue line that has adhesive type contact adhesive,the Cordless Drill Driver from Metabo in the Metabo Brushless BS 1OW-IK5 Cordless Drill Driver line that has voltage 18 V, battery platform 18v-system, and kit contents bare tool,the Workshop Drill Grinder and Sander from Makita in the Makita Workshop DDF OIE-YYP Workshop Drill Grinder and Sander line that has machine type drill press and voltage 400 V? Answer in exactly format \"count : %d\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxR"
+}

@@ -1,0 +1,6 @@
+{
+  "task_id": "t13",
+  "trial_id": "vm2-LxdCFXUzrcMjfcReke9iH93tC9S",
+  "instruction": "How many of these products have at least 1 items available in Brno Veveri hardware store today: the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type drywall screw,the Nut Bolt and Washer from Heco in the Heco Zinc Plated HECO 3DW-64B Nut Bolt and Washer line that has fastener type bolt and diameter 10 mm,the Wood and Drywall Screw from Heco in the Heco Zinc Plated TopFix GTU-YPJ Wood and Drywall Screw line that has screw type wood screw and diameter 6 mm,the Tool Box and Bag from Festool in the Festool Stackable SYS 3JJ-9LM Tool Box and Bag line that has storage type tool bag,the Cleaning Liquid from Ajax in the Ajax Eco Classic 25C-DXE Cleaning Liquid line that has cleaner type floor cleaner,the Nut Bolt and Washer from Heco in the Heco Zinc Plated HECO 3DW-64B Nut Bolt and Washer line that has fastener type bolt and diameter 8 mm? Answer in exactly format \"%d\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxdCFXUzrcMjfcReke9iH93tC9S"
+}

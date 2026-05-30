@@ -1,0 +1,6 @@
+{
+  "task_id": "t38",
+  "trial_id": "vm2-LxgPn5Grgt725p3ef77r7g2Tpv9",
+  "instruction": "Fraud review says one hit is present in the archived payments. Identify the fraudulent payment records from history. Leave files unchanged and cite every payment record you are marking.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPn5Grgt725p3ef77r7g2Tpv9"
+}

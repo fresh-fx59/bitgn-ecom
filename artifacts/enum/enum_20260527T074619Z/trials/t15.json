@@ -1,0 +1,6 @@
+{
+  "task_id": "t15",
+  "trial_id": "vm2-LxdCFXUzrcMjfcReke9iH93tC9U",
+  "instruction": "How many of these products have at least 4 items available in the central Bratislava PowerTool shop today: the Valve and Connector from Giacomini in the Giacomini R Series R 1PA-6JD Valve and Connector line that has connector type ball valve, diameter 20 mm, and thread type 1 inch,the Hammer Measuring and Cutting Tool from Irwin in the Irwin Vise-Grip Vise-Grip 3QR-2ZH Hammer Measuring and Cutting Tool line that has tool type chisel and length 600 mm,the Cleaning Machine from Karcher in the Karcher Workshop SC 27T-68S Cleaning Machine line that has machine type floor cleaner, power 1400 W, tank volume 0 l, and surface metal,the Chainsaw from Stihl in the Stihl AK System HSA DUW-0VN Chainsaw line that has power source battery and bar length 35 cm,the Respiratory Protection from Honeywell in the Honeywell Pro HW 2GM-UMP Respiratory Protection line that has mask type half mask and protection class ffp2,the Workshop Saw and Cutter from Bosch in the Bosch Precision PKS 3Q6-CLK Workshop Saw and Cutter line that has machine type band saw, voltage 400 V, and power 750 W? Answer in exactly format \"[QTY:%d]\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxdCFXUzrcMjfcReke9iH93tC9U"
+}

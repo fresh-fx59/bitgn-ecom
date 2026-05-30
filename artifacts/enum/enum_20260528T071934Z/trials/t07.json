@@ -1,0 +1,6 @@
+{
+  "task_id": "t07",
+  "trial_id": "vm2-LxgPn5Grgt725p3ef77r7g2Tpuc",
+  "instruction": "A support note claims we stock the Cleaning Liquid from Ajax in the Ajax Concentrate Fresh 252-QRO Cleaning Liquid line that has cleaner type glass cleaner, volume 750 ml, and surface glass and has cleaner type multi surface cleaner. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPn5Grgt725p3ef77r7g2Tpuc"
+}

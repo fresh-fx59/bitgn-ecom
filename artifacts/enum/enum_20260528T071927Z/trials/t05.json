@@ -1,0 +1,6 @@
+{
+  "task_id": "t05",
+  "trial_id": "vm2-LxgPm8a6u13mHDAvm8qchjCVMiU",
+  "instruction": "A support note claims we stock the Tool Box and Bag from Festool in the Festool Stackable SYS 3JJ-9LM Tool Box and Bag line that has storage type parts case and has stackable system only. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPm8a6u13mHDAvm8qchjCVMiU"
+}

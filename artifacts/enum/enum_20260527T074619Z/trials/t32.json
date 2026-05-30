@@ -1,0 +1,6 @@
+{
+  "task_id": "t32",
+  "trial_id": "vm2-LxdCFXUzrcMjfcReke9iH93tC9m",
+  "instruction": "A support note claims we stock the Automotive Charger and Bulb from Liqui Moly in the Liqui Moly Workshop Special VKX-LRS Automotive Charger and Bulb line that has product type jump starter and voltage 12 V and is wifi-enabled. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra capability is absent, answer with <NO> and include the checked SKU.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxdCFXUzrcMjfcReke9iH93tC9m"
+}

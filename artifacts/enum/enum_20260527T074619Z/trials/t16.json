@@ -1,0 +1,6 @@
+{
+  "task_id": "t16",
+  "trial_id": "vm2-LxdCFXUzrcMjfcReke9iH93tC9V",
+  "instruction": "How many of these products have at least 3 items available in Brno Veveri hardware store today: the Tool Box and Bag from Tanos in the Tanos Systainer SYS H9Z-N1R Tool Box and Bag line that has storage type tool box and color family Red,the Workshop Drill Grinder and Sander from Metabo in the Metabo Compact HWW 2XB-JHU Workshop Drill Grinder and Sander line that has machine type belt sander, voltage 230 V, and power 750 W,the Engine Oil from Shell in the Shell Rimula Helix 3OS-ZCH Engine Oil line that has volume 1000 ml and viscosity 5W-40,the Automotive Cleaner from WD-40 in the WD-40 Specialist Specialist 1M8-PCH Automotive Cleaner line that has cleaner type screen wash, volume 1000 ml, and vehicle type van,the Cleaning Liquid from Ajax in the Ajax Heavy Duty AJ 24K-8ZC Cleaning Liquid line that has cleaner type degreaser and volume 750 ml,the Valve and Connector from Giacomini in the Giacomini Professional G 25C-NJJ Valve and Connector line that has connector type shower hose, diameter 25 mm, and thread type 1/2 inch? Answer in exactly format \"%d\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxdCFXUzrcMjfcReke9iH93tC9V"
+}

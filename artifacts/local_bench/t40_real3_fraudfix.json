@@ -1,0 +1,37 @@
+{
+  "ts": "20260529T124756Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t40_real3",
+      "run_index": 0,
+      "passed": false,
+      "detail": "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION",
+      "outcome": "OUTCOME_NONE_CLARIFICATION",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/payments/README.md"
+      ],
+      "message": "I found the fraud-incident payment IDs in archived SQL history, but I can\u2019t complete a compliant per-record cited answer because the payment record files are missing from the workspace (no accessible payment JSON records to cite). Please provide the payment record files so I can return the exact fraud record list with file citations.",
+      "steps": 9,
+      "wall_sec": 109.4409618107602
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t40_real3": {
+        "passed": 0,
+        "runs": 1,
+        "rate": 0.0,
+        "fail_details": [
+          "expected outcome OUTCOME_OK, got OUTCOME_NONE_CLARIFICATION"
+        ]
+      }
+    },
+    "totals": {
+      "passed": 0,
+      "runs": 1,
+      "rate": 0.0
+    }
+  }
+}

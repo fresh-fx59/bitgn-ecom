@@ -1,0 +1,6 @@
+{
+  "task_id": "t11",
+  "trial_id": "vm2-LxgPm8a6u13mHDAvm8qchjCVMia",
+  "instruction": "How many catalogue products are Lawn Mower? Answer in exactly format \"<COUNT:%d>\" (no quotes).",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPm8a6u13mHDAvm8qchjCVMia"
+}

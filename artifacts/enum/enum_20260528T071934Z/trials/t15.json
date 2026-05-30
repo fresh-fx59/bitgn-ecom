@@ -1,0 +1,6 @@
+{
+  "task_id": "t15",
+  "trial_id": "vm2-LxgPn5Grgt725p3ef77r7g2Tpuk",
+  "instruction": "How many of these products have at least 1 items available in the PowerTool shop near Salzburg station today: the Hammer Measuring and Cutting Tool from Gedore in the Gedore Red GED 1CA-RS0 Hammer Measuring and Cutting Tool line that has tool type hammer and length 100 mm,the Storage Bin and Organizer from Raaco in the Raaco Stackable Assorter 20C-L8E Storage Bin and Organizer line that has storage type stacking box, color family Green, and volume 25 l,the Pipe Fitting from Uponor in the Uponor Press Fit Aqua 35M-6XO Pipe Fitting line that has fitting type thread adapter, diameter 16 mm, and connection type push fit,the Hammer Measuring and Cutting Tool from Irwin in the Irwin Vise-Grip Vise-Grip 3QR-2ZH Hammer Measuring and Cutting Tool line that has tool type clamp and length 450 mm,the Cleaning Liquid from Karcher in the Karcher Workshop WD 2C4-U0U Cleaning Liquid line that has cleaner type floor cleaner and volume 5000 ml,the Safety Eyewear from 3M in the 3M SecureFit Aura TUM-I54 Safety Eyewear line that has lens color Clear, size S, and coating basic? Answer in exactly format \"[QTY:%d]\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPn5Grgt725p3ef77r7g2Tpuk"
+}

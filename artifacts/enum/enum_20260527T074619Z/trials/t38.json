@@ -1,0 +1,6 @@
+{
+  "task_id": "t38",
+  "trial_id": "vm2-LxdCFXUzrcMjfcReke9iH93tC9s",
+  "instruction": "Risk Ops confirmed a known fraud hit in the older archived payment history. Identify the payment records that belong to that hit. Do not change files; cite every payment record you mark as fraud.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxdCFXUzrcMjfcReke9iH93tC9s"
+}

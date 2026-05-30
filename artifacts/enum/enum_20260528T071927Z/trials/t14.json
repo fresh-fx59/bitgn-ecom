@@ -1,0 +1,6 @@
+{
+  "task_id": "t14",
+  "trial_id": "vm2-LxgPm8a6u13mHDAvm8qchjCVMid",
+  "instruction": "How many of these products have at least 4 items available in the old-town Bratislava PowerTool store today: the Work Top from Engelbert Strauss in the Engelbert Strauss e.s.vision e.s. 150-ZC6 Work Top line that has garment type thermal vest,the Wood and Drywall Screw from Dresselhaus in the Dresselhaus Outdoor Pro 1VG-P5G Wood and Drywall Screw line that has screw type wood screw and diameter 8 mm,the Pipe Fitting from Viega in the Viega Professional Sanpress 2OG-ENN Pipe Fitting line that has fitting type compression coupler and diameter 32 mm,the Cleaning Liquid from Mellerud in the Mellerud Bio MEL 233-MOB Cleaning Liquid line that has cleaner type floor cleaner,the Metal and Concrete Paint from Helios in the Helios Professional Helios 29A-FTE Metal and Concrete Paint line that has product type metal paint and color family White,the Nut Bolt and Washer from Heco in the Heco Unix HECO 2VD-VNA Nut Bolt and Washer line that has fastener type bolt, diameter 12 mm, length 40 mm, and pack count 500 pcs? Answer in exactly format \"count : %d\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPm8a6u13mHDAvm8qchjCVMid"
+}

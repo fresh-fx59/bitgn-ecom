@@ -1,0 +1,6 @@
+{
+  "task_id": "t05",
+  "trial_id": "vm2-LxdCFXUzrcMjfcReke9iH93tC9J",
+  "instruction": "A support note claims we stock the Tool Box and Bag from Festool in the Festool Stackable SYS 3JJ-9LM Tool Box and Bag line that has storage type tool bag. Check the exact product record, and if the catalogue product exists, answer with <YES> and include the checked SKU.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxdCFXUzrcMjfcReke9iH93tC9J"
+}

@@ -1,0 +1,6 @@
+{
+  "task_id": "t32",
+  "trial_id": "vm2-LxgPn5Grgt725p3ef77r7g2Tpv3",
+  "instruction": "A support note claims we stock the Engine Oil from Mobil in the Mobil Mobil 1 Delvac 1B5-M95 Engine Oil line that has volume 1000 ml and viscosity 10W-40 and supports voice control. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra capability is absent, answer with <NO> and include the checked SKU.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPn5Grgt725p3ef77r7g2Tpv3"
+}

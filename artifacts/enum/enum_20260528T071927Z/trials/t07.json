@@ -1,0 +1,6 @@
+{
+  "task_id": "t07",
+  "trial_id": "vm2-LxgPm8a6u13mHDAvm8qchjCVMiW",
+  "instruction": "A support note claims we stock the Screwdriver and Hex Key Set from Facom in the Facom Comfort Grip R 26K-PFN Screwdriver and Hex Key Set line that has tool profile hex and piece count 32 pcs and has piece count 8 pcs. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPm8a6u13mHDAvm8qchjCVMiW"
+}

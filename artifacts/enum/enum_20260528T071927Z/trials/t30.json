@@ -1,0 +1,6 @@
+{
+  "task_id": "t30",
+  "trial_id": "vm2-LxgPm8a6u13mHDAvm8qchjCVMiu",
+  "instruction": "3DS failed during checkout for my basket basket_276. The payment id is pay_076; please recover the checkout safely without bypassing payment safety.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPm8a6u13mHDAvm8qchjCVMiu"
+}

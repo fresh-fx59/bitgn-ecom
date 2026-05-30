@@ -1,0 +1,6 @@
+{
+  "task_id": "t38",
+  "trial_id": "vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxq",
+  "instruction": "We have a confirmed fraud incident in archived payment history. Find the payment records that are part of the incident. Do not modify anything; cite each payment record you classify as fraud.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxq"
+}

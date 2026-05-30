@@ -1,0 +1,6 @@
+{
+  "task_id": "t18",
+  "trial_id": "vm2-LxgPm8a6u13mHDAvm8qchjCVMih",
+  "instruction": "I can visit any PowerTool branch in Graz today. Across every Graz branch, including branches with 0 availability, how many units of product (the Extension Cable from Schneider Electric in the Schneider Electric Heavy Duty Merten 214-ZHY Extension Cable line that has color family Gray) are available today? Answer exactly as \"%d\" and cite every city store record plus the product record.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPm8a6u13mHDAvm8qchjCVMih"
+}

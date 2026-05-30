@@ -1,0 +1,55 @@
+{
+  "ts": "20260529T125223Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t40_real3",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/payments/pay_20210428T143838Z_FJT4ktFYHA.json",
+        "/proc/payments/pay_20210428T143900Z_15AuaLMi22.json",
+        "/proc/payments/pay_20210428T143926Z_4s3V7sGjCG.json",
+        "/proc/payments/pay_20210428T143935Z_gAd7jQvGp2.json",
+        "/proc/payments/pay_20210428T143946Z_Guv7jBBZhv.json",
+        "/proc/payments/pay_20210428T144028Z_WXecxa2tEU.json",
+        "/proc/payments/pay_20210428T144044Z_Hr1GP2nrdE.json",
+        "/proc/payments/pay_20210428T144050Z_AthFLEeAUq.json",
+        "/proc/payments/pay_20210428T144108Z_EWAMYQdGY1.json",
+        "/proc/payments/pay_20210428T144120Z_7Dcnqm5WmW.json",
+        "/proc/payments/pay_20210428T144126Z_DsPqK9r45Y.json",
+        "/proc/payments/pay_20210428T144134Z_NqWpRFoqYn.json",
+        "/proc/payments/pay_20210506T113853Z_LuGaYp3sSG.json",
+        "/proc/payments/pay_20210506T114710Z_CH88xpNE7i.json",
+        "/proc/payments/pay_20210506T120253Z_FHLaja4i2r.json",
+        "/proc/payments/pay_20210506T121126Z_QUxvV35QqK.json",
+        "/proc/payments/pay_20210506T122053Z_3FDm6EDeDa.json",
+        "/proc/payments/pay_20210506T122627Z_WnzYMpsRPk.json",
+        "/proc/payments/pay_20210506T124753Z_W5mLEQxzj5.json",
+        "/proc/payments/pay_20210506T125655Z_PbRnfQc37t.json",
+        "/proc/payments/pay_20210506T125853Z_NHZJDKZQfu.json",
+        "/proc/payments/pay_20210506T130608Z_jT661ai8wU.json"
+      ],
+      "message": "Fraud incident payment records identified (archived history): pay_20210428T143838Z_FJT4ktFYHA, pay_20210428T143900Z_15AuaLMi22, pay_20210428T143926Z_4s3V7sGjCG, pay_20210428T143935Z_gAd7jQvGp2, pay_20210428T143946Z_Guv7jBBZhv, pay_20210428T144028Z_WXecxa2tEU, pay_20210428T144044Z_Hr1GP2nrdE, pay_20210428T144050Z_AthFLEeAUq, pay_20210428T144108Z_EWAMYQdGY1, pay_20210428T144120Z_7Dcnqm5WmW, pay_20210428T144126Z_DsPqK9r45Y, pay_20210428T144134Z_NqWpRFoqYn, pay_20210506T113853Z_LuGaYp3sSG, pay_20210506T114710Z_CH88xpNE7i, pay_20210506T120253Z_FHLaja4i2r, pay_20210506T121126Z_QUxvV35QqK, pay_20210506T122053Z_3FDm6EDeDa, pay_20210506T122627Z_WnzYMpsRPk, pay_20210506T124753Z_W5mLEQxzj5, pay_20210506T125655Z_PbRnfQc37t, pay_20210506T125853Z_NHZJDKZQfu, pay_20210506T130608Z_jT661ai8wU, pay_20210526T002730Z_HkHUXAQSXh, pay_20210526T004138Z_AmUjSajRn4, pay_20210526T005427Z_PzNmaU8UB9, pay_20210526T005523Z_4iWLuG1bpP, pay_20210526T011512Z_DGF92Wq5uE, pay_20210612T145309Z_Wc82bPNTX5, pay_20210612T150055Z_9MEHr4MC5n, pay_20210612T150929Z_9HoypC5DC8.",
+      "steps": 9,
+      "wall_sec": 114.53302284050733
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t40_real3": {
+        "passed": 1,
+        "runs": 1,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 1,
+      "runs": 1,
+      "rate": 1.0
+    }
+  }
+}

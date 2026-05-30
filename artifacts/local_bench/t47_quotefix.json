@@ -1,0 +1,37 @@
+{
+  "ts": "20260529T193241Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t47_real2",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/power_tools/corded_angle_grinder/PWR-1ALYVIXX.json",
+        "/proc/catalog/paints_finishes/wood_stain_oil/PNT-1CJQ9WWP.json",
+        "/proc/catalog/fasteners/wood_drywall_screws/FST-1GZ71C60.json",
+        "/proc/catalog/cleaning/cloths_mops_wipes/CLN-3066WM0S.json"
+      ],
+      "message": "RowID\tSKU\tin_stock\tmatch\n8E6JY\tPWR-1ALYVIXX\t1\ttrue\nHMN3V\tPNT-1CJQ9WWP\t3\tfalse\n47bUd\t\t\tfalse\nYe7Yo\tFST-1GZ71C60\t0\tfalse\ngvP3B\tCLN-3066WM0S\t6\tfalse",
+      "steps": 7,
+      "wall_sec": 100.19851288944483
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t47_real2": {
+        "passed": 1,
+        "runs": 1,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 1,
+      "runs": 1,
+      "rate": 1.0
+    }
+  }
+}

@@ -1,0 +1,261 @@
+{
+  "benchmark": "bitgn/ecom1-dev",
+  "run_id": "run-22RUnf8gYwsUoaMCYqpmoNjci",
+  "ts": "20260527T122352Z",
+  "trials": [
+    {
+      "task_id": "t01",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLC",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t02",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLD",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t03",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLE",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t04",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLF",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t05",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLG",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t06",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLH",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t07",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLJ",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t08",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLK",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t09",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLL",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t10",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLM",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t11",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLN",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t12",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLP",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t13",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLQ",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t14",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLR",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t15",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLS",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t16",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLT",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t17",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLU",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t18",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLV",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t19",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLW",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t20",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLX",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t21",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLY",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t22",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLZ",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t23",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLa",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t24",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLb",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t25",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLc",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t26",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLd",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t27",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLe",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t28",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLf",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t29",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLg",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t30",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLh",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t31",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLi",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t32",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLj",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t33",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLk",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t34",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLm",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t35",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLn",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t36",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLo",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t37",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLp",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t38",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLq",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t39",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLr",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t40",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLs",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t41",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLt",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t42",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLu",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t43",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLv",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t44",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLw",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t45",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLx",
+      "deep_probed": true,
+      "n_probes": 1751
+    },
+    {
+      "task_id": "t46",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLy",
+      "deep_probed": true,
+      "n_probes": 12582
+    },
+    {
+      "task_id": "t47",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjLz",
+      "deep_probed": true,
+      "n_probes": 1751
+    },
+    {
+      "task_id": "t48",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjM1",
+      "deep_probed": true,
+      "n_probes": 2679
+    },
+    {
+      "task_id": "t49",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjM2",
+      "deep_probed": false
+    },
+    {
+      "task_id": "t50",
+      "trial_id": "vm2-Lxdpgcn32fphCVWEca2NXRFmjM3",
+      "deep_probed": false
+    }
+  ]
+}

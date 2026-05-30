@@ -1,0 +1,6 @@
+{
+  "task_id": "t19",
+  "trial_id": "vm2-LxgPm8a6u13mHDAvm8qchjCVMii",
+  "instruction": "I can visit any PowerTool branch in Graz today. Across every Graz branch, including branches with 0 availability, how many units of product (the Wood and Drywall Screw from Fischer in the Fischer Universal SX 1PF-JY8 Wood and Drywall Screw line that has screw type deck screw and diameter 4 mm) are available today? Answer exactly as \"%d\" and cite every city store record plus the product record.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPm8a6u13mHDAvm8qchjCVMii"
+}

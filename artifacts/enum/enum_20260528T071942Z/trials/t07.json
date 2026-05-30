@@ -1,0 +1,6 @@
+{
+  "task_id": "t07",
+  "trial_id": "vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxJ",
+  "instruction": "A support note claims we stock the Work Trousers from Carhartt in the Carhartt Stretch Rugged 3EY-11K Work Trousers line that has color family Gray and size XXL and has color family black. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxJ"
+}

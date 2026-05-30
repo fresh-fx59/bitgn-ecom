@@ -1,0 +1,6 @@
+{
+  "task_id": "t16",
+  "trial_id": "vm2-LxgPn5Grgt725p3ef77r7g2Tpum",
+  "instruction": "How many of these products have at least 1 items available in the Veveri PowerTool shop in Brno today: the Workshop Saw and Cutter from Scheppach in the Scheppach Precision HC 18L-GVQ Workshop Saw and Cutter line that has machine type table saw, voltage 230 V, and power 3000 W,the Cleaning Liquid from HG in the HG Fresh HG 3LY-SR9 Cleaning Liquid line that has cleaner type glass cleaner and volume 250 ml,the Extension Cable from Schneider Electric in the Schneider Electric Acti9 Resi 26D-3T6 Extension Cable line that has color family Gray and length 2 m,the Wall Paint from Helios in the Helios Interior Mobihel GHH-2WC Wall Paint line that has color family White and finish gloss,the Adhesive and Glue from Bostik in the Bostik Professional BST 30G-CNL Adhesive and Glue line that has adhesive type tile adhesive, color family Brown, and volume 250 ml,the Compressor and Dust Extractor from Einhell in the Einhell Industrial TE 38K-KSW Compressor and Dust Extractor line that has machine type compressor, voltage 400 V, and power 3000 W? Answer in exactly format \"count : %d\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPn5Grgt725p3ef77r7g2Tpum"
+}

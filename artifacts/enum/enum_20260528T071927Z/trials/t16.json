@@ -1,0 +1,6 @@
+{
+  "task_id": "t16",
+  "trial_id": "vm2-LxgPm8a6u13mHDAvm8qchjCVMif",
+  "instruction": "How many of these products have at least 4 items available in the central Innsbruck PowerTool shop today: the Sealant from Soudal in the Soudal Fast Cure Fix 3CA-AJA Sealant line that has sealant type hybrid sealant, color family Gray, and volume 300 ml,the Work Trousers from Sparco in the Sparco Pro SP 1VN-V9E Work Trousers line that has color family Black, size XL, and fit regular,the Workshop Drill Grinder and Sander from Bernardo in the Bernardo Professional BM 2NF-ERC Workshop Drill Grinder and Sander line that has machine type drill press, voltage 400 V, and power 750 W,the Workshop Drill Grinder and Sander from Metabo in the Metabo LiHD KGS 1ZU-JMD Workshop Drill Grinder and Sander line that has machine type belt sander, voltage 230 V, and power 250 W,the Wiper Blade from Bosch in the Bosch Premium BBS 3IH-RIY Wiper Blade line that has length 600 mm and adapter type pinch tab,the Storage Bin and Organizer from Curver in the Curver Infinity Smart 3GU-9PO Storage Bin and Organizer line that has storage type storage bin, color family Gray, and volume 8 l? Answer in exactly format \"count : %d\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPm8a6u13mHDAvm8qchjCVMif"
+}

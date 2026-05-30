@@ -1,0 +1,128 @@
+{
+  "benchmark": "bitgn/ecom1-prod",
+  "task_id": "t001",
+  "probes": [
+    [
+      "list /bin",
+      {
+        "path": "/bin",
+        "paths": []
+      }
+    ],
+    [
+      "read /bin/jq",
+      {
+        "path": "/bin/jq",
+        "content": "",
+        "content_type": "text/plain",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    [
+      "jq --version",
+      {
+        "path": "/bin/jq",
+        "args": [
+          "--version"
+        ],
+        "stdin": "",
+        "stdout": "PowerTools E-Commerce OS jq\n",
+        "exit_code": 1,
+        "stderr": "flag provided but not defined: -version\nUsage: jq [-r|--raw-output] <filter> [path|-]\nMinimal filters: ., keys, length, .field, .field.nested, .array[0], .array[]\n"
+      }
+    ],
+    [
+      "jq (no args)",
+      {
+        "path": "/bin/jq",
+        "args": [],
+        "stdin": "",
+        "stdout": "PowerTools E-Commerce OS jq\n",
+        "exit_code": 1,
+        "stderr": "jq: expected filter\n"
+      }
+    ],
+    [
+      "jq -r .name (stdin)",
+      {
+        "path": "/bin/jq",
+        "args": [
+          "-r",
+          ".name"
+        ],
+        "stdin": "{\"name\":\"hi\",\"n\":3,\"nested\":{\"ok\":true}}",
+        "stdout": "PowerTools E-Commerce OS jq\nhi\n",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    ],
+    [
+      "jq .n+1 (stdin)",
+      {
+        "path": "/bin/jq",
+        "args": [
+          "-c",
+          ".n + 1"
+        ],
+        "stdin": "{\"name\":\"hi\",\"n\":3,\"nested\":{\"ok\":true}}",
+        "stdout": "PowerTools E-Commerce OS jq\n",
+        "exit_code": 1,
+        "stderr": "flag provided but not defined: -c\nUsage: jq [-r|--raw-output] <filter> [path|-]\nMinimal filters: ., keys, length, .field, .field.nested, .array[0], .array[]\n"
+      }
+    ],
+    [
+      "jq -e .missing (stdin)",
+      {
+        "path": "/bin/jq",
+        "args": [
+          "-e",
+          ".missing"
+        ],
+        "stdin": "{\"name\":\"hi\",\"n\":3,\"nested\":{\"ok\":true}}",
+        "stdout": "PowerTools E-Commerce OS jq\n",
+        "exit_code": 1,
+        "stderr": "flag provided but not defined: -e\nUsage: jq [-r|--raw-output] <filter> [path|-]\nMinimal filters: ., keys, length, .field, .field.nested, .array[0], .array[]\n"
+      }
+    ],
+    [
+      "jq .nested.ok (stdin)",
+      {
+        "path": "/bin/jq",
+        "args": [
+          "-r",
+          ".nested.ok"
+        ],
+        "stdin": "{\"name\":\"hi\",\"n\":3,\"nested\":{\"ok\":true}}",
+        "stdout": "PowerTools E-Commerce OS jq\ntrue\n",
+        "exit_code": 0,
+        "stderr": ""
+      }
+    ],
+    [
+      "list /proc/payments",
+      {
+        "path": "/proc/payments",
+        "error": "list failed: not found"
+      }
+    ],
+    [
+      "list /proc/baskets",
+      {
+        "path": "/proc/baskets",
+        "error": "list failed: not found"
+      }
+    ],
+    [
+      "list /proc/stores",
+      {
+        "path": "/proc/stores",
+        "error": "list failed: not found"
+      }
+    ]
+  ],
+  "flow": "run",
+  "run_id": "run-22RyKq3gEsHw84XnKMimmwaJA",
+  "resolved_task": "t001",
+  "instruction_head": "sku for 2x5ah makita ddf485 drill kit pls. sku only.",
+  "proc_file_used": null
+}

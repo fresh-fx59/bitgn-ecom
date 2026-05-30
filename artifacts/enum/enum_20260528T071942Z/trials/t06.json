@@ -1,0 +1,6 @@
+{
+  "task_id": "t06",
+  "trial_id": "vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxH",
+  "instruction": "A support note claims we stock the Safety Eyewear from 3M in the 3M Ventilated SecureFit 2CE-B35 Safety Eyewear line that has lens color Yellow and has size XL. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxH"
+}

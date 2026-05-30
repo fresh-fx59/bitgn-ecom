@@ -1,0 +1,6 @@
+{
+  "task_id": "t20",
+  "trial_id": "vm2-LxgPn5Grgt725p3ef77r7g2Tpuq",
+  "instruction": "I can visit any PowerTool branch in Graz today. Across every Graz branch, including branches with 0 availability, how many units of product (the Wood and Drywall Screw from Wurth in the Wurth Universal WU 107-WY8 Wood and Drywall Screw line that has screw type drywall screw, diameter 10 mm, and length 60 mm) are available today? Answer exactly as \"%d\" and cite every city store record plus the product record.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPn5Grgt725p3ef77r7g2Tpuq"
+}

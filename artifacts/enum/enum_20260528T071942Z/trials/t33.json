@@ -1,0 +1,6 @@
+{
+  "task_id": "t33",
+  "trial_id": "vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxk",
+  "instruction": "I can visit any PowerTool branch in Graz today. Across every Graz branch, how many units of product (the Cleaning Liquid from Mellerud in the Mellerud Bio MEL 233-MOB Cleaning Liquid line that has cleaner type multi surface cleaner) are available today? Answer exactly as \"[QTY:%d]\" and cite every store record you included plus the product record.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxk"
+}

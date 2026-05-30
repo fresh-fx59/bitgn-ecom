@@ -1,0 +1,256 @@
+{
+  "benchmark": "bitgn/ecom1-prod",
+  "results": [
+    [
+      "identity",
+      {
+        "args": [
+          "-r",
+          "."
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\n{\"amount\":120,\"fee\":5,\"lines\":[{\"price\":10,\"qty\":1,\"sku\":\"PWR-1\"},{\"price\":20,\"qty\":3,\"sku\":\"PWR-2\"},{\"price\":7,\"qty\":5,\"sku\":\"PWR-3\"}],\"policy\":{\"blocked\":false,\"max_discount_pct\":7},\"status\":\"paid\",\"three_ds\":{\"attempts\":2,\"recovery_allowed\":true}}\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "field",
+      {
+        "args": [
+          "-r",
+          ".status"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\npaid\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "nested bool",
+      {
+        "args": [
+          "-r",
+          ".three_ds.recovery_allowed"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\ntrue\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "arithmetic .amount-.fee",
+      {
+        "args": [
+          "-r",
+          ".amount - .fee"
+        ],
+        "exit_code": 1,
+        "stdout": "PowerTools E-Commerce OS jq\n",
+        "stderr": "jq: cannot index non-object with field \"fee\"\n"
+      }
+    ],
+    [
+      "array index",
+      {
+        "args": [
+          "-r",
+          ".lines[0].sku"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\nPWR-1\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "iterate pipe field",
+      {
+        "args": [
+          "-r",
+          ".lines[] | .sku"
+        ],
+        "exit_code": 1,
+        "stdout": "PowerTools E-Commerce OS jq\n",
+        "stderr": "jq: unsupported path segment \"lines[] | \"\n"
+      }
+    ],
+    [
+      "length",
+      {
+        "args": [
+          "-r",
+          ".lines | length"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\nnull\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "select gt",
+      {
+        "args": [
+          "-r",
+          ".lines[] | select(.qty > 2) | .sku"
+        ],
+        "exit_code": 1,
+        "stdout": "PowerTools E-Commerce OS jq\n",
+        "stderr": "jq: unsupported path segment \"lines[] | select(\"\n"
+      }
+    ],
+    [
+      "map add (sum qty)",
+      {
+        "args": [
+          "-r",
+          "[.lines[].qty] | add"
+        ],
+        "exit_code": 1,
+        "stdout": "PowerTools E-Commerce OS jq\n",
+        "stderr": "jq: unsupported filter \"[.lines[].qty] | add\"\n"
+      }
+    ],
+    [
+      "comparison bool",
+      {
+        "args": [
+          "-r",
+          ".lines[1].qty > 2"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\nnull\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "has",
+      {
+        "args": [
+          "-r",
+          "has(\"status\")"
+        ],
+        "exit_code": 1,
+        "stdout": "PowerTools E-Commerce OS jq\n",
+        "stderr": "jq: unsupported filter \"has(\\\"status\\\")\"\n"
+      }
+    ],
+    [
+      "keys",
+      {
+        "args": [
+          "-r",
+          "keys"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\n[\"amount\",\"fee\",\"lines\",\"policy\",\"status\",\"three_ds\"]\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "default //",
+      {
+        "args": [
+          "-r",
+          ".missing // \"none\""
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\nnull\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "type",
+      {
+        "args": [
+          "-r",
+          ".status | type"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\nnull\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "string interp",
+      {
+        "args": [
+          "-r",
+          "\"st=\\(.status)\""
+        ],
+        "exit_code": 1,
+        "stdout": "PowerTools E-Commerce OS jq\n",
+        "stderr": "jq: unsupported filter \"\\\"st=\\\\(.status)\\\"\"\n"
+      }
+    ],
+    [
+      "not flag --raw-output",
+      {
+        "args": [
+          "--raw-output",
+          ".status"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\npaid\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "no -r (string quoting)",
+      {
+        "args": [
+          ".status"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\n\"paid\"\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "multiply price*qty",
+      {
+        "args": [
+          "-r",
+          ".lines[] | .price * .qty"
+        ],
+        "exit_code": 1,
+        "stdout": "PowerTools E-Commerce OS jq\n",
+        "stderr": "jq: unsupported path segment \"lines[] | \"\n"
+      }
+    ],
+    [
+      "tostring",
+      {
+        "args": [
+          "-r",
+          ".amount | tostring"
+        ],
+        "exit_code": 0,
+        "stdout": "PowerTools E-Commerce OS jq\nnull\n",
+        "stderr": ""
+      }
+    ],
+    [
+      "group/complex select+field",
+      {
+        "args": [
+          "-r",
+          "[.lines[] | select(.qty>=3) | .sku]"
+        ],
+        "exit_code": 1,
+        "stdout": "PowerTools E-Commerce OS jq\n",
+        "stderr": "jq: unsupported filter \"[.lines[] | select(.qty>=3) | .sku]\"\n"
+      }
+    ]
+  ],
+  "run_id": "run-22RyLRyMaCvWEYDjXzhPEM4Un",
+  "task": "t001",
+  "listings": {
+    "/proc": [],
+    "/proc/catalog": [],
+    "/proc/payments": [
+      "__ERR__ list failed: not found"
+    ],
+    "/proc/baskets": [
+      "__ERR__ list failed: not found"
+    ]
+  }
+}

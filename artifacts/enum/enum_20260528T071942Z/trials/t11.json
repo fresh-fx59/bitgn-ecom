@@ -1,0 +1,6 @@
+{
+  "task_id": "t11",
+  "trial_id": "vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxN",
+  "instruction": "For the catalogue count report, how many products are Screwdriver and Hex Key Set? Answer in exactly format \"[QTY:%d]\" (no quotes).",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxN"
+}

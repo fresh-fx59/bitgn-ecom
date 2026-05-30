@@ -1,0 +1,6 @@
+{
+  "task_id": "t33",
+  "trial_id": "vm2-LxdCFXUzrcMjfcReke9iH93tC9n",
+  "instruction": "I can visit any PowerTool branch in Vienna today. Across every Vienna branch, how many units of product (the Automotive Cleaner from Sonax in the Sonax Workshop XTREME 218-FC5 Automotive Cleaner line that has cleaner type screen wash) are available today? Answer exactly as \"count : %d\" and cite every store record you included plus the product record.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxdCFXUzrcMjfcReke9iH93tC9n"
+}

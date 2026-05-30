@@ -1,0 +1,6 @@
+{
+  "task_id": "t09",
+  "trial_id": "vm2-LxdCFXUzrcMjfcReke9iH93tC9N",
+  "instruction": "How many catalogue products are Nut Bolt and Washer? Answer in exactly format \"%d\" (no quotes).",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxdCFXUzrcMjfcReke9iH93tC9N"
+}

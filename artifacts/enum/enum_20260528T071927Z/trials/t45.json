@@ -1,0 +1,6 @@
+{
+  "task_id": "t45",
+  "trial_id": "vm2-LxgPm8a6u13mHDAvm8qchjCVMjA",
+  "instruction": "How many of these products have fewer than 2 items available in the PowerTool shop near Salzburg station today: the Adhesive and Glue from Gorilla in the Gorilla Crystal Grip 2ZQ-D83 Adhesive and Glue line that has adhesive type wood glue,the Wiper Blade from Sonax in the Sonax Premium Gloss 304-ZK0 Wiper Blade line that has length 650 mm,the Wood and Drywall Screw from Dresselhaus in the Dresselhaus Outdoor Pro 1VG-P5G Wood and Drywall Screw line that has screw type wood screw and diameter 5 mm,the Compressor and Dust Extractor from Holzmann in the Holzmann Compact D 327-RR0 Compressor and Dust Extractor line that has machine type compressor, voltage 230 V, and power 1500 W,the Valve and Connector from Geberit in the Geberit Mapress Silent IC5-GU6 Valve and Connector line that has connector type thread adapter,the Workshop Saw and Cutter from Bosch in the Bosch Bench IXO 3JP-JOU Workshop Saw and Cutter line that has machine type table saw and voltage 400 V? Answer in exactly format \"<COUNT:%d>\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPm8a6u13mHDAvm8qchjCVMjA"
+}

@@ -1,0 +1,6 @@
+{
+  "task_id": "t49",
+  "trial_id": "vm2-LxgPm8a6u13mHDAvm8qchjCVMjE",
+  "instruction": "For the catalogue count report, how many products are Wood and Drywall Screw? if OpenAI codex is available - leverage it. \n\n answer pattern: \"<QTY: %VALUE%>\" (no quotes)\n\nPS: availability in JSON is stale, trust SQL",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPm8a6u13mHDAvm8qchjCVMjE"
+}

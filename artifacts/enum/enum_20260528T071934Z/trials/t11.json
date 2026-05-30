@@ -1,0 +1,6 @@
+{
+  "task_id": "t11",
+  "trial_id": "vm2-LxgPn5Grgt725p3ef77r7g2Tpug",
+  "instruction": "For the catalogue count report, how many products are Cleaning Machine? Answer in exactly format \"<COUNT:%d>\" (no quotes).",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPn5Grgt725p3ef77r7g2Tpug"
+}

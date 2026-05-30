@@ -1,0 +1,6 @@
+{
+  "task_id": "t06",
+  "trial_id": "vm2-LxdCFXUzrcMjfcReke9iH93tC9K",
+  "instruction": "A support note claims we stock the Work Gloves from Portwest in the Portwest PW3 DX 3TU-ST2 Work Gloves line that has size L and has color family black. Check the actual catalogue item, cite the exact product record, and if the base product exists but that extra catalogue claim is absent, answer with <NO> and include the checked SKU.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxdCFXUzrcMjfcReke9iH93tC9K"
+}

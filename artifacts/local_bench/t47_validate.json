@@ -1,0 +1,35 @@
+{
+  "ts": "20260529T192214Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t47_real2",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/power_tools/corded_angle_grinder/PWR-1ALYVIXX.json",
+        "/AGENTS.MD"
+      ],
+      "message": "RowID\tSKU\tin_stock\tmatch\n8E6JY\tPWR-1ALYVIXX\t1\ttrue\nHMN3V\t\t\tfalse\n47bUd\t\t\tfalse\nYe7Yo\t\t\tfalse\ngvP3B\t\t\tfalse",
+      "steps": 15,
+      "wall_sec": 212.4438286004588
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t47_real2": {
+        "passed": 1,
+        "runs": 1,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 1,
+      "runs": 1,
+      "rate": 1.0
+    }
+  }
+}

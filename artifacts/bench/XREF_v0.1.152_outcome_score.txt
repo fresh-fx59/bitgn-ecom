@@ -1,0 +1,38 @@
+=== category counts ===
+  PASS: 73
+  OK_WRONG: 21
+  REFUSAL_FAIL: 6
+
+=== OK but WRONG/PARTIAL (precision bugs) ===
+  t002 OK score=0.0
+  t003 OK score=0.0
+  t004 OK score=0.804
+  t005 OK score=0.0
+  t007 OK score=0.0
+  t014 OK score=0.83
+  t024 OK score=0.824
+  t025 OK score=0.0
+  t027 OK score=0.0
+  t044 OK score=0.829
+  t045 OK score=0.0
+  t046 OK score=0.0
+  t055 OK score=0.743
+  t060 OK score=0.0
+  t062 OK score=0.0
+  t063 OK score=0.0
+  t064 OK score=0.823
+  t065 OK score=0.0
+  t067 OK score=0.0
+  t075 OK score=0.781
+  t087 OK score=0.0
+
+=== REFUSAL/ABSTAIN that FAILED (false negatives -> the headroom) ===
+  t010 CLR score=0.0
+  t013 SEC score=0.0
+  t026 CLR score=0.0
+  t052 SEC score=0.0
+  t072 SEC score=0.0
+  t099 SEC score=0.0
+
+=== refusals that PASSED (correct refusals -> LEAVE ALONE) ===
+   ['t011', 't012', 't017', 't019', 't030', 't031', 't032', 't033', 't038', 't040', 't041', 't050', 't051', 't053', 't057', 't058', 't070', 't071', 't073', 't077', 't082', 't084', 't085', 't086', 't088', 't092', 't097', 't098', 't100']

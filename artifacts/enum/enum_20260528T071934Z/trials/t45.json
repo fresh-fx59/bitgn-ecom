@@ -1,0 +1,6 @@
+{
+  "task_id": "t45",
+  "trial_id": "vm2-LxgPn5Grgt725p3ef77r7g2TpvG",
+  "instruction": "How many of these products have at least 2 items available in the PowerTool shop by Praterstern in Vienna today: the Screwdriver and Hex Key Set from Wiha in the Wiha VDE VDE 13X-B49 Screwdriver and Hex Key Set line that has tool profile phillips,the Screwdriver and Hex Key Set from Wiha in the Wiha VDE VDE 13X-B49 Screwdriver and Hex Key Set line that has tool profile pozidriv,the Pliers and Wrenches from Bahco in the Bahco Comfort Grip BE 1ZR-PGS Pliers and Wrenches line that has tool type side cutter and length 300 mm,the Wood and Drywall Screw from Dresselhaus in the Dresselhaus Outdoor Pro 1VG-P5G Wood and Drywall Screw line that has screw type wood screw and diameter 6 mm,the Extension Cable from Schneider Electric in the Schneider Electric Heavy Duty Merten 214-ZHY Extension Cable line that has color family White and length 3 m,the Work Top from Engelbert Strauss in the Engelbert Strauss e.s.vision e.s. 150-ZC6 Work Top line that has garment type thermal vest? Answer in exactly format \"count : %d\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPn5Grgt725p3ef77r7g2TpvG"
+}

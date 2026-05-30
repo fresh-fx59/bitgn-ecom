@@ -1,0 +1,6 @@
+{
+  "task_id": "t12",
+  "trial_id": "vm2-LxgPm8a6u13mHDAvm8qchjCVMib",
+  "instruction": "How many catalogue products are Work Jacket? Answer in exactly format \"<COUNT:%d>\" (no quotes).",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPm8a6u13mHDAvm8qchjCVMib"
+}

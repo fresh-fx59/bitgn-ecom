@@ -1,0 +1,6 @@
+{
+  "task_id": "t19",
+  "trial_id": "vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxW",
+  "instruction": "I can visit any PowerTool branch in Graz today. Across every Graz branch, including branches with 0 availability, how many units of product (the Adhesive and Glue from Ceresit in the Ceresit Universal CT OY1-0BK Adhesive and Glue line that has adhesive type contact adhesive, color family Clear, and volume 50 ml) are available today? Answer exactly as \"%d\" and cite every city store record plus the product record.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxW"
+}

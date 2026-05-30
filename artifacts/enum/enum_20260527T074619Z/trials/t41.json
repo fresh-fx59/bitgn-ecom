@@ -1,0 +1,6 @@
+{
+  "task_id": "t41",
+  "trial_id": "vm2-LxdCFXUzrcMjfcReke9iH93tC9v",
+  "instruction": "Basket basket_266 got stuck at card verification during checkout. Can you fix it so I can finish?",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxdCFXUzrcMjfcReke9iH93tC9v"
+}

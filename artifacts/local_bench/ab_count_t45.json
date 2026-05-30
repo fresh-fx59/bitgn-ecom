@@ -1,0 +1,51 @@
+{
+  "ts": "20260529T194445Z",
+  "model": "gpt-5.3-codex",
+  "results": [
+    {
+      "snapshot": "t45_real2",
+      "run_index": 0,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/AGENTS.MD",
+        "/proc/stores/README.md",
+        "/proc/catalog/Sika/ADH-2D3Q64KH.json"
+      ],
+      "message": "<COUNT:4>",
+      "steps": 9,
+      "wall_sec": 113.24799622688442
+    },
+    {
+      "snapshot": "t45_real2",
+      "run_index": 1,
+      "passed": true,
+      "detail": "passed all checks",
+      "outcome": "OUTCOME_OK",
+      "grounding_refs": [
+        "/proc/catalog/Sika/ADH-2D3Q64KH.json",
+        "/proc/stores/README.md",
+        "/AGENTS.MD"
+      ],
+      "message": "<COUNT:4>",
+      "steps": 11,
+      "wall_sec": 176.18081892095506
+    }
+  ],
+  "summary": {
+    "snapshots": {
+      "t45_real2": {
+        "passed": 2,
+        "runs": 2,
+        "rate": 1.0,
+        "fail_details": []
+      }
+    },
+    "totals": {
+      "passed": 2,
+      "runs": 2,
+      "rate": 1.0
+    }
+  }
+}

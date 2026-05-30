@@ -1,0 +1,6 @@
+{
+  "task_id": "t15",
+  "trial_id": "vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxS",
+  "instruction": "How many of these products have at least 4 items available in the Linz Hauptplatz PowerTool shop today: the Workshop Drill Grinder and Sander from Einhell in the Einhell Precision GC 3FR-N91 Workshop Drill Grinder and Sander line that has machine type planer thicknesser, voltage 230 V, and power 500 W,the Cordless Saw and Sander from Makita in the Makita Precision DDF 26V-AVZ Cordless Saw and Sander line that has tool type router and voltage 20 V,the Automotive Charger and Bulb from Shell in the Shell Professional Advance 1PO-W67 Automotive Charger and Bulb line that has product type jump starter, voltage 24 V, and current 4 A,the Pipe Fitting from Uponor in the Uponor Press Fit Aqua 35M-6XO Pipe Fitting line that has fitting type thread adapter, diameter 16 mm, and connection type push fit,the Valve and Connector from Giacomini in the Giacomini R Series R 1PA-6JD Valve and Connector line that has connector type faucet connector, diameter 15 mm, and thread type 1 inch,the Storage Bin and Organizer from Raaco in the Raaco Stackable Assorter 20C-L8E Storage Bin and Organizer line that has storage type stacking box and color family Black? Answer in exactly format \"<COUNT:%d>\" (no quotes)",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPo5NyDrAk5oYwLV9PrmbiXxS"
+}

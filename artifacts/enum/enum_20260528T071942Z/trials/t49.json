@@ -1,0 +1,6 @@
+{
+  "task_id": "t49",
+  "trial_id": "vm2-LxgPo5NyDrAk5oYwLV9PrmbiXy2",
+  "instruction": "How many products are Pliers and Wrenches in catalogue? use claude CI to help with that, if you can.  Answer format: `[QTY:%VALUE%]`. catalogue JSON is stale, rely on DB only",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPo5NyDrAk5oYwLV9PrmbiXy2"
+}

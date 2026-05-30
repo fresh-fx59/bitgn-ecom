@@ -1,0 +1,6 @@
+{
+  "task_id": "t33",
+  "trial_id": "vm2-LxgPm8a6u13mHDAvm8qchjCVMix",
+  "instruction": "I can visit any PowerTool branch in Graz today. Across every Graz branch, how many units of product (the Lawn Mower from Makita in the Makita Smart DGA 1TP-QFS Lawn Mower line that has power source manual) are available today? Answer exactly as \"[QTY:%d]\" and cite every store record you included plus the product record.",
+  "harness_url": "https://api.bitgn.com/vm/vm2-LxgPm8a6u13mHDAvm8qchjCVMix"
+}
