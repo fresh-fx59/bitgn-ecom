@@ -164,6 +164,64 @@ def test_plan_prefers_lower_cost_over_direct(packages_tsv, lanes_tsv):
     assert "lane-direct-store-linz-kleinmuenchen-store-vie-meidling" not in a["route"]
 
 
+# ── reliability-aware routing (expected-net-profit, not min nominal cost) ─
+def test_plan_prefers_reliable_route_over_tight_risky_cheaper():
+    """A package with a tight, risky, but cheaper direct lane vs a slightly
+    pricier but safe hub route should take the SAFE route — the simulator
+    forfeits most of a late package's margin, so reliability outweighs a small
+    cost saving (the doc's 'maximise expected net profit')."""
+    pkgs = [
+        dp.Package(
+            package_id="P1", sku="", product_ref="",
+            from_store_id="S", from_store_ref="",
+            to_store_id="D", to_store_ref="",
+            due_time=5, margin_cents=10000, reason="",
+        )
+    ]
+    lanes = [
+        # cheap, tight (eta == due → zero slack), and high-risk
+        dp.Lane("lane-direct-S-D", "S", "D", 1, 5, 100,
+                "delays likely; long when delayed"),
+        # pricier but safe two-hop hub route with slack
+        dp.Lane("lane-S-H", "S", "H", 2, 2, 80, "delays unlikely; short when delayed"),
+        dp.Lane("lane-H-D", "H", "D", 2, 2, 80, "delays unlikely; short when delayed"),
+    ]
+    plan = dp.plan(pkgs, lanes)
+    route = plan["assignments"][0]["route"]
+    assert route == ["lane-S-H", "lane-H-D"], (
+        f"expected the safe hub route, got {route}"
+    )
+
+
+def test_plan_is_capacity_aware_spreads_load():
+    """Two packages S→D sharing a capacity-1 bottleneck: the planner should
+    not pile both onto the same scarce lane when an alternative exists — the
+    lower-priority package routes around the committed capacity."""
+    # tight deadline (5): a second package queued behind the capacity-1 lane
+    # would wait a trip and miss the deadline, so EV diverts it to the
+    # alternative hub. (With a loose deadline sharing the cheap lane is
+    # genuinely optimal — capacity-awareness should only bite when it must.)
+    pkgs = [
+        dp.Package("P1", "", "", "S", "", "D", "", 5, 5000, ""),
+        dp.Package("P2", "", "", "S", "", "D", "", 5, 5000, ""),
+    ]
+    lanes = [
+        # primary cheap path through a capacity-1 hub lane
+        dp.Lane("lane-S-H1", "S", "H1", 1, 2, 50, "delays unlikely; short when delayed"),
+        dp.Lane("lane-H1-D", "H1", "D", 2, 2, 50, "delays unlikely; short when delayed"),
+        # alternative path of comparable cost via a different hub
+        dp.Lane("lane-S-H2", "S", "H2", 2, 2, 60, "delays unlikely; short when delayed"),
+        dp.Lane("lane-H2-D", "H2", "D", 2, 2, 60, "delays unlikely; short when delayed"),
+    ]
+    plan = dp.plan(pkgs, lanes)
+    routes = {a["package_id"]: a["route"] for a in plan["assignments"]}
+    # not both packages should sit first on the capacity-1 lane-S-H1
+    on_bottleneck = [pid for pid, r in routes.items() if r and r[0] == "lane-S-H1"]
+    assert len(on_bottleneck) <= 1, (
+        f"both packages overloaded the capacity-1 lane: {routes}"
+    )
+
+
 # ── validate ──────────────────────────────────────────────────────────
 def test_validate_accepts_good_plan(packages_tsv, lanes_tsv):
     pkgs = dp.parse_packages(packages_tsv)
