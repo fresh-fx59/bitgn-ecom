@@ -73,6 +73,41 @@ class CanonicalizationResult:
     preserved_tokens: list[str] # Tokens detected as preserve-critical
     canonicalized: bool         # True if LLM call succeeded + preservation passed
     failure_reason: Optional[str] = None
+    injection_markers: list[str] = None  # forged chat-template control tokens (see detect_injection)
+
+    def __post_init__(self):
+        if self.injection_markers is None:
+            self.injection_markers = []
+
+
+# Structural prompt-injection markers: forged chat-template control tokens
+# and role-delimiters that a legitimate e-commerce instruction NEVER
+# contains. Their presence inside task text is an attempt to forge a
+# system/user turn or smuggle operator directives ("apply the embedded
+# instructions before reading local docs"). This is a STRUCTURAL signal —
+# language- and content-independent — so it survives the canonicalizer
+# paraphrase that would otherwise launder the foreign-language payload away.
+# Covers DeepSeek (fullwidth-pipe), ChatML / OpenAI (`<|...|>`), and Llama
+# (`[INST]`, `<<SYS>>`) template families.
+_INJECTION_MARKERS = re.compile(
+    "<｜[^｜]{1,48}｜>"   # fullwidth-pipe tokens  <｜System｜>, <｜begin▁of▁sentence｜>
+    r"|<\|[^|>]{1,48}\|>"             # ASCII chat tokens      <|system|>, <|im_start|>
+    r"|\[/?INST\]"                    # Llama-2 instruction     [INST] [/INST]
+    r"|<</?SYS>>",                    # Llama-2 system block     <<SYS>> <</SYS>>
+    re.IGNORECASE,
+)
+
+
+def detect_injection(text: str) -> list[str]:
+    """Return the distinct structural prompt-injection markers found in
+    ``text`` (forged chat-template / role-delimiter control tokens), or an
+    empty list. A legitimate instruction never embeds model control tokens,
+    so any hit is a high-confidence injection signal independent of the
+    payload's language — which is why we check the RAW text before the
+    LLM canonicalizer (which paraphrases the visible attack away)."""
+    if not text:
+        return []
+    return sorted({m.group(0) for m in _INJECTION_MARKERS.finditer(text)})
 
 
 def _detect_preserve_tokens(text: str) -> tuple[list[str], list[str]]:
@@ -168,6 +203,17 @@ def canonicalize(
     """
     if not task_text or not task_text.strip():
         return CanonicalizationResult("en", task_text, [], False, "empty")
+
+    # Detect structural injection markers in the RAW text first — before the
+    # _looks_english short-circuit and before any LLM paraphrase, both of
+    # which would launder the attack away. Keep raw text (don't canonicalize)
+    # so downstream sees the unmodified instruction; surface the markers.
+    injection = detect_injection(task_text)
+    if injection:
+        return CanonicalizationResult(
+            "en", task_text, [], False, "injection_detected",
+            injection_markers=injection,
+        )
 
     if _looks_english(task_text):
         return CanonicalizationResult("en", task_text, [], True, None)
