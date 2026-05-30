@@ -53,3 +53,5 @@ artifacts/scans/**/_mirror_workspace/
 
 # Regenerable prod-faithful materialized snapshots (build_prod_snapshot.py)
 artifacts/ws_snapshots/*_prod/
+
+artifacts/ws_snapshots/*_synth/

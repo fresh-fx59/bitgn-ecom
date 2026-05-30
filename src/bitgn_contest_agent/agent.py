@@ -576,11 +576,28 @@ class AgentLoop:
                 # Env-gated default-off (BITGN_USE_FS_REDERIVE_COUNT=1). Only
                 # runs if the SQL pass did not already bounce. See
                 # fs_count_rederive + memory project_ecom_prod_fs_ground_truth.
+                # Two count shapes are handled: (A) task_spec.kind ==
+                # count_per_store (products described by brand/line/attrs ->
+                # resolved from /proc/catalog); and (B) the RAW-SKU-LIST
+                # compound shape the prod classifier labels kind="none"
+                # (explicit SKU list + "at least N on hand but fewer than M
+                # available" / "short of N but incoming within D days"),
+                # detected straight from the task TEXT. Shape B is the
+                # dominant prod count shape (t005/t025/t045/t065).
+                _fs_text = (
+                    getattr(session, "task_text_en", "")
+                    or self._current_task_text
+                    or task_text
+                ) or ""
+                _want_spec_count = (
+                    getattr(fn.task_spec, "kind", "none") == "count_per_store")
+                _want_shape_b = bool(
+                    fs_count_rederive._SHAPE_B_SIGNAL.search(_fs_text))
                 if (
                     verdict.ok
                     and fs_count_rederive.is_enabled()
                     and fn.outcome == "OUTCOME_OK"
-                    and getattr(fn.task_spec, "kind", "none") == "count_per_store"
+                    and (_want_spec_count or _want_shape_b)
                 ):
                     import json as _json_fs
                     import re as _re_fs
@@ -626,16 +643,21 @@ class AgentLoop:
                         except Exception:
                             return []
 
-                    _fs_text = (
-                        getattr(session, "task_text_en", "")
-                        or self._current_task_text
-                        or task_text
-                    )
-                    try:
-                        _fr = fs_count_rederive.rederive_count_fs(
-                            fn.task_spec, _read_fs, _search_fs, _list_fs, _fs_text)
-                    except Exception:
-                        _fr = None
+                    _fr = None
+                    _bounce_fn = count_rederive.build_bounce_reason
+                    if _want_spec_count:
+                        try:
+                            _fr = fs_count_rederive.rederive_count_fs(
+                                fn.task_spec, _read_fs, _search_fs, _list_fs, _fs_text)
+                        except Exception:
+                            _fr = None
+                    if (_fr is None or _fr.count is None) and _want_shape_b:
+                        try:
+                            _fr = fs_count_rederive.rederive_count_b(
+                                _fs_text, _read_fs, _list_fs)
+                            _bounce_fn = fs_count_rederive.build_bounce_reason_b
+                        except Exception:
+                            _fr = None
                     if _fr is not None and _fr.count is not None:
                         _mfs = _re_fs.search(r"-?\d+", fn.message or "")
                         _agent_nfs = int(_mfs.group()) if _mfs else None
@@ -650,7 +672,7 @@ class AgentLoop:
                             )
                             verdict = Verdict(
                                 ok=False,
-                                reasons=[count_rederive.build_bounce_reason(_agent_nfs, _fr)],
+                                reasons=[_bounce_fn(_agent_nfs, _fr)],
                             )
                 if verdict.ok:
                     # Pre-completion verification (spec 2026-04-21).
