@@ -1061,11 +1061,14 @@ class LocalEcomClient:
         against the ``sqlite_schema`` virtual table instead:
             SELECT name, sql FROM sqlite_schema WHERE type='table';
 
-        BITGN_LOCAL_SQL_UNAVAILABLE=1: emulate PROD's no-/bin/sql state
-        (data lives in filesystem, not a SQL cluster). Returns exit_code=1
-        with a PROD-shaped "sql backend unavailable" error so the agent's
-        filesystem-fallback paths are exercised locally. Default (flag
-        unset) = normal SQLite-backed behaviour.
+        BITGN_LOCAL_SQL_UNAVAILABLE=1: emulate PROD's no-SQL state. On real
+        ECOM1-PROD `/bin/sql` exists but the SQL *server* is unreachable —
+        every query returns exit_code=1 with the ODBC login-timeout stderr
+        below (verified in live prod raw dumps; see memory
+        project_ecom_prod_fs_ground_truth). Mirroring the exact message
+        exercises the agent's filesystem-fallback paths against the same
+        signal it sees on PROD. Default (flag unset) = normal SQLite-backed
+        behaviour.
         """
         if os.environ.get("BITGN_LOCAL_SQL_UNAVAILABLE") == "1":
             self.ops_log.append({
@@ -1075,9 +1078,10 @@ class LocalEcomClient:
             return ecom_pb2.ExecResponse(
                 exit_code=1,
                 stderr=(
-                    "sql backend unavailable: no SQL cluster reachable "
-                    "in this environment; use filesystem paths under "
-                    "/proc/ instead\n"
+                    "Sqlcmd: Error: Microsoft ODBC Driver 18 for SQL Server "
+                    ": Login timeout expired.\n"
+                    "Sqlcmd: Error: Microsoft ODBC Driver 18 for SQL Server "
+                    ": TCP Provider: The wait operation timed out.\n"
                 ),
             )
 

@@ -1,0 +1,21 @@
+{
+  "id": 52,
+  "sku": "PT-WASH-KAR-K4-HOME",
+  "name": "Karcher K4 Power Control Home pressure washer",
+  "brand": "Karcher",
+  "category_id": "cat-garden-outdoor",
+  "kind_id": "kind-pressure-washers",
+  "family_id": "fam-karcher-k4-power-control",
+  "price_cents": 29990,
+  "fulfillment_type": 1,
+  "return_policy": 1,
+  "properties": {
+    "accessory_set": "home cleaning kit",
+    "detergent_system": "plug and clean",
+    "flow_l_h": 420,
+    "hose_m": 8,
+    "max_bar": 130,
+    "power_w": 1800,
+    "pump_material": "aluminium"
+  }
+}

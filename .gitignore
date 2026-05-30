@@ -50,3 +50,6 @@ artifacts/scans/**/_mirror_workspace/
 
 # Claude Code agent worktrees (transient, may contain nested checkouts)
 .claude/worktrees/
+
+# Regenerable prod-faithful materialized snapshots (build_prod_snapshot.py)
+artifacts/ws_snapshots/*_prod/
