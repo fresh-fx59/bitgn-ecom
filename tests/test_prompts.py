@@ -138,6 +138,35 @@ def test_jq_flag_toggles_prompt_but_stays_deterministic(monkeypatch) -> None:
     assert off_a != on_a
 
 
+def test_sku_nudge_absent_when_flag_off(monkeypatch) -> None:
+    monkeypatch.delenv("BITGN_USE_SKU_NUDGE", raising=False)
+    p = prompts.system_prompt()
+    assert "SKU_NUDGE_SLOT" not in p
+    assert "UNIQUE-MATCH RESOLVES" not in p
+
+
+def test_sku_nudge_present_and_uniqueness_gated_when_flag_on(monkeypatch) -> None:
+    monkeypatch.setenv("BITGN_USE_SKU_NUDGE", "1")
+    p = prompts.system_prompt()
+    assert "UNIQUE-MATCH RESOLVES" in p
+    # Must preserve genuine clarification for true ties.
+    assert "GENUINE tie" in p
+    assert "TWO OR MORE" in p
+    assert "SKU_NUDGE_SLOT" not in p
+
+
+def test_all_slot_flags_off_is_baseline(monkeypatch) -> None:
+    """With every gated slot flag OFF, the rendered prompt carries no
+    sentinel and no slot content — the v0.1.152 baseline."""
+    monkeypatch.delenv("HINT", raising=False)
+    monkeypatch.delenv("BITGN_USE_JQ", raising=False)
+    monkeypatch.delenv("BITGN_USE_SKU_NUDGE", raising=False)
+    p = prompts.system_prompt()
+    assert "_SLOT" not in p
+    assert "/bin/jq" not in p
+    assert "UNIQUE-MATCH RESOLVES" not in p
+
+
 def test_system_prompt_stays_bit_identical_for_cache_hits() -> None:
     """Architectural invariant: the system prompt must not vary per task.
     Two calls without HINT must return byte-identical strings, proving

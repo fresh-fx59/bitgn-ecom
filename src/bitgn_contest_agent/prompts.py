@@ -613,6 +613,7 @@ Catalogue / SQL discipline (ECOM-specific):
     Generic principle: spec attributes named in the task are
     DISAMBIGUATORS, not decorations. Push every disambiguator into
     the WHERE clause.
+<<SKU_NUDGE_SLOT>>
 
     NEVER EQUALITY-MATCH THE DISPLAY-NAME COLUMN AGAINST THE SHORT
     PRODUCT TYPE. The catalogue's `name` / `product_name` column is a
@@ -1561,17 +1562,52 @@ _JQ_DISCIPLINE_BLOCK = """\
                        fall back to `read` and parse the JSON directly."""
 
 
-def _render_jq_slot(prompt: str) -> str:
-    """Replace the <<JQ_SLOT>> sentinel with the jq discipline block when
-    BITGN_USE_JQ=1, else strip the sentinel line entirely so the rendered
-    prompt is bit-identical to the pre-jq baseline (cache-safe)."""
-    if os.environ.get("BITGN_USE_JQ", "").strip() == "1":
-        return prompt.replace("<<JQ_SLOT>>", _JQ_DISCIPLINE_BLOCK)
-    return prompt.replace("<<JQ_SLOT>>\n", "")
+# Uniqueness-gated SKU-resolution nudge (Task 2C), injected at the
+# <<SKU_NUDGE_SLOT>> sentinel only when BITGN_USE_SKU_NUDGE=1. gpt-5.4
+# over-emits OUTCOME_NONE_CLARIFICATION when a single qualifier token
+# already discriminates one candidate; this counters that WITHOUT a
+# deterministic rewriter (prompt-only) and WITHOUT loosening precision —
+# it fires only when EXACTLY ONE candidate survives all named qualifiers,
+# and explicitly preserves clarification for genuine ties. Framed as a
+# "prefer answering" nudge, never bundled with the precision warnings
+# above (memory feedback_pre_submit_checklist_hurts_recall). Default-off.
+_SKU_NUDGE_BLOCK = """\
+    UNIQUE-MATCH RESOLVES — DO NOT OVER-CLARIFY. After pushing every
+    named qualifier into the lookup (the disambiguator rule above),
+    count the candidates that satisfy ALL of them. If EXACTLY ONE
+    survives, that candidate IS the requested product — answer
+    OUTCOME_OK and cite its record. A qualifier that uniquely selects
+    one row ("the SET" vs the bare tool, a named capacity, a price
+    ceiling only one variant meets, a specific pack count) is a
+    RESOLUTION, not an ambiguity; the task's own qualifier has already
+    made the choice, so do not turn around and ask the actor to choose.
+    Reserve OUTCOME_NONE_CLARIFICATION for a GENUINE tie only: TWO OR
+    MORE candidates each satisfy EVERY stated constraint and nothing in
+    the task picks between them. One survivor → answer; multiple equal
+    survivors → clarify."""
+
+
+# Sentinel → (env-flag, replacement block). Each slot renders to its
+# block when the flag is "1", else the sentinel line is stripped so the
+# prompt is bit-identical to the v0.1.152 baseline (preserves the
+# cross-task prompt cache for the passing set).
+_PROMPT_SLOTS = (
+    ("<<JQ_SLOT>>", "BITGN_USE_JQ", _JQ_DISCIPLINE_BLOCK),
+    ("<<SKU_NUDGE_SLOT>>", "BITGN_USE_SKU_NUDGE", _SKU_NUDGE_BLOCK),
+)
+
+
+def _render_slots(prompt: str) -> str:
+    for sentinel, flag, block in _PROMPT_SLOTS:
+        if os.environ.get(flag, "").strip() == "1":
+            prompt = prompt.replace(sentinel, block)
+        else:
+            prompt = prompt.replace(sentinel + "\n", "")
+    return prompt
 
 
 def system_prompt() -> str:
-    base = _render_jq_slot(_STATIC_SYSTEM_PROMPT)
+    base = _render_slots(_STATIC_SYSTEM_PROMPT)
     hint = os.environ.get("HINT", "").strip()
     if hint:
         return base + f"\n\n[RUN HINT]: {hint}\n"
