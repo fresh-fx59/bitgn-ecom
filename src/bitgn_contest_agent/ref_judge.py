@@ -52,10 +52,14 @@ Think step by step, then output JSON only:
 import json as _json
 import re as _re
 
-# Families whose /proc/catalog ref set the grader checks against task intent.
+# YES/NO families only (existence + availability). Count-list ("how many of
+# these SKUs") is owned DETERMINISTICALLY by count_ref_completer, which runs
+# BEFORE this judge and cites every candidate; the judge must NOT fire there
+# (its yes/no "cite only the match" rubric could prune the completer's correct
+# additions → regression). So this signal deliberately EXCLUDES "how many".
 _FAMILY_SIGNAL = _re.compile(
-    r"how many of these|does such product exist|do you have|does (the|this|a)\b|"
-    r"is there a|in stock|same-day|available",
+    r"does such product exist|does (the|this|that|a)\b|do you have|"
+    r"is there a|do we (have|stock)|can i buy",
     _re.I)
 _SKU_TOKEN = _re.compile(r"\b([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)\b")
 

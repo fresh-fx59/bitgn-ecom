@@ -1,0 +1,48 @@
+# A/B 2 snapshot(s) x 4 runs | candidate={'BITGN_USE_COUNT_REF_COMPLETER': '1', 'BITGN_USE_REF_JUDGE': '1'}
+# model=gpt-5.4 effort=medium
+  [baseline][FAIL] count_ref_synth#0 outcome=OUTCOME_OK steps=6 75s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+  [baseline][FAIL] count_ref_synth#1 outcome=OUTCOME_OK steps=5 93s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+  [baseline][FAIL] count_ref_synth#2 outcome=OUTCOME_OK steps=6 75s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+classify attempt 1: JSON parse failed at char 0: Expecting value
+JSON fix attempt failed: Expecting value: line 1 column 1 (char 0)
+classify attempt 2: JSON parse failed at char 0: Expecting value
+classify attempt 1: JSON parse failed at char 0: Expecting value
+classify attempt 1: JSON parse failed at char 0: Expecting value
+JSON fix attempt failed: Expecting value: line 1 column 1 (char 0)
+classify attempt 2: JSON parse failed at char 0: Expecting value
+JSON fix attempt failed: Expecting value: line 1 column 1 (char 0)
+classify attempt 3: JSON parse failed at char 0: Expecting value
+  [baseline][FAIL] count_ref_synth#3 outcome=OUTCOME_OK steps=7 150s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+  [baseline][PASS] yes_no_ref_synth#0 outcome=OUTCOME_OK steps=5 71s :: passed all checks
+  [baseline][PASS] yes_no_ref_synth#1 outcome=OUTCOME_OK steps=5 72s :: passed all checks
+  [baseline][PASS] yes_no_ref_synth#2 outcome=OUTCOME_OK steps=4 71s :: passed all checks
+  [baseline][PASS] yes_no_ref_synth#3 outcome=OUTCOME_OK steps=4 59s :: passed all checks
+classify attempt 1: JSON parse failed at char 0: Expecting value
+classify attempt 1: JSON parse failed at char 0: Expecting value
+classify attempt 1: JSON parse failed at char 0: Expecting value
+JSON fix attempt failed: Expecting value: line 1 column 1 (char 0)
+classify attempt 1: JSON parse failed at char 0: Expecting value
+classify attempt 2: JSON parse failed at char 0: Expecting value
+classify attempt 1: JSON parse failed at char 0: Expecting value
+  [candidate][PASS] count_ref_synth#0 outcome=OUTCOME_OK steps=6 110s :: passed all checks
+classify attempt 1: JSON parse failed at char 0: Expecting value
+classify attempt 1: JSON parse failed at char 0: Expecting value
+  [candidate][PASS] count_ref_synth#1 outcome=OUTCOME_OK steps=6 129s :: passed all checks
+JSON fix attempt failed: Expecting value: line 1 column 1 (char 0)
+classify attempt 1: JSON parse failed at char 0: Expecting value
+classify attempt 2: JSON parse failed at char 0: Expecting value
+JSON fix attempt failed: Expecting value: line 1 column 1 (char 0)
+classify attempt 2: JSON parse failed at char 0: Expecting value
+  [candidate][PASS] count_ref_synth#2 outcome=OUTCOME_OK steps=7 146s :: passed all checks
+  [candidate][PASS] count_ref_synth#3 outcome=OUTCOME_OK steps=6 138s :: passed all checks
+  [candidate][PASS] yes_no_ref_synth#0 outcome=OUTCOME_OK steps=4 41s :: passed all checks
+  [candidate][PASS] yes_no_ref_synth#1 outcome=OUTCOME_OK steps=4 46s :: passed all checks
+  [candidate][PASS] yes_no_ref_synth#2 outcome=OUTCOME_OK steps=5 63s :: passed all checks
+  [candidate][PASS] yes_no_ref_synth#3 outcome=OUTCOME_OK steps=4 55s :: passed all checks
+
+# RESULTS  (baseline -> candidate)
+  count_ref_synth                    0% ->   100%  (+lift)
+  yes_no_ref_synth                 100% ->   100%
+
+# baseline mean 50.0%  candidate mean 100.0%
+# no regressions

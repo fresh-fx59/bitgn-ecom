@@ -1,0 +1,21 @@
+# A/B 1 snapshot(s) x 4 runs | candidate={'BITGN_USE_COUNT_REF_COMPLETER': '1'}
+# model=gpt-5.4 effort=medium
+  [baseline][FAIL] count_ref_synth#0 outcome=OUTCOME_OK steps=6 65s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+  [baseline][FAIL] count_ref_synth#1 outcome=OUTCOME_OK steps=4 57s :: answer missing required reference '/proc/catalog/Bosch Professional/PT-DRL-BOS-GSR55-2AH.json'
+  [baseline][FAIL] count_ref_synth#2 outcome=OUTCOME_OK steps=6 78s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+  [baseline][FAIL] count_ref_synth#3 outcome=OUTCOME_OK steps=5 61s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+classify attempt 1: JSON parse failed at char 0: Expecting value
+JSON fix attempt failed: Expecting value: line 1 column 1 (char 0)
+classify attempt 2: JSON parse failed at char 0: Expecting value
+JSON fix attempt failed: Expecting value: line 1 column 1 (char 0)
+classify attempt 3: JSON parse failed at char 0: Expecting value
+  [candidate][PASS] count_ref_synth#0 outcome=OUTCOME_OK steps=6 119s :: passed all checks
+  [candidate][PASS] count_ref_synth#1 outcome=OUTCOME_OK steps=7 125s :: passed all checks
+  [candidate][PASS] count_ref_synth#2 outcome=OUTCOME_OK steps=7 109s :: passed all checks
+  [candidate][PASS] count_ref_synth#3 outcome=OUTCOME_OK steps=6 108s :: passed all checks
+
+# RESULTS  (baseline -> candidate)
+  count_ref_synth                    0% ->   100%  (+lift)
+
+# baseline mean 0.0%  candidate mean 100.0%
+# no regressions

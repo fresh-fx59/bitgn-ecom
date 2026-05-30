@@ -3,7 +3,18 @@ judge call is injected). Validates reference-anchoring (judge can't introduce
 unknown paths), abstain-on-bad-output, and the catalogue-ref swap."""
 from __future__ import annotations
 
-from bitgn_contest_agent.ref_judge import apply_correction, judge_catalog_refs
+from bitgn_contest_agent.ref_judge import apply_correction, applies, judge_catalog_refs
+
+
+def test_applies_to_yes_no_not_count_list():
+    # yes/no existence/availability → judge applies
+    assert applies("Does the Bosch GSR55 with voltage 18 exist?", ["/proc/catalog/B/PT-X.json"])
+    assert applies("Do you have 5 of the Makita drill?", ["/proc/catalog/B/PT-X.json"])
+    # count-list is owned by count_ref_completer → judge must NOT fire (no
+    # interaction that could prune the completer's additions)
+    assert not applies("how many of these SKUs are available: PT-A, PT-B?", ["/proc/catalog/B/PT-A.json"])
+    # nothing to reason about → no fire
+    assert not applies("Check out basket basket-1.", [])
 
 _CANDS = [
     {"path": "/proc/catalog/DeWalt/PT-A.json", "sku": "PT-A", "brand": "DeWalt", "name": "A"},
