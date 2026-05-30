@@ -47,3 +47,6 @@ artifacts/scans/*/trials/
 artifacts/scans/*/manifest.json.bak
 # Mirror-workspace temp dirs produced by scripts/verify_local_mirror.py
 artifacts/scans/**/_mirror_workspace/
+
+# Claude Code agent worktrees (transient, may contain nested checkouts)
+.claude/worktrees/
