@@ -785,6 +785,30 @@ Catalogue / SQL discipline (ECOM-specific):
     filters (for precision). Both passes are required; running
     only one of them leaves score on the table.
 
+  - DISPATCH-WAVE (warehouse rebalancing / shipping plan). When the
+    task says to plan a dispatch wave (e.g. "Plan the dispatch wave
+    described in /ops/dispatch/wave-XXXX/dispatch.md"), first read
+    /docs/dispatch.md (the rules + answer format) and the named wave
+    .md file; the wave file names a packages TSV and a lanes TSV —
+    read both. Then output exactly ONE JSON object as the answer:
+    `{"assignments":[{"package_id":...,"route":[lane_ids...],"priority":N}]}`,
+    with one assignment per package. A `route` is an ordered list of
+    lane_ids forming a CONNECTED path: it starts at the package's
+    `from_store_id`, ends at its `to_store_id`, and each lane's `to`
+    equals the next lane's `from` (use hub lanes — hub-east/central/west
+    — or a direct lane). Route ETA = sum of lane `eta`s; a package earns
+    its margin only if ETA ≤ its `due_time`, so choose routes that meet
+    the deadline; among those pick MINIMUM total cost_cents (avoid the
+    slow expensive `lane-direct-...` lanes and lanes whose delay_hint is
+    "delays likely / long when delayed" when a comparably-cheap safer
+    route exists). If no route meets the deadline, take the fastest one
+    (late beats missing). Set `priority` by urgency — rank packages by
+    `due_time` ascending then `margin_cents` descending, priority 1 =
+    most urgent — so scarce early lane capacity loads the most
+    time-critical / highest-value packages first. The goal is to
+    MAXIMIZE net profit (Σ on-time margins − Σ lane costs − late/missed
+    penalties), not merely the count delivered.
+
 Parallel reads (latency optimization, optional):
   When you need to gather information from several independent sources
   in one turn, you may emit a `parallel_reads` array on `NextStep`

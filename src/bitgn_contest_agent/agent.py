@@ -1479,6 +1479,102 @@ class AgentLoop:
                         )
                         fn = fn.model_copy(update={"message": new_msg})
 
+            # v0.1.153 DISPATCH-WAVE planner (PROD "dispatch wave" family).
+            # A pure-Python solver routes each transfer package over the
+            # directed hub-and-spoke lane network (min cost within deadline,
+            # late beats missing) and ranks priorities by urgency. The
+            # required answer is ONE JSON object {"assignments":[...]} graded
+            # by a shipping SIMULATOR on net profit — a computed optimum, not
+            # a semantic judgment, so a full OVERRIDE is correct here, but
+            # ONLY when the plan validates (one connected route per package).
+            # Otherwise abstain (leave the agent's answer untouched). Wrapped
+            # in try/except so a planner crash NEVER fails the task. Env-gated
+            # default-off via BITGN_USE_DISPATCH_PLANNER. See dispatch_planner
+            # module + tests/test_dispatch_planner.py.
+            try:
+                from bitgn_contest_agent import dispatch_planner as _dispatch
+                if _dispatch.is_enabled():
+                    _wave_path = _dispatch.extract_wave_path(task_text or "")
+                    if _wave_path:
+                        import json
+
+                        from bitgn_contest_agent.adapter.ecom import (
+                            Req_Read as _Req_Read_DP,
+                        )
+
+                        def _read_dp(p: str) -> str | None:
+                            try:
+                                tr = self._adapter.dispatch(
+                                    _Req_Read_DP(tool="read", path=p)
+                                )
+                            except Exception:
+                                return None
+                            if not (tr.ok and tr.content):
+                                return None
+                            # `read` content is a MessageToJson body with a
+                            # `content` field holding the file bytes; unwrap
+                            # it, falling back to the raw text otherwise.
+                            try:
+                                parsed = json.loads(tr.content)
+                                if isinstance(parsed, dict) and isinstance(
+                                    parsed.get("content"), str
+                                ):
+                                    return parsed["content"]
+                            except (ValueError, AttributeError):
+                                pass
+                            return tr.content
+
+                        _wave_md = _read_dp(_wave_path)
+                        if _wave_md:
+                            _plan_obj = _dispatch.plan_from_paths(
+                                _wave_md, _read_dp
+                            )
+                            if _plan_obj is not None:
+                                # re-parse the TSVs to validate the plan we
+                                # are about to commit (cheap; the reads are
+                                # cached upstream where applicable).
+                                _mp = _dispatch._PKG_PATH_RE.search(_wave_md)
+                                _ml = _dispatch._LANE_PATH_RE.search(_wave_md)
+                                _pkgs = _lanes = None
+                                if _mp and _ml:
+                                    _pt = _read_dp(
+                                        _mp.group(1).strip().rstrip(".,;")
+                                    )
+                                    _lt = _read_dp(
+                                        _ml.group(1).strip().rstrip(".,;")
+                                    )
+                                    if _pt and _lt:
+                                        _pkgs = _dispatch.parse_packages(_pt)
+                                        _lanes = _dispatch.parse_lanes(_lt)
+                                if (
+                                    _pkgs
+                                    and _lanes
+                                    and _dispatch.validate(
+                                        _plan_obj, _pkgs, _lanes
+                                    )
+                                ):
+                                    _n = len(_plan_obj["assignments"])
+                                    fn = fn.model_copy(
+                                        update={
+                                            "message": json.dumps(
+                                                _plan_obj,
+                                                separators=(",", ":"),
+                                            ),
+                                            "outcome": "OUTCOME_OK",
+                                        }
+                                    )
+                                    emit_arch(
+                                        category=ArchCategory.REFS_DROP,
+                                        at_step=None,
+                                        details=(
+                                            f"dispatch_planner: planned "
+                                            f"{_n} packages"
+                                        ),
+                                    )
+            except Exception:
+                # Any planner failure degrades to the agent's own answer.
+                pass
+
             # v0.1.147 fraud-ring completer (t40 SQL fraud-incident task).
             # The agent detects the incident by device clustering and catches
             # most of it but under-cites the ring members on a secondary
