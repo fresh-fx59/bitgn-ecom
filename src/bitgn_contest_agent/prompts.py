@@ -474,6 +474,17 @@ Catalogue / SQL discipline (ECOM-specific):
                        basket exists.
     Discover the table inventory by reading /AGENTS.MD — do NOT guess
     table or column names.
+  - RECORD-NOT-FOUND → TRY THE SCOPED PATH before giving up. A flat
+    record path (e.g. `/proc/payments/<id>.json`) returning 404 / UNKNOWN
+    does NOT mean the entity is absent — many records are only readable
+    under a SCOPED path (e.g. under the owning customer, basket, or
+    return: `/proc/customers/<cust_id>/...`, the parent return/order
+    record, etc.). When a payment / return / order / refund lookup 404s,
+    derive the owner from a record you already hold, then retry the
+    owner-scoped path and `list` the parent directory BEFORE concluding
+    the record is missing or refusing the action. (run2 t037: a
+    `refund_pending` refund was abandoned after a single flat-path 404
+    even though it was closable via the scoped path.)
   - Prefer SQL over file-walking for any aggregation, count, sum,
     group-by, or join. Reading every CSV row by hand is brittle and
     bytes-expensive; one `exec /bin/sql <<<'SELECT ...'` returns the
