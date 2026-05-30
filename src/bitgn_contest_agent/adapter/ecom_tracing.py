@@ -56,6 +56,21 @@ _ecom_op_origin: ContextVar[Optional[str]] = ContextVar(
     "ecom_op_origin", default=None,
 )
 
+# Task id for the trial currently executing in this context. Stamped on
+# every raw-dump record so the per-process dump (which interleaves all
+# parallel trials) can be SLICED BY TASK after the run — the basis for the
+# prod-world scraper (scripts/scrape_prod_worlds.py), which rebuilds the
+# exact files each count task saw into faithful local test beds. PROD has
+# no SQL so deep_extract can't do this; filesystem-tagged capture can.
+_ecom_task_id: ContextVar[Optional[str]] = ContextVar(
+    "ecom_task_id", default=None,
+)
+
+
+def set_ecom_task(task_id: Optional[str]) -> None:
+    """Tag subsequent raw-dump records with this trial's task id."""
+    _ecom_task_id.set(task_id)
+
 
 @contextmanager
 def ecom_origin(label: str) -> Iterator[None]:
@@ -175,6 +190,7 @@ def _dump_raw(op: str, req: Any, resp: Any, *, ok: bool, wall_ms: int,
             "request": _proto_to_dict(req) if req is not None else None,
             "response": _proto_to_dict(resp) if resp is not None else None,
             "origin": _ecom_op_origin.get(),
+            "task": _ecom_task_id.get(),
         }
         line = json.dumps(record, default=str) + "\n"
         with _RAW_DUMP_LOCK:

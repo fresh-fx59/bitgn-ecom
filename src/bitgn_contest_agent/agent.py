@@ -29,7 +29,9 @@ from typing import Any, List, Optional, Sequence
 from pydantic import ValidationError
 
 from bitgn_contest_agent.adapter.ecom import EcomAdapter, ToolResult
-from bitgn_contest_agent.adapter.ecom_tracing import ecom_origin, set_ecom_origin
+from bitgn_contest_agent.adapter.ecom_tracing import (
+    ecom_origin, set_ecom_origin, set_ecom_task,
+)
 from bitgn_contest_agent.arch_constants import (
     ArchCategory,
     ArchResult,
@@ -336,6 +338,9 @@ class AgentLoop:
         # verification verbs, and content assertions before deciding
         # which refs to keep / strip on DENIED_SECURITY refusals.
         self._current_task_text = task_text
+        # Tag raw-dump records with this trial's task id so the per-process
+        # dump can be sliced by task post-run (prod-world scraper).
+        set_ecom_task(task_id)
         from bitgn_contest_agent import classifier as _classifier_cov
         from bitgn_contest_agent import count_rederive
         from bitgn_contest_agent import fs_count_rederive
