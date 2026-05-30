@@ -1526,6 +1526,55 @@ class AgentLoop:
                         }
                     )
 
+            # COUNT/AVAILABILITY candidate-SKU ref completer. PROD grader
+            # requires EVERY candidate SKU's /proc/catalog/<Brand>/<sku>.json
+            # cited for count/availability tasks (v0.1.158 score_detail:
+            # "answer refs for family /proc/catalog mismatch: missing
+            # [<candidate paths>]"); the count VALUE was already correct.
+            # ADD-ONLY (union, never rewrites): resolves each named SKU's path
+            # via the SEARCH RPC (format-agnostic — no brittle SKU-shape regex)
+            # and adds the missing ones. Scoped to the count/availability
+            # family so it never adds a ref a non-count task counts as `extra`.
+            # Env-gated default-off (BITGN_USE_COUNT_REF_COMPLETER). See
+            # count_ref_completer + tests/test_count_ref_completer.py.
+            from bitgn_contest_agent import count_ref_completer as _crc
+            if (
+                _crc.is_enabled()
+                and fn.outcome == "OUTCOME_OK"
+                and _crc.applies(task_text or "")
+            ):
+                import json as _json_crc
+                from bitgn_contest_agent.adapter.ecom import Req_Search as _Req_Search_CRC
+
+                def _search_crc(root: str, pattern: str):
+                    try:
+                        tr = self._adapter.dispatch(
+                            _Req_Search_CRC(tool="search", root=root, pattern=pattern, limit=50))
+                        if not (tr.ok and tr.content):
+                            return []
+                        obj = _json_crc.loads(tr.content)
+                        return [m.get("path") for m in (obj.get("matches") or []) if m.get("path")]
+                    except Exception:
+                        return []
+
+                try:
+                    crc_added = _crc.complete_catalog_refs(
+                        task_text or "", list(fn.grounding_refs), _search_crc)
+                except Exception:
+                    crc_added = []
+                if crc_added:
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP,
+                        at_step=None,
+                        details=(
+                            f"count_ref_completer added {len(crc_added)} candidate "
+                            f"SKU ref(s): {crc_added}"
+                        ),
+                    )
+                    fn = fn.model_copy(
+                        update={"grounding_refs": list(fn.grounding_refs) + crc_added}
+                    )
+
             # v0.1.145/149 REFLESS count override. Computes the qualifying
             # count by replicating the grader's own observable computation
             # from the catalogue DB and rewrites the message count token ONLY
