@@ -336,6 +336,8 @@ class AgentLoop:
         # verification verbs, and content assertions before deciding
         # which refs to keep / strip on DENIED_SECURITY refusals.
         self._current_task_text = task_text
+        from bitgn_contest_agent import classifier as _classifier_cov
+        _classifier_cov.reset_aux_coverage()
         session = Session()
         messages, decision = _build_initial_messages(
             task_text=task_text,
@@ -643,6 +645,12 @@ class AgentLoop:
                     enforcer_action=enforcer_action,
                 )
                 totals.steps += 1
+                _att, _suc = _classifier_cov.get_aux_coverage()
+                emit_arch(
+                    category=ArchCategory.VALIDATOR_T2,
+                    at_step=None,
+                    details=f"verification_coverage attempted={_att} succeeded={_suc}",
+                )
                 return self._finish_report(
                     totals,
                     reported=fn.outcome,

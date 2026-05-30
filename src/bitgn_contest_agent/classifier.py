@@ -79,6 +79,35 @@ _LOG = logging.getLogger(__name__)
 
 _inflight_semaphore: threading.Semaphore | None = None
 
+# ── Per-task aux-call coverage counters (thread-local) ──────────────────────
+# Each agent task runs in its own thread (ThreadPoolExecutor in cli.py).
+# Thread-local storage gives correct per-task attribution without any
+# coupling between the aux-call sites (validator, judge_enforcer,
+# task_canonicalizer, router, reactive_router) and the AgentLoop.
+
+_aux_coverage = threading.local()
+
+
+def _aux_cov() -> threading.local:
+    cov = _aux_coverage
+    if not hasattr(cov, "attempted"):
+        cov.attempted = 0
+        cov.succeeded = 0
+    return cov
+
+
+def reset_aux_coverage() -> None:
+    """Zero the calling thread's aux-call counters (call at task start)."""
+    cov = _aux_cov()
+    cov.attempted = 0
+    cov.succeeded = 0
+
+
+def get_aux_coverage() -> tuple[int, int]:
+    """Return (attempted, succeeded) aux LLM calls for the calling thread."""
+    cov = _aux_cov()
+    return cov.attempted, cov.succeeded
+
 
 def set_inflight_semaphore(sem: threading.Semaphore | None) -> None:
     """Set the shared inflight semaphore for classifier LLM calls.
@@ -286,12 +315,25 @@ def _llm_call(client: Any, **kwargs: Any) -> Any:
     400s (e.g. linkapi "bad response status code 400") are transparently
     retried up to 3 times before propagating.  The semaphore wraps the
     entire retry block so every attempt counts against the concurrency cap.
+
+    Increments the thread-local aux-coverage counters: ``attempted`` once
+    at entry (regardless of internal retries), ``succeeded`` only when the
+    call returns without raising.  If ``_call_with_retry`` exhausts all
+    attempts and raises, ``succeeded`` is NOT incremented.
     """
-    sem = _inflight_semaphore
-    if sem is not None:
-        with sem:
-            return _call_with_retry(lambda: client.chat.completions.create(**kwargs))
-    return _call_with_retry(lambda: client.chat.completions.create(**kwargs))
+    cov = _aux_cov()
+    cov.attempted += 1
+
+    def _do() -> Any:
+        sem = _inflight_semaphore
+        if sem is not None:
+            with sem:
+                return _call_with_retry(lambda: client.chat.completions.create(**kwargs))
+        return _call_with_retry(lambda: client.chat.completions.create(**kwargs))
+
+    result = _do()
+    cov.succeeded += 1
+    return result
 
 
 def _stream_call_content(
