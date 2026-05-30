@@ -1544,22 +1544,29 @@ class AgentLoop:
                 and _crc.applies(task_text or "")
             ):
                 import json as _json_crc
-                from bitgn_contest_agent.adapter.ecom import Req_Search as _Req_Search_CRC
+                from bitgn_contest_agent.adapter.ecom import Req_Find as _Req_Find_CRC
 
-                def _search_crc(root: str, pattern: str):
+                def _resolve_crc(sku: str):
+                    # EXACT filename find (<sku>.json) — not content search:
+                    # avoids substring/truncation/paging issues; returns the
+                    # unique catalogue record path.
                     try:
-                        tr = self._adapter.dispatch(
-                            _Req_Search_CRC(tool="search", root=root, pattern=pattern, limit=20))
+                        tr = self._adapter.dispatch(_Req_Find_CRC(
+                            tool="find", name=f"{sku}.json", root="/proc/catalog",
+                            kind="files", limit=20))
                         if not (tr.ok and tr.content):
-                            return []
+                            return None
                         obj = _json_crc.loads(tr.content)
-                        return [m.get("path") for m in (obj.get("matches") or []) if m.get("path")]
+                        for p in (obj.get("paths") or []):
+                            if p.endswith(f"/{sku}.json"):
+                                return p
                     except Exception:
-                        return []
+                        return None
+                    return None
 
                 try:
                     crc_added = _crc.complete_catalog_refs(
-                        task_text or "", list(fn.grounding_refs), _search_crc)
+                        task_text or "", list(fn.grounding_refs), _resolve_crc)
                 except Exception:
                     crc_added = []
                 if crc_added:
@@ -1591,8 +1598,8 @@ class AgentLoop:
             ):
                 import json as _json_rj
                 from bitgn_contest_agent.adapter.ecom import (
+                    Req_Find as _Req_Find_RJ,
                     Req_Read as _Req_Read_RJ,
-                    Req_Search as _Req_Search_RJ,
                 )
 
                 def _read_rj(p: str):
@@ -1610,20 +1617,24 @@ class AgentLoop:
                     except Exception:
                         return None
 
-                def _search_rj(root: str, pattern: str):
+                def _resolve_rj(sku: str):
                     try:
-                        tr = self._adapter.dispatch(
-                            _Req_Search_RJ(tool="search", root=root, pattern=pattern, limit=20))
+                        tr = self._adapter.dispatch(_Req_Find_RJ(
+                            tool="find", name=f"{sku}.json", root="/proc/catalog",
+                            kind="files", limit=20))
                         if not (tr.ok and tr.content):
-                            return []
+                            return None
                         obj = _json_rj.loads(tr.content)
-                        return [m.get("path") for m in (obj.get("matches") or []) if m.get("path")]
+                        for p in (obj.get("paths") or []):
+                            if p.endswith(f"/{sku}.json"):
+                                return p
                     except Exception:
-                        return []
+                        return None
+                    return None
 
                 try:
                     _cands = _rj.gather_candidates(
-                        task_text or "", list(fn.grounding_refs), _search_rj, _read_rj)
+                        task_text or "", list(fn.grounding_refs), _resolve_rj, _read_rj)
                     _cur_cat = [p for p in fn.grounding_refs if str(p).startswith("/proc/catalog/")]
                     _corrected = _rj.judge_catalog_refs(
                         task_text or "", fn.message or "", _cur_cat, _cands)

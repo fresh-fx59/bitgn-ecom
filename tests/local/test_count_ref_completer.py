@@ -38,7 +38,7 @@ def test_does_not_apply_without_count_signal():
     # a security/checkout task naming one SKU must NOT trigger (avoid `extra` refs)
     txt = "Check out basket basket-0013 for me now."
     assert applies(txt) is False
-    assert complete_catalog_refs(txt, [], lambda r, p: []) == []
+    assert complete_catalog_refs(txt, [], lambda sku: None) == []
 
 
 def test_does_not_apply_to_yes_no_do_you_have_with_exclusion():
@@ -47,7 +47,7 @@ def test_does_not_apply_to_yes_no_do_you_have_with_exclusion():
     txt = ("Do you have 25 of 'makita dhs680 accessory bundle without batteries' "
            "(but not PT-SAW-MAK-DHS680-BLADE) in stock at Maxglan?")
     assert applies(txt) is False
-    assert complete_catalog_refs(txt, [], lambda r, p: ["/proc/catalog/X/PT-SAW-MAK-DHS680-BLADE.json"]) == []
+    assert complete_catalog_refs(txt, [], lambda sku: "/proc/catalog/X/PT-SAW-MAK-DHS680-BLADE.json") == []
 
 
 def test_completer_adds_missing_resolved_paths():
@@ -61,15 +61,12 @@ def test_completer_adds_missing_resolved_paths():
         "PT-SAW-MAK-DHS680-5AH": "/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json",
     }
 
-    def search_fn(root, pattern):
-        # pattern is re.escape(sku); recover the sku by stripping escapes
-        sku = pattern.replace("\\", "")
-        p = catalog.get(sku)
-        return [p] if p else []
+    def resolve_fn(sku):
+        return catalog.get(sku)
 
     # agent already cited the qualifying one; completer must add the other 5
     already = ["/proc/catalog/Bosch Professional/PT-SND-BOS-GEX125-DUST.json"]
-    add = complete_catalog_refs(_T005, already, search_fn)
+    add = complete_catalog_refs(_T005, already, resolve_fn)
     assert set(add) == {catalog[s] for s in _T005_SKUS} - set(already)
     # union is the full grader-expected set, no extras
     assert set(already) | set(add) == {catalog[s] for s in _T005_SKUS}
@@ -77,7 +74,7 @@ def test_completer_adds_missing_resolved_paths():
 
 def test_no_duplicate_or_already_present():
     catalog = {"PT-A-B-C": "/proc/catalog/X/PT-A-B-C.json"}
-    search_fn = lambda r, p: [catalog.get(p.replace("\\", ""), None)] if catalog.get(p.replace("\\", "")) else []
+    resolve_fn = lambda sku: catalog.get(sku)
     txt = "how many of these SKUs are available: PT-A-B-C?"
     # already present -> no addition
-    assert complete_catalog_refs(txt, ["/proc/catalog/X/PT-A-B-C.json"], search_fn) == []
+    assert complete_catalog_refs(txt, ["/proc/catalog/X/PT-A-B-C.json"], resolve_fn) == []

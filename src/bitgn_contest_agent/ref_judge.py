@@ -79,22 +79,21 @@ def applies(task_text: str, current_refs: list[str]) -> bool:
     return has_catalog_ref or bool(_SKU_TOKEN.search(task_text))
 
 
-def gather_candidates(task_text, current_refs, search_fn, read_fn) -> list[dict]:
+def gather_candidates(task_text, current_refs, resolve_fn, read_fn) -> list[dict]:
     """Collect candidate catalogue records (path+sku+brand+name+attributes) the
     judge reasons over: the agent's own /proc/catalog refs PLUS every SKU named
-    in the task, resolved via the search RPC. Reads each record for attributes
-    so the judge can decide spec matches (yes/no)."""
+    in the task, resolved via ``resolve_fn(sku)`` (an EXACT filename `find`, not
+    content search — see count_ref_completer for why). Reads each record for
+    attributes so the judge can decide spec matches (yes/no)."""
     paths: list[str] = [p for p in (current_refs or []) if _is_catalog(p)]
     for m in _SKU_TOKEN.finditer(task_text or ""):
         sku = m.group(1)
         try:
-            hits = search_fn("/proc/catalog", _re.escape(sku)) or []
+            p = resolve_fn(sku)
         except Exception:
-            hits = []
-        for h in hits:
-            if h.endswith(f"/{sku}.json") and h not in paths:
-                paths.append(h)
-                break
+            p = None
+        if p and p not in paths:
+            paths.append(p)
     out: list[dict] = []
     seen = set()
     for p in paths:

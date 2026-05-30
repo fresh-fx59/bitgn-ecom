@@ -64,26 +64,24 @@ def applies(task_text: str) -> bool:
 def complete_catalog_refs(
     task_text: str,
     existing_refs,
-    search_fn: Callable[[str, str], list[str]],
+    resolve_fn: Callable[[str], Optional[str]],
 ) -> list[str]:
     """Return the list of /proc/catalog refs to ADD so every candidate SKU in
-    the task is cited. Resolves each SKU's path via search (the live catalogue
-    supplies the <Brand> segment). Never returns paths already present."""
+    the task is cited. ``resolve_fn(sku)`` returns the SKU's catalogue record
+    path (or None). Use an EXACT filename `find` (``<sku>.json`` under
+    /proc/catalog), NOT content `search`: a SKU token can be a substring of
+    sibling SKUs, and the search RPC caps at 20 results with no paging, so a
+    content match could truncate before the exact file. `find` by filename
+    returns the unique record. Never returns paths already present."""
     if not applies(task_text):
         return []
     existing = set(existing_refs or [])
     additions: list[str] = []
     for sku in candidate_skus(task_text):
         try:
-            hits = search_fn("/proc/catalog", re.escape(sku)) or []
+            path = resolve_fn(sku)
         except Exception:
-            hits = []
-        # prefer the catalog record file named exactly <sku>.json
-        path = None
-        for p in hits:
-            if p.endswith(f"/{sku}.json"):
-                path = p
-                break
+            path = None
         if path and path not in existing and path not in additions:
             additions.append(path)
     return additions
