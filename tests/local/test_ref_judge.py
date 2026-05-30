@@ -59,6 +59,24 @@ def test_reference_anchored_drops_hallucinated_path():
     assert out == ["/proc/catalog/DeWalt/PT-A.json"]  # FAKE not in candidate set → dropped
 
 
+def test_no_answer_allows_empty_correction_strips_near_miss():
+    # does-not-exist answer + judge returns [] → strip the near-miss extra ref
+    out = judge_catalog_refs(
+        "Customer wants 'air compressor capacity helper'. Does such product exist?",
+        "FALSE(2)", ["/proc/catalog/X/PT-NEAR-MISS.json"], _CANDS,
+        classify_fn=_judge_returning([]))
+    assert out == []
+
+
+def test_empty_correction_abstains_on_positive_answer():
+    # safety: a YES answer with an empty judge result must NOT strip refs
+    out = judge_catalog_refs(
+        "Does the Bosch PT-C exist?", "TRUE(1)",
+        ["/proc/catalog/Bosch/PT-C.json"], _CANDS,
+        classify_fn=_judge_returning([]))
+    assert out is None
+
+
 def test_abstain_on_no_candidates():
     assert judge_catalog_refs("t", "a", [], [], classify_fn=_judge_returning(["x"])) is None
 

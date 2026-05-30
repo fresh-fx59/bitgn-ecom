@@ -35,15 +35,19 @@ wrong ref scores the whole answer 0. Decide the correct set from the candidate \
 records provided (cite paths ONLY from that list — never invent a path).
 
 Apply the ONE rule matching the task:
-- COUNT over a SKU list ("how many of these SKUs/products ...: <list>"): cite \
-the catalog record of EVERY candidate SKU named in the list, whether or not it \
-qualifies under the threshold.
-- YES/NO EXISTENCE ("does <brand> <line> with <specs> exist?" / "...does such \
-product exist"): cite ONLY the record(s) matching ALL stated specs. Do NOT cite \
-near-miss candidates you examined but that fail a spec.
-- YES/NO AVAILABILITY ("do you have N of <product> (but not <SKU>)"): cite the \
-resolved product's record. NEVER cite an excluded SKU.
-If none match, keep exactly the catalog refs the agent already cited.
+- DOES-NOT-EXIST / NO answer (the answer is FALSE / FALSE(n) / <NO> / "nein" / \
+"no" — the product does NOT exist): the correct set is EMPTY. Cite NO catalog \
+record — do NOT cite a near-miss you examined and rejected. (Verified: grader \
+marks such a near-miss as an EXTRA ref → score 0.)
+- YES/NO EXISTENCE answered YES ("does <brand> <line> with <specs> exist?"): \
+cite ONLY the record(s) matching ALL stated specs; not near-misses that fail a \
+spec.
+- YES/NO AVAILABILITY ("do you have N of <product> ..."): cite the record of \
+the product the request RESOLVES TO (the variant matching the description). A \
+"(but not <SKU>)" clause constrains the quantity/availability check, NOT the \
+citation — do NOT drop a SKU just because it appears after "but not".
+If you cannot confidently resolve which records belong, keep exactly the \
+catalog refs the agent already cited.
 
 Think step by step, then output JSON only:
 {"reasoning": "<one or two sentences>", "catalog_refs": ["/proc/catalog/...", ...]}"""
@@ -164,8 +168,26 @@ def judge_catalog_refs(
     allowed = {r.get("path") for r in candidate_records} | set(current_catalog_refs)
     corrected = [p for p in refs if _is_catalog(p) and p in allowed]
     if not corrected:
+        # Empty set is a VALID correction ONLY for a does-not-exist / NO answer
+        # (cite nothing — drop the near-miss the agent wrongly cited). On any
+        # other answer an empty result is treated as ABSTAIN, so the judge can
+        # never wrongly strip the refs of a YES/positive answer.
+        if _is_negative_answer(agent_answer):
+            return []
         return None
     return corrected
+
+
+_NEG_ANSWER = _re.compile(r"\bfalse\b|false\s*\(|<\s*no\s*>|\bnein\b|\bno\b|\bnein\b", _re.I)
+
+
+def _is_negative_answer(answer: str) -> bool:
+    """True when the answer asserts the product does NOT exist / is unavailable
+    (FALSE / FALSE(n) / <NO> / nein / no)."""
+    a = (answer or "").strip().lower()
+    if not a:
+        return False
+    return bool(_NEG_ANSWER.search(a))
 
 
 def apply_correction(all_refs: list[str], corrected_catalog: list[str]) -> list[str]:
