@@ -42,6 +42,24 @@ class RederiveResult:
         return self.count is None
 
 
+def build_bounce_reason(agent_n: int, rr: "RederiveResult") -> str:
+    """The corrective critique injected when the re-derivation disagrees.
+
+    Spells out the convention so the adaptive model reconciles; never gives
+    the answer as a command (it BOUNCES, the model recomputes).
+    """
+    return (
+        f"COUNT RE-DERIVATION: you reported {agent_n} but an independent SQL "
+        f"re-derivation yields {rr.count}. Convention: available_today = "
+        f"COALESCE(store_inventory.available_today_quantity, 0) — a product with NO "
+        f"inventory row at the named store has 0 available. Apply the threshold "
+        f"DIRECTION-aware (for 'fewer than'/'no availability' a 0 QUALIFIES; for "
+        f"'at least'/'>=' a 0 does NOT qualify). Per-product verdicts "
+        f"(brand, code, qualifies): {rr.per_product}. Recompute each listed product "
+        f"with a LEFT JOIN on store_inventory and reconcile your count."
+    )
+
+
 def _split(line: str) -> list[str]:
     s = line.strip()
     return [c.strip() for c in (s.split("|") if "|" in s else s.split(","))]

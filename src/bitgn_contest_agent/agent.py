@@ -337,6 +337,7 @@ class AgentLoop:
         # which refs to keep / strip on DENIED_SECURITY refusals.
         self._current_task_text = task_text
         from bitgn_contest_agent import classifier as _classifier_cov
+        from bitgn_contest_agent import count_rederive
         _classifier_cov.reset_aux_coverage()
         session = Session()
         messages, decision = _build_initial_messages(
@@ -509,6 +510,59 @@ class AgentLoop:
                 if fn is not step_obj.function:
                     step_obj = step_obj.model_copy(update={"function": fn})
                 verdict = self._validator.check_terminal(session, step_obj, step_idx)
+                # Independent, deterministic SQL re-derivation of
+                # count_per_store (BOUNCE on disagreement — never rewrite).
+                # Pure /bin/sql + Python (the aux LLM route 400-blacks-out,
+                # so a deterministic check can't be silently no-opped). Only
+                # examines a terminal the validator already accepted; on
+                # disagreement flips verdict to ok=False so the existing
+                # retry path re-prompts. Naturally capped at one bounce
+                # (terminal handling returns after one inline retry).
+                # Env-gated default-off (BITGN_USE_REDERIVE_COUNT=1).
+                # See docs/SPEC_RELIABILITY_53.md.
+                if (
+                    verdict.ok
+                    and count_rederive.is_enabled()
+                    and fn.outcome == "OUTCOME_OK"
+                    and getattr(fn.task_spec, "kind", "none") == "count_per_store"
+                ):
+                    import re as _re_cr
+                    from bitgn_contest_agent.adapter.ecom import Req_Exec as _Req_Exec_RC
+
+                    def _run_sql_rc(sql: str) -> str | None:
+                        try:
+                            tr = self._adapter.dispatch(
+                                _Req_Exec_RC(tool="exec", path="/bin/sql", args=[], stdin=sql)
+                            )
+                            return tr.content if tr.ok else None
+                        except Exception:
+                            return None
+
+                    _rc_text = (
+                        getattr(session, "task_text_en", "")
+                        or self._current_task_text
+                        or task_text
+                    )
+                    try:
+                        _rr = count_rederive.rederive_count(fn.task_spec, _run_sql_rc, _rc_text)
+                    except Exception:
+                        _rr = None
+                    if _rr is not None and _rr.count is not None:
+                        _m = _re_cr.search(r"-?\d+", fn.message or "")
+                        _agent_n = int(_m.group()) if _m else None
+                        if _agent_n is not None and _agent_n != _rr.count:
+                            emit_arch(
+                                category=ArchCategory.VALIDATOR_T2,
+                                at_step=step_idx,
+                                details=(
+                                    f"count_rederive disagree: agent={_agent_n} "
+                                    f"rederived={_rr.count} verdicts={_rr.per_product}"
+                                ),
+                            )
+                            verdict = Verdict(
+                                ok=False,
+                                reasons=[count_rederive.build_bounce_reason(_agent_n, _rr)],
+                            )
                 if verdict.ok:
                     # Pre-completion verification (spec 2026-04-21).
                     # Hard cap: 1 verification round per task.
