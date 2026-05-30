@@ -42,7 +42,10 @@ NonEmptyStr = Annotated[str, StringConstraints(min_length=1)]
 # models fail on JSON Schema with unions. Empty fields outside the
 # `kind` variant's scope are ignored by the completer.
 class ProductFilter(BaseModel):
-    brand: str = Field(description="Brand name as it appears in the task")
+    brand: str = Field(
+        default="",
+        description="Brand name as it appears in the task",
+    )
     series: str = Field(
         default="",
         description="Series / line name (incl. model code if part of the line)",
