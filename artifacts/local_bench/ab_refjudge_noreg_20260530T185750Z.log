@@ -1,0 +1,20 @@
+classify attempt 1: JSON parse failed at char 0: Expecting value
+JSON fix attempt failed: Expecting value: line 1 column 1 (char 0)
+# A/B 1 snapshot(s) x 4 runs | candidate={'BITGN_USE_REF_JUDGE': '1'}
+# model=gpt-5.4 effort=medium
+  [baseline][PASS] yes_no_ref_synth#0 outcome=OUTCOME_OK steps=4 54s :: passed all checks
+  [baseline][PASS] yes_no_ref_synth#1 outcome=OUTCOME_OK steps=4 37s :: passed all checks
+  [baseline][PASS] yes_no_ref_synth#2 outcome=OUTCOME_OK steps=4 58s :: passed all checks
+  [baseline][PASS] yes_no_ref_synth#3 outcome=OUTCOME_OK steps=4 52s :: passed all checks
+classify attempt 1: JSON parse failed at char 0: Expecting value
+classify attempt 1: JSON parse failed at char 0: Expecting value
+  [candidate][PASS] yes_no_ref_synth#0 outcome=OUTCOME_OK steps=4 56s :: passed all checks
+  [candidate][PASS] yes_no_ref_synth#1 outcome=OUTCOME_OK steps=4 48s :: passed all checks
+  [candidate][PASS] yes_no_ref_synth#2 outcome=OUTCOME_OK steps=4 58s :: passed all checks
+  [candidate][PASS] yes_no_ref_synth#3 outcome=OUTCOME_OK steps=5 73s :: passed all checks
+
+# RESULTS  (baseline -> candidate)
+  yes_no_ref_synth                 100% ->   100%
+
+# baseline mean 100.0%  candidate mean 100.0%
+# no regressions

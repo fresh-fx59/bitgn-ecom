@@ -55,3 +55,7 @@ artifacts/scans/**/_mirror_workspace/
 artifacts/ws_snapshots/*_prod/
 
 artifacts/ws_snapshots/*_synth/
+
+# large/regenerable run dumps + scraped snapshots
+artifacts/raw_dumps/
+artifacts/ws_snapshots/*_scraped/

@@ -1,0 +1,18 @@
+classify attempt 1: JSON parse failed at char 0: Expecting value
+# A/B 1 snapshot(s) x 4 runs | candidate={'BITGN_USE_COUNT_REF_COMPLETER': '1'}
+# model=gpt-5.4 effort=medium
+  [baseline][FAIL] count_ref_synth#0 outcome=OUTCOME_OK steps=4 63s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+  [baseline][FAIL] count_ref_synth#1 outcome=OUTCOME_OK steps=7 97s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+  [baseline][FAIL] count_ref_synth#2 outcome=OUTCOME_OK steps=7 106s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+  [baseline][FAIL] count_ref_synth#3 outcome=OUTCOME_OK steps=7 76s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+classify attempt 1: JSON parse failed at char 0: Expecting value
+  [candidate][FAIL] count_ref_synth#0 outcome=OUTCOME_OK steps=4 71s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+  [candidate][FAIL] count_ref_synth#1 outcome=OUTCOME_OK steps=7 79s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+  [candidate][FAIL] count_ref_synth#2 outcome=OUTCOME_OK steps=7 87s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+  [candidate][FAIL] count_ref_synth#3 outcome=OUTCOME_OK steps=7 89s :: answer missing required reference '/proc/catalog/Makita/PT-SAW-MAK-DHS680-5AH.json'
+
+# RESULTS  (baseline -> candidate)
+  count_ref_synth                    0% ->     0%
+
+# baseline mean 0.0%  candidate mean 0.0%
+# no regressions
