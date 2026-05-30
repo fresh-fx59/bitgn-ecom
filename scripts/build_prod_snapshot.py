@@ -21,10 +21,36 @@ Crucially, `available_today` is NOT written into inventory entries: PROD
 does not expose it, and the agent must compute max(on_hand-reserved,0)
 per /docs/availability-checks.md — which is exactly where count tasks err.
 
+Store SHAPE fidelity (see artifacts/prod_explore/prod_truth/sample_store_*.json
+and the byte-faithful scraped worlds under
+artifacts/ws_snapshots/prod_run1/.../proc/locations/): a real PROD store
+record is SMALL (~4.5 KB, 35-36 inventory entries) with top-level fields
+``id, name, address_line_1, postal_code, city, country_code, is_open,
+lat, lon, inventory``. The deep-extract ``catalogue.db`` is a DEV-schema
+projection: its ``store_inventory`` is DENSE (2.4k-10k stocked SKUs per
+store, all with positive availability) and its ``stores`` table has no
+address fields. So this materializer can faithfully reproduce the store
+FIELD SHAPE but NOT PROD's real ~35-SKU stocking subset — that subset is
+not recoverable from the db. Two consequences are handled here:
+
+  * Field shape: address_line_1/postal_code/country_code are emitted
+    (synthesized deterministically from city; the db lacks them, so they
+    are placeholders, not real PROD values — they exist only so the
+    record shape and key set match PROD under the 16 KiB read cap).
+  * Size: ``--max-inventory N`` caps the embedded inventory to a
+    prod-realistic bound. Default is UNLIMITED so an existing count
+    oracle is never silently corrupted (dropping a task-relevant SKU
+    would flip "available" to absent=0 and change the count). When a
+    store exceeds the prod-realistic band a WARNING is printed.
+
+For oracle-faithful COUNT test beds, prefer scripts/scrape_prod_worlds.py:
+it writes the exact ~35-entry store the agent actually read on PROD.
+
 Usage:
     scripts/build_prod_snapshot.py --from artifacts/ws_snapshots/t16_real2 \
         --out artifacts/ws_snapshots/t16_prod \
-        [--truth artifacts/prod_explore/prod_truth]
+        [--truth artifacts/prod_explore/prod_truth] \
+        [--max-inventory 35]
 """
 from __future__ import annotations
 
@@ -37,19 +63,48 @@ from typing import Optional
 
 _DEFAULT_TRUTH = Path("artifacts/prod_explore/prod_truth")
 
+# Real PROD stores carry 35-36 inventory entries (~4.5 KB). A store record
+# materially larger than this is unfaithful AND breaks under the 16 KiB
+# read cap (a 200 KB store truncates to invalid JSON; see test_build_prod
+# _snapshot.test_store_truncates_cleanly_under_read_cap). Used only to warn.
+_PROD_REALISTIC_MAX_INVENTORY = 60
+
+# country_code is a fixed 2-letter ISO code in every scraped PROD store.
+# The deep-extract db has no per-store country; PROD's worlds are all
+# Austria/CZ/SI but the db cannot tell us which, so we default to "AT"
+# (the modal scraped value) as a clearly-synthetic placeholder.
+_DEFAULT_COUNTRY_CODE = "AT"
+
 
 def _cols(conn: sqlite3.Connection, table: str) -> set[str]:
     return {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
 
 
 def _store_record(row: dict, inventory: list[dict]) -> dict:
-    """PROD-shaped store JSON with embedded inventory. Address fields are
-    not in the deep-extract db (and irrelevant to the broken families),
-    so they are omitted; the inventory array is the fidelity-critical part."""
-    rec = {
-        "id": row["store_id"],
+    """PROD-shaped store JSON with embedded inventory.
+
+    Field set + order match the byte-faithful scraped PROD stores and
+    artifacts/prod_explore/prod_truth/sample_store_*.json:
+        id, name, address_line_1, postal_code, city, country_code,
+        is_open, lat, lon, inventory
+
+    The deep-extract db has no address_line_1 / postal_code /
+    country_code columns, so those are SYNTHESIZED deterministically from
+    the city. They are placeholders (NOT real PROD values); they exist so
+    the record's key set and approximate size match PROD. lat/lon come
+    from the db when present (PROD always has them; if the db row lacks
+    them they are omitted rather than faked, since they carry geo meaning
+    the address placeholder does not)."""
+    city = row.get("city") or "Unknown"
+    store_id = row["store_id"]
+    rec: dict = {
+        "id": store_id,
         "name": row.get("store_name"),
-        "city": row.get("city"),
+        # placeholder address fields — see docstring (db has none)
+        "address_line_1": f"{city} branch (address not in deep-extract db)",
+        "postal_code": "0000",
+        "city": city,
+        "country_code": row.get("country_code") or _DEFAULT_COUNTRY_CODE,
         "is_open": bool(row.get("is_open")),
     }
     if row.get("latitude") is not None:
@@ -58,6 +113,20 @@ def _store_record(row: dict, inventory: list[dict]) -> dict:
         rec["lon"] = row["longitude"]
     rec["inventory"] = inventory
     return rec
+
+
+def _cap_inventory(inventory: list[dict], max_inventory: Optional[int]) -> list[dict]:
+    """Bound an embedded inventory to ``max_inventory`` entries.
+
+    Selection is DETERMINISTIC (sorted by SKU, the same order PROD uses
+    for inventory exports per /docs/availability-checks.md) so repeated
+    builds are stable. NOTE: capping a DENSE db store can drop a SKU that
+    a count task names and that IS available, lowering the count — that is
+    why the default is no cap. Use the cap only for shape/size/truncation
+    testing, not for count-oracle beds."""
+    if max_inventory is None or len(inventory) <= max_inventory:
+        return inventory
+    return sorted(inventory, key=lambda e: e.get("sku") or "")[:max_inventory]
 
 
 def _inventory_entry(r: dict) -> dict:
@@ -78,6 +147,18 @@ def _inventory_entry(r: dict) -> dict:
 
 
 def _catalog_record(r: dict, rid: int) -> dict:
+    """PROD-shaped catalogue record.
+
+    Field set + order match artifacts/prod_explore/prod_truth/
+    sample_catalog_*.json:
+        id, sku, name, brand, category_id, kind_id, family_id,
+        price_cents, fulfillment_type, return_policy, properties
+
+    fulfillment_type and return_policy are small integer enums on PROD but
+    the deep-extract db has NO such columns. They are emitted with a
+    deterministic placeholder (1) so the record key set matches PROD;
+    callers MUST NOT treat the value as authoritative — it is synthetic.
+    If the db ever grows these columns the real value is used."""
     props = r.get("properties")
     if isinstance(props, str):
         try:
@@ -93,6 +174,9 @@ def _catalog_record(r: dict, rid: int) -> dict:
         "kind_id": r.get("product_kind_id"),
         "family_id": r.get("product_family_id"),
         "price_cents": int(r["price_cents"]) if r.get("price_cents") not in (None, "") else None,
+        # PROD-shape enum fields; db lacks them → synthetic placeholder 1
+        "fulfillment_type": int(r["fulfillment_type"]) if r.get("fulfillment_type") not in (None, "") else 1,
+        "return_policy": int(r["return_policy"]) if r.get("return_policy") not in (None, "") else 1,
         "properties": props or {},
     }
     return rec
@@ -103,7 +187,13 @@ def _write_json(path: Path, obj: dict) -> None:
     path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
 
 
-def build(*, from_snapshot: Path, out_dir: Path, truth_dir: Optional[Path] = None) -> Path:
+def build(
+    *,
+    from_snapshot: Path,
+    out_dir: Path,
+    truth_dir: Optional[Path] = None,
+    max_inventory: Optional[int] = None,
+) -> Path:
     from_snapshot = Path(from_snapshot)
     out_dir = Path(out_dir)
     truth_dir = Path(truth_dir) if truth_dir else _DEFAULT_TRUTH
@@ -129,12 +219,17 @@ def build(*, from_snapshot: Path, out_dir: Path, truth_dir: Optional[Path] = Non
                 d = dict(r)
                 inv_by_store.setdefault(d["store_id"], []).append(_inventory_entry(d))
         n_stores = 0
+        bloated: list[tuple[str, int]] = []
         for r in conn.execute("SELECT * FROM stores"):
             d = dict(r)
             city = (d.get("city") or "Unknown")
-            rec = _store_record(d, inv_by_store.get(d["store_id"], []))
+            full_inv = inv_by_store.get(d["store_id"], [])
+            inv = _cap_inventory(full_inv, max_inventory)
+            rec = _store_record(d, inv)
             _write_json(out_ws / "proc" / "locations" / city / f"{d['store_id']}.json", rec)
             n_stores += 1
+            if len(inv) > _PROD_REALISTIC_MAX_INVENTORY:
+                bloated.append((d["store_id"], len(inv)))
 
         # ---- catalog → /proc/catalog/<Brand>/<sku>.json
         n_cat = 0
@@ -172,7 +267,21 @@ def build(*, from_snapshot: Path, out_dir: Path, truth_dir: Optional[Path] = Non
             json.dumps(meta, indent=2), encoding="utf-8")
 
     print(f"# built prod-faithful snapshot at {out_dir}: "
-          f"{n_stores} stores, {n_cat} catalog records")
+          f"{n_stores} stores, {n_cat} catalog records"
+          + (f" (inventory capped at {max_inventory}/store)" if max_inventory else ""))
+    if bloated:
+        import sys as _sys
+        worst = max(n for _, n in bloated)
+        print(
+            f"# WARNING: {len(bloated)} store(s) carry >{_PROD_REALISTIC_MAX_INVENTORY} "
+            f"inventory entries (worst {worst}); real PROD stores carry ~35-36 "
+            f"(~4.5 KB). The deep-extract db is a DENSE DEV projection and cannot "
+            f"reproduce PROD's real stocking subset. Such a store EXCEEDS the 16 KiB "
+            f"read cap and truncates to invalid JSON. For SIZE/shape testing pass "
+            f"--max-inventory 35; for oracle-faithful count beds use "
+            f"scripts/scrape_prod_worlds.py.",
+            file=_sys.stderr,
+        )
     return out_dir
 
 
@@ -186,8 +295,15 @@ def main() -> int:
     p.add_argument("--from", dest="from_snapshot", type=Path, required=True)
     p.add_argument("--out", dest="out_dir", type=Path, required=True)
     p.add_argument("--truth", dest="truth_dir", type=Path, default=None)
+    p.add_argument(
+        "--max-inventory", dest="max_inventory", type=int, default=None,
+        help="cap embedded inventory entries per store to a PROD-realistic "
+             "bound (PROD stores carry ~35-36). Default: no cap (preserves "
+             "count-oracle correctness — see module docstring). Pass 35 for "
+             "shape/size/truncation testing.")
     a = p.parse_args()
-    build(from_snapshot=a.from_snapshot, out_dir=a.out_dir, truth_dir=a.truth_dir)
+    build(from_snapshot=a.from_snapshot, out_dir=a.out_dir,
+          truth_dir=a.truth_dir, max_inventory=a.max_inventory)
     return 0
 
 
