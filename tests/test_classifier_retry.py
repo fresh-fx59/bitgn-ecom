@@ -4,9 +4,34 @@ from __future__ import annotations
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+import httpx
+import openai
 import pytest
 
 from bitgn_contest_agent.classifier import classify, _try_fix_json
+from bitgn_contest_agent import classifier
+
+
+def _make_bad_request_error(msg: str) -> openai.BadRequestError:
+    """Construct an openai.BadRequestError with the given message.
+
+    openai>=1.x requires a real httpx.Response (with a request set) at
+    construction time; passing response=None raises AttributeError.
+    """
+    req = httpx.Request("POST", "http://test.example.com/v1/chat/completions")
+    resp = httpx.Response(400, request=req, text=msg)
+    return openai.BadRequestError(msg, response=resp, body=None)
+
+
+def test_classify_retries_400(monkeypatch):
+    # A BadRequestError whose message contains a known transient substring
+    # must be treated as retryable.
+    assert classifier._is_retryable_aux_error(
+        _make_bad_request_error("bad response status code 400")
+    ) is True
+
+    # A plain non-openai exception must NOT be treated as retryable.
+    assert classifier._is_retryable_aux_error(ValueError("nope")) is False
 
 
 def _make_response(content: str | None):

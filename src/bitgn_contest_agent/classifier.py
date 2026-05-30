@@ -25,9 +25,52 @@ import re as _re
 import threading
 from typing import TYPE_CHECKING, Any, List
 
+import openai as _openai
 from pydantic import BaseModel
 
 from bitgn_contest_agent import router_config
+
+# Transient error substrings from the aux route (linkapi / cliproxyapi).
+# These strings appear in HTTP 400 responses that are gateway-side glitches,
+# not caller mistakes, so they should be retried.  Mirrors the list in
+# backend/openai_compat.py::_TRANSIENT_MESSAGE_SUBSTRINGS.
+_AUX_RETRY_SUBSTRINGS = (
+    "bad response status code 400",
+    "bad_response_status_code",
+    "upstream request failed",
+    "upstream_connection_error",
+    "concurrency limit exceeded",
+)
+
+
+def _is_retryable_aux_error(exc: Exception) -> bool:
+    """Return True if *exc* is an openai API error with a transient message.
+
+    Only ``openai.APIError`` subclasses (including ``BadRequestError``) are
+    candidates; plain Python exceptions are never retried.
+    """
+    if isinstance(exc, _openai.APIError):
+        msg = str(getattr(exc, "message", "") or exc).lower()
+        return any(s in msg for s in _AUX_RETRY_SUBSTRINGS)
+    return False
+
+
+def _call_with_retry(fn, *, attempts: int = 3) -> Any:
+    """Call *fn()* up to *attempts* times, retrying on transient aux errors.
+
+    Raises immediately on any non-retryable exception.  If all attempts are
+    exhausted the last retryable exception is re-raised.  No sleep between
+    attempts — linkapi 400s are immediate gateway glitches, not rate limits.
+    """
+    last: Exception | None = None
+    for _ in range(attempts):
+        try:
+            return fn()
+        except Exception as exc:  # noqa: BLE001
+            if not _is_retryable_aux_error(exc):
+                raise
+            last = exc
+    raise last  # type: ignore[misc]
 
 if TYPE_CHECKING:
     from bitgn_contest_agent.backend.base import Backend
@@ -237,12 +280,18 @@ def _classifier_timeout_sec() -> float:
 
 
 def _llm_call(client: Any, **kwargs: Any) -> Any:
-    """Make an OpenAI chat completion call, respecting the inflight semaphore."""
+    """Make an OpenAI chat completion call, respecting the inflight semaphore.
+
+    Wraps the transport call in ``_call_with_retry`` so transient aux-route
+    400s (e.g. linkapi "bad response status code 400") are transparently
+    retried up to 3 times before propagating.  The semaphore wraps the
+    entire retry block so every attempt counts against the concurrency cap.
+    """
     sem = _inflight_semaphore
     if sem is not None:
         with sem:
-            return client.chat.completions.create(**kwargs)
-    return client.chat.completions.create(**kwargs)
+            return _call_with_retry(lambda: client.chat.completions.create(**kwargs))
+    return _call_with_retry(lambda: client.chat.completions.create(**kwargs))
 
 
 def _stream_call_content(
