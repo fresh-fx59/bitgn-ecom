@@ -630,7 +630,7 @@ class AgentLoop:
                     def _search_fs(root: str, pattern: str):
                         try:
                             tr = self._adapter.dispatch(
-                                _Req_Search_FS(tool="search", root=root, pattern=pattern, limit=50))
+                                _Req_Search_FS(tool="search", root=root, pattern=pattern, limit=20))
                             if not (tr.ok and tr.content):
                                 return []
                             obj = _json_fs.loads(tr.content)
@@ -1549,7 +1549,7 @@ class AgentLoop:
                 def _search_crc(root: str, pattern: str):
                     try:
                         tr = self._adapter.dispatch(
-                            _Req_Search_CRC(tool="search", root=root, pattern=pattern, limit=50))
+                            _Req_Search_CRC(tool="search", root=root, pattern=pattern, limit=20))
                         if not (tr.ok and tr.content):
                             return []
                         obj = _json_crc.loads(tr.content)
@@ -1613,7 +1613,7 @@ class AgentLoop:
                 def _search_rj(root: str, pattern: str):
                     try:
                         tr = self._adapter.dispatch(
-                            _Req_Search_RJ(tool="search", root=root, pattern=pattern, limit=50))
+                            _Req_Search_RJ(tool="search", root=root, pattern=pattern, limit=20))
                         if not (tr.ok and tr.content):
                             return []
                         obj = _json_rj.loads(tr.content)
