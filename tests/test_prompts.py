@@ -102,6 +102,42 @@ def test_ecom_specific_guidance_in_prompt() -> None:
     assert "stat" in p
 
 
+def test_jq_block_absent_when_flag_off(monkeypatch) -> None:
+    """BITGN_USE_JQ unset → no jq mention; the v0.1.152 baseline prompt.
+    The sentinel must never leak into the rendered prompt."""
+    monkeypatch.delenv("BITGN_USE_JQ", raising=False)
+    p = prompts.system_prompt()
+    assert "/bin/jq" not in p
+    assert "JQ_SLOT" not in p
+
+
+def test_jq_block_present_and_disciplined_when_flag_on(monkeypatch) -> None:
+    """BITGN_USE_JQ=1 → jq bin entry with the whitelisted grammar, the
+    silent-null trap, and the cannot-count warning."""
+    monkeypatch.setenv("BITGN_USE_JQ", "1")
+    p = prompts.system_prompt()
+    assert "/bin/jq" in p
+    assert "keys" in p
+    assert "CANNOT count" in p
+    assert "null" in p  # silent-null trap called out
+    assert "JQ_SLOT" not in p  # sentinel consumed
+
+
+def test_jq_flag_toggles_prompt_but_stays_deterministic(monkeypatch) -> None:
+    """Each flag state is internally deterministic (cache-safe within a
+    run), and the two states differ."""
+    monkeypatch.delenv("HINT", raising=False)
+    monkeypatch.delenv("BITGN_USE_JQ", raising=False)
+    off_a = prompts.system_prompt()
+    off_b = prompts.system_prompt()
+    monkeypatch.setenv("BITGN_USE_JQ", "1")
+    on_a = prompts.system_prompt()
+    on_b = prompts.system_prompt()
+    assert off_a == off_b
+    assert on_a == on_b
+    assert off_a != on_a
+
+
 def test_system_prompt_stays_bit_identical_for_cache_hits() -> None:
     """Architectural invariant: the system prompt must not vary per task.
     Two calls without HINT must return byte-identical strings, proving

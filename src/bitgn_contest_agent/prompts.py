@@ -400,6 +400,7 @@ Catalogue / SQL discipline (ECOM-specific):
     Common bins (post-freeze inventory; /AGENTS.MD is authoritative if
     it disagrees):
       /bin/sql       — query catalogue tables; SQL body on stdin
+<<JQ_SLOT>>
       /bin/id        — print actor identity (already in the pre-pass)
       /bin/date      — print the trial-anchored clock (already in the
                        pre-pass; this is the canonical "today" anchor)
@@ -1531,11 +1532,50 @@ Language handling (i18n discipline):
 """
 
 
+# `/bin/jq` discipline block, injected at the <<JQ_SLOT>> sentinel only
+# when BITGN_USE_JQ=1. Scoped deliberately: jq is a field-extractor and
+# ref-enumerator, NOT a counting/compute tool (the restricted PowerTools
+# build silently returns null for length/type/comparisons — see memory
+# project_ecom_prod_jq_contract). Default-OFF so the lever can be A/B'd
+# in isolation against the v0.1.152 baseline prompt.
+_JQ_DISCIPLINE_BLOCK = """\
+      /bin/jq        — deterministic JSON field extractor over /proc
+                       records (a `/bin/sql` alternative for EXTRACTION,
+                       not counting). Contract:
+                       `exec /bin/jq args=["-r","<filter>"]` with the
+                       file CONTENT on stdin (read the file first, pipe
+                       it in). Output has a banner first line — ignore it.
+                       SUPPORTED filters ONLY: `.a`, `.a.b.c`, `.arr[i]`,
+                       `.arr[i].field`, `.arr[]`, `.arr[].field`, `keys`.
+                       Use it to (a) read ONE policy/status field before
+                       deciding (e.g. a 3DS-recovery flag, a return
+                       status, a discount cap), and (b) ENUMERATE refs
+                       (`.lines[].sku`) so grounding_refs is complete.
+                       DO NOT use pipes `|`, select(), has(), arithmetic,
+                       or length/type — they error or SILENTLY return
+                       null (a trap: null looks like a clean answer).
+                       jq CANNOT count: to count, enumerate the rows then
+                       count them yourself. Cite the /proc FILE PATH you
+                       read, never the jq output string. jq is an
+                       accelerator — if it is absent or a filter errors,
+                       fall back to `read` and parse the JSON directly."""
+
+
+def _render_jq_slot(prompt: str) -> str:
+    """Replace the <<JQ_SLOT>> sentinel with the jq discipline block when
+    BITGN_USE_JQ=1, else strip the sentinel line entirely so the rendered
+    prompt is bit-identical to the pre-jq baseline (cache-safe)."""
+    if os.environ.get("BITGN_USE_JQ", "").strip() == "1":
+        return prompt.replace("<<JQ_SLOT>>", _JQ_DISCIPLINE_BLOCK)
+    return prompt.replace("<<JQ_SLOT>>\n", "")
+
+
 def system_prompt() -> str:
+    base = _render_jq_slot(_STATIC_SYSTEM_PROMPT)
     hint = os.environ.get("HINT", "").strip()
     if hint:
-        return _STATIC_SYSTEM_PROMPT + f"\n\n[RUN HINT]: {hint}\n"
-    return _STATIC_SYSTEM_PROMPT
+        return base + f"\n\n[RUN HINT]: {hint}\n"
+    return base
 
 
 def critique_injection(reasons: Sequence[str]) -> str:
