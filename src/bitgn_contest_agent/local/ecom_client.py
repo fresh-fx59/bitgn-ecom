@@ -484,6 +484,32 @@ class LocalEcomClient:
             elif path.startswith("/proc/baskets/") and path.endswith(".json"):
                 synth = self._synth_row_read(
                     path, "shopping_baskets", "basket_id")
+            # BITGN_LOCAL_PROD_PATHS=1: also answer the PROD-namespaced
+            # /proc paths (per prod AGENTS.MD) so prod fixes can be
+            # A/B'd faithfully against dev snapshots. The snapshot db
+            # stores record_path as the flat dev path, so the
+            # record_path lookup in _synth_row_read misses and the
+            # trailing-id-token fallback resolves the row — making this
+            # mode path-agnostic (works regardless of nesting).
+            elif (
+                os.environ.get("BITGN_LOCAL_PROD_PATHS") == "1"
+                and path.endswith(".json")
+            ):
+                if path.startswith("/proc/payment-ledger/"):
+                    synth = self._synth_row_read(
+                        path, "payment_transactions", "payment_id")
+                elif path.startswith("/proc/carts/"):
+                    synth = self._synth_row_read(
+                        path, "shopping_baskets", "basket_id")
+                elif path.startswith("/proc/locations/"):
+                    synth = self._synth_row_read(
+                        path, "stores", "store_id")
+                elif path.startswith("/proc/staff/"):
+                    synth = self._synth_row_read(
+                        path, "employee_accounts", "employee_id")
+                elif path.startswith("/proc/return-workflows/"):
+                    synth = self._synth_row_read(
+                        path, "return_requests", "return_id")
             if synth is not None:
                 self.reads.add(path.lstrip("/"))
                 self.ops_log.append({
