@@ -95,6 +95,15 @@ _DATE_BIN_PATHS = frozenset({"/bin/date", "bin/date"})
 _CHECKOUT_BIN_PATHS = frozenset({"/bin/checkout", "bin/checkout"})
 _DISCOUNT_BIN_PATHS = frozenset({"/bin/discount", "bin/discount"})
 _PAYMENTS_BIN_PATHS = frozenset({"/bin/payments", "bin/payments"})
+_JQ_BIN_PATHS = frozenset({"/bin/jq", "bin/jq"})
+
+# PROD's /bin/jq is a custom "PowerTools E-Commerce OS jq" (probed live
+# 2026-05-30, artifacts/prod_explore/jq_probe*.json), NOT real jq. It
+# prepends this banner line to stdout on EVERY invocation (even errors).
+_JQ_BANNER = "PowerTools E-Commerce OS jq\n"
+_JQ_USAGE = "Usage: jq [-r|--raw-output] <filter> [path|-]\n"
+# Single path token: `.field`, `[<int>]`, or `[]` (iterate-all).
+_JQ_TOKEN_RE = re.compile(r"\.[A-Za-z_][A-Za-z0-9_]*|\[\d+\]|\[\]")
 
 # /bin/* entries are zero-byte stubs in the real ECOM runtime —
 # `read /bin/checkout` returns {path, content_type, sha256} with
@@ -105,11 +114,117 @@ _PAYMENTS_BIN_PATHS = frozenset({"/bin/payments", "bin/payments"})
 # e3b0c442... (empty string) and content_type=text/plain.
 _BIN_STUB_PATHS = frozenset({
     "/bin/checkout", "/bin/date", "/bin/discount", "/bin/id",
-    "/bin/payments", "/bin/sql",
+    "/bin/payments", "/bin/sql", "/bin/jq",
 })
 _EMPTY_FILE_SHA256 = (
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 )
+
+
+def _jq_format_value(value: Any, raw: bool) -> str:
+    """One output value as PowerTools-jq prints it: raw (-r) emits bare
+    strings; everything else (and all non-strings) is compact JSON with
+    object keys sorted, mirroring jq's default ordering."""
+    if raw and isinstance(value, str):
+        return value
+    return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
+def _eval_jq_filter(doc: Any, filt: str) -> tuple[Optional[list], Optional[str]]:
+    """Evaluate a PowerTools-OS /bin/jq filter against ``doc``.
+
+    Returns ``(outputs, None)`` on success (``outputs`` is the list of
+    emitted values — more than one when the filter iterates an array via
+    ``[]``), or ``(None, error_message)`` on a hard failure (exit 1).
+
+    Faithful to the restricted grammar probed on PROD 2026-05-30
+    (artifacts/prod_explore/jq_probe2/3/4_*.json):
+
+      SUPPORTED (path-extraction only):
+        .            -> whole doc
+        .a / .a.b.c  -> nested object field (missing key -> null)
+        .a[i]        -> array index (out of range -> null)
+        .a[]         -> iterate all elements (one output per element)
+        .a[].b       -> field of every element
+        keys         -> sorted top-level keys
+
+      SILENTLY WRONG on PROD -> returns a single ``null`` (exit 0):
+        pipes ``| length|type|tostring|...``, ``//`` default,
+        comparisons ``> < == !=``.  Replicated so local A/B catches a
+        prompt that wrongly relies on them (they look like they work).
+
+      HARD ERROR (exit 1) on PROD:
+        select(), has(), [..] collect, arithmetic + - *, string interp.
+    """
+    f = filt.strip()
+    if f == ".":
+        return [doc], None
+    if f == "keys":
+        if isinstance(doc, dict):
+            return [sorted(doc.keys())], None
+        return None, f'jq: cannot compute keys of {type(doc).__name__}'
+
+    # PROD hard-error bucket (checked BEFORE the silent-null bucket: a
+    # pipe whose left side iterates an array, or any function-call /
+    # collect / interpolation / arithmetic, errors out rather than
+    # silently nulling).
+    pipe_left = f.split("|", 1)[0] if "|" in f else ""
+    if (
+        "(" in f                       # select(, has(, any function call
+        or f.startswith("[")           # [..] collect
+        or "\\(" in f                  # string interpolation
+        or re.search(r"[+*]", f)       # arithmetic + *
+        or re.search(r"\s-\s", f)      # arithmetic -
+        or ("|" in f and "[]" in pipe_left)   # iterate-then-pipe
+    ):
+        return None, f'jq: unsupported filter "{filt}"'
+
+    # PROD silent-null bucket: scalar pipe to a function (`.x | length`),
+    # `//` default, comparisons — these parse but yield null on the
+    # custom engine. Replicate (single null, exit 0) so they are not
+    # mistaken for working extractions during local validation.
+    if ("|" in f) or ("//" in f) or re.search(r"[<>]=?|==|!=", f):
+        return [None], None
+
+    # Pure path expression. Tokenise and walk.
+    if not f.startswith("."):
+        return None, f'jq: unsupported filter "{filt}"'
+    pos = 0
+    tokens: list[str] = []
+    while pos < len(f):
+        m = _JQ_TOKEN_RE.match(f, pos)
+        if not m:
+            return None, f'jq: unsupported path segment "{f[pos:]}"'
+        tokens.append(m.group())
+        pos = m.end()
+
+    current: list[Any] = [doc]
+    for tok in tokens:
+        nxt: list[Any] = []
+        if tok.startswith("."):
+            key = tok[1:]
+            for v in current:
+                if isinstance(v, dict):
+                    nxt.append(v.get(key))
+                else:
+                    return None, (
+                        f'jq: cannot index non-object with field "{key}"'
+                    )
+        elif tok == "[]":
+            for v in current:
+                if isinstance(v, list):
+                    nxt.extend(v)
+                else:
+                    return None, "jq: cannot iterate over non-array"
+        else:  # [<int>]
+            idx = int(tok[1:-1])
+            for v in current:
+                if isinstance(v, list):
+                    nxt.append(v[idx] if 0 <= idx < len(v) else None)
+                else:
+                    return None, "jq: cannot index non-array"
+        current = nxt
+    return current, None
 
 
 def _content_type_for(path: Path) -> str:
@@ -695,6 +810,8 @@ class LocalEcomClient:
             return self._exec_discount(args=args, stdin=stdin)
         if path in _PAYMENTS_BIN_PATHS:
             return self._exec_payments(args=args, stdin=stdin)
+        if path in _JQ_BIN_PATHS:
+            return self._exec_jq(args=args, stdin=stdin)
 
         self.ops_log.append({
             "op": "exec", "path": path, "args": args, "exit_code": 127,
@@ -704,8 +821,9 @@ class LocalEcomClient:
             stderr=(
                 f"local mock: exec {path!r} not supported. "
                 "Implemented bins: /bin/sql, /bin/id, /bin/date, "
-                "/bin/checkout, /bin/discount, /bin/payments. Run this "
-                "task against a real ECOM VM for unmodelled binaries."
+                "/bin/checkout, /bin/discount, /bin/payments, /bin/jq. "
+                "Run this task against a real ECOM VM for unmodelled "
+                "binaries."
             ),
         )
 
@@ -823,6 +941,76 @@ class LocalEcomClient:
                 stdout=f"3ds_recovery_started {payment_id}\n",
             )
         return ecom_pb2.ExecResponse()
+
+    def _exec_jq(self, *, args: list[str], stdin: str) -> "ecom_pb2.ExecResponse":
+        """`/bin/jq` — the custom "PowerTools E-Commerce OS jq".
+
+        PROD contract (probed live 2026-05-30, see _eval_jq_filter and
+        artifacts/prod_explore/jq_probe*.json):
+
+          - Invocation: ``jq [-r|--raw-output] <filter> [path|-]``.
+            JSON read from the path arg (``-`` or absent => stdin).
+          - stdout ALWAYS begins with the banner line, then the result.
+          - ONLY -r / --raw-output supported; any other flag is rejected.
+          - Restricted path-extraction grammar (no pipes/functions/ops).
+
+        This local mock mirrors that exactly so prompt guidance that uses
+        /bin/jq can be A/B-validated faithfully before a PROD run. It is
+        deliberately *not* a passthrough to the host's real jq, which is
+        far more capable and would mask filters that fail on PROD.
+        """
+        self.ops_log.append({"op": "exec", "path": "/bin/jq", "args": args})
+
+        raw = False
+        positionals: list[str] = []
+        for a in args:
+            if a in ("-r", "--raw-output"):
+                raw = True
+            elif a == "-":
+                positionals.append(a)
+            elif a.startswith("-") and a != "-":
+                return ecom_pb2.ExecResponse(
+                    exit_code=1, stdout=_JQ_BANNER,
+                    stderr=f"flag provided but not defined: {a}\n{_JQ_USAGE}",
+                )
+            else:
+                positionals.append(a)
+
+        if not positionals:
+            return ecom_pb2.ExecResponse(
+                exit_code=1, stdout=_JQ_BANNER, stderr="jq: expected filter\n",
+            )
+        filt = positionals[0]
+        path_arg = positionals[1] if len(positionals) > 1 else None
+
+        if path_arg and path_arg != "-":
+            try:
+                content = getattr(
+                    self.read(ecom_pb2.ReadRequest(path=path_arg)), "content", ""
+                ) or ""
+            except Exception:
+                return ecom_pb2.ExecResponse(
+                    exit_code=1, stdout=_JQ_BANNER,
+                    stderr=f"jq: error: could not open {path_arg}\n",
+                )
+        else:
+            content = stdin
+
+        try:
+            doc = json.loads(content)
+        except (ValueError, TypeError):
+            return ecom_pb2.ExecResponse(
+                exit_code=1, stdout=_JQ_BANNER,
+                stderr="jq: error: input is not valid JSON\n",
+            )
+
+        outputs, err = _eval_jq_filter(doc, filt)
+        if err is not None:
+            return ecom_pb2.ExecResponse(
+                exit_code=1, stdout=_JQ_BANNER, stderr=err + "\n",
+            )
+        body = "".join(_jq_format_value(o, raw) + "\n" for o in (outputs or []))
+        return ecom_pb2.ExecResponse(stdout=_JQ_BANNER + body)
 
     def _exec_sql(self, *, args: list[str], stdin: str) -> "ecom_pb2.ExecResponse":
         """Run the stdin SQL body against the workspace's SQLite
