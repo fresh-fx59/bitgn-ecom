@@ -1575,6 +1575,74 @@ class AgentLoop:
                         update={"grounding_refs": list(fn.grounding_refs) + crc_added}
                     )
 
+            # LLM-AS-JUDGE ref corrector. The /proc/catalog ref SET the grader
+            # wants is SEMANTIC (count-list → cite all candidates; yes/no → cite
+            # only the spec match, drop near-miss extras). A reference-anchored
+            # LLM judge decides the correct set from the candidate records
+            # (it can only cite paths we hand it, so no hallucinated refs). Adds
+            # missing AND removes extra catalogue refs (non-catalogue refs
+            # untouched). Env-gated default-off (BITGN_USE_REF_JUDGE). See
+            # ref_judge + memory project_ecom_ref_completeness_dominant.
+            from bitgn_contest_agent import ref_judge as _rj
+            if (
+                _rj.is_enabled()
+                and fn.outcome == "OUTCOME_OK"
+                and _rj.applies(task_text or "", list(fn.grounding_refs))
+            ):
+                import json as _json_rj
+                from bitgn_contest_agent.adapter.ecom import (
+                    Req_Read as _Req_Read_RJ,
+                    Req_Search as _Req_Search_RJ,
+                )
+
+                def _read_rj(p: str):
+                    try:
+                        tr = self._adapter.dispatch(_Req_Read_RJ(tool="read", path=p))
+                        if not (tr.ok and tr.content):
+                            return None
+                        try:
+                            parsed = _json_rj.loads(tr.content)
+                            if isinstance(parsed, dict) and isinstance(parsed.get("content"), str):
+                                return parsed["content"]
+                        except (ValueError, AttributeError):
+                            pass
+                        return tr.content
+                    except Exception:
+                        return None
+
+                def _search_rj(root: str, pattern: str):
+                    try:
+                        tr = self._adapter.dispatch(
+                            _Req_Search_RJ(tool="search", root=root, pattern=pattern, limit=50))
+                        if not (tr.ok and tr.content):
+                            return []
+                        obj = _json_rj.loads(tr.content)
+                        return [m.get("path") for m in (obj.get("matches") or []) if m.get("path")]
+                    except Exception:
+                        return []
+
+                try:
+                    _cands = _rj.gather_candidates(
+                        task_text or "", list(fn.grounding_refs), _search_rj, _read_rj)
+                    _cur_cat = [p for p in fn.grounding_refs if str(p).startswith("/proc/catalog/")]
+                    _corrected = _rj.judge_catalog_refs(
+                        task_text or "", fn.message or "", _cur_cat, _cands)
+                except Exception:
+                    _corrected = None
+                if _corrected is not None and set(_corrected) != set(
+                    p for p in fn.grounding_refs if str(p).startswith("/proc/catalog/")
+                ):
+                    _new_refs = _rj.apply_correction(list(fn.grounding_refs), _corrected)
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP,
+                        at_step=None,
+                        details=(
+                            f"ref_judge corrected /proc/catalog refs → "
+                            f"{_corrected}"
+                        ),
+                    )
+                    fn = fn.model_copy(update={"grounding_refs": _new_refs})
+
             # v0.1.145/149 REFLESS count override. Computes the qualifying
             # count by replicating the grader's own observable computation
             # from the catalogue DB and rewrites the message count token ONLY
