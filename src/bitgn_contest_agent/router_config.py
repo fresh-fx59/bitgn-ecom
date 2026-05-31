@@ -22,13 +22,32 @@ import os
 
 DEFAULT_CLASSIFIER_MODEL = "claude-haiku-4-5-20251001"
 
+# Provider-aware aux/classifier model. The aux layer (classifier, task
+# normaliser, ref_judge, judge_enforcer — all via classifier.raw_completion)
+# must hit a model the active provider actually serves. Evidence
+# 2026-05-31: on linkapi the dated Haiku channel is dead — EVERY aux call
+# returns "bad response status code 400", so a full PROD run blacked out
+# verification (succeeded=0 on all 100 tasks). The only aux-sized models
+# linkapi serves with content are the gpt-4.x chat minis. cliproxyapi /
+# closerouter still serve Haiku reliably. Explicit BITGN_CLASSIFIER_MODEL
+# always overrides this table.
+_AUX_MODEL_BY_PROFILE = {
+    "linkapi": "gpt-4.1-mini",
+    "cliproxyapi": "claude-haiku-4-5-20251001",
+    "closerouter": "anthropic/claude-haiku-4.5",
+}
+
 # Confidence threshold below which a classifier response is treated as
 # UNKNOWN. Set to 0.6 in the spec §5.3.
 DEFAULT_CONFIDENCE_THRESHOLD = 0.6
 
 
 def classifier_model() -> str:
-    return os.environ.get("BITGN_CLASSIFIER_MODEL", DEFAULT_CLASSIFIER_MODEL)
+    explicit = os.environ.get("BITGN_CLASSIFIER_MODEL")
+    if explicit:
+        return explicit
+    profile = (os.environ.get("BITGN_PROVIDER_PROFILE") or "").strip().lower()
+    return _AUX_MODEL_BY_PROFILE.get(profile, DEFAULT_CLASSIFIER_MODEL)
 
 
 def confidence_threshold() -> float:

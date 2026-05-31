@@ -336,6 +336,25 @@ def _llm_call(client: Any, **kwargs: Any) -> Any:
     return result
 
 
+_NON_REASONING_MODEL_MARKERS = (
+    "gpt-4.1", "gpt-4o", "gpt-4-turbo", "gpt-4-", "gpt-3.5",
+)
+
+
+def _model_supports_reasoning(model: str) -> bool:
+    """Whether ``model`` accepts the ``reasoning`` / ``reasoning_effort``
+    request args.
+
+    Reasoning models (gpt-5.x, o-series, Claude 4.x via the proxies) accept
+    them; plain chat models (gpt-4.1*, gpt-4o*, gpt-4-*, gpt-3.5*) 400 with
+    ``Unrecognized request arguments supplied: reasoning, reasoning_effort``
+    on linkapi. Unknown ids default to True (reasoning-capable) so only the
+    known plain-chat families are stripped — never the historic default.
+    """
+    m = (model or "").lower()
+    return not any(tok in m for tok in _NON_REASONING_MODEL_MARKERS)
+
+
 def _stream_call_content(
     client: Any,
     *,
@@ -357,8 +376,11 @@ def _stream_call_content(
     """
     effort = os.environ.get("BITGN_CLASSIFIER_REASONING_EFFORT", "low").strip() or "low"
     body = dict(extra_body or {})
-    body.setdefault("reasoning", {"effort": effort})
-    body.setdefault("reasoning_effort", effort)
+    # Only reasoning-capable models accept these args; plain chat models
+    # (gpt-4.1-mini etc.) 400 on them. effort=none/off/0 disables globally.
+    if effort.lower() not in ("none", "off", "0") and _model_supports_reasoning(model):
+        body.setdefault("reasoning", {"effort": effort})
+        body.setdefault("reasoning_effort", effort)
     kwargs = dict(
         model=model,
         messages=messages,

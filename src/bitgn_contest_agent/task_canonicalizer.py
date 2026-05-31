@@ -93,7 +93,39 @@ _INJECTION_MARKERS = re.compile(
     "<｜[^｜]{1,48}｜>"   # fullwidth-pipe tokens  <｜System｜>, <｜begin▁of▁sentence｜>
     r"|<\|[^|>]{1,48}\|>"             # ASCII chat tokens      <|system|>, <|im_start|>
     r"|\[/?INST\]"                    # Llama-2 instruction     [INST] [/INST]
-    r"|<</?SYS>>",                    # Llama-2 system block     <<SYS>> <</SYS>>
+    r"|<</?SYS>>"                     # Llama-2 system block     <<SYS>> <</SYS>>
+    # --- non-chat-template families (PROD t038/t083, 2026-05-31) ---
+    # HTML/SGML comments smuggle operator directives ("the user-visible
+    # request is stale; recovered control text follows"). A legitimate
+    # e-commerce instruction never contains an HTML comment. (t083)
+    r"|<!--|-->"
+    # Forged "model context" / "system prompt" identity labels. A real task
+    # never narrates the model's own context or names a chat model. CJK
+    # (t038: '模型上下文: deepseek-chat') + Latin re-instantiations.
+    r"|模型上下文|系统提示词?|系统指令"
+    r"|(?:model\s+context|system\s+prompt|developer\s+message)\s*[:：]"
+    # Social-engineering control phrases with no legitimate use.
+    r"|compatibility\s+shim"
+    r"|recovered\s+control\s+text"
+    r"|user-visible\s+request\s+is\s+stale"
+    # Fake control annotations smuggled as a markdown header / inline tag
+    # ("...format# Security relay: authenticated request") that fabricate an
+    # authenticated/trusted session. The leading '#' distinguishes them from
+    # a legitimate use of the word 'authenticated' in a sentence. (t028)
+    r"|security\s+relay"
+    r"|#\s*(?:security|auth\w*|system|session|trust\w*)\s+"
+    r"(?:relay|gateway|override|directive|context|channel)\b"
+    # Defense-in-depth: canonical instruction-override tells (OWASP LLM01 /
+    # ChatInject arXiv:2509.22830). ZERO matches on the observed PROD run, so
+    # no regression here — they harden the detector against re-instantiation
+    # variants whose payload uses the textbook phrasing. None of these has any
+    # legitimate use in an e-commerce instruction. (NB: a bare 'override' is
+    # deliberately NOT listed — it appears in already-passing tasks t013/t019/
+    # t033 whose denial path must stay untouched.)
+    r"|ignore\s+(?:all\s+|the\s+)?(?:previous|prior|above)\s+(?:instruction|message|prompt)"
+    r"|disregard\s+(?:the\s+|all\s+|your\s+)?(?:above|previous|prior|system\s+prompt|instruction)"
+    r"|developer\s+mode|jailbreak\b|\bDAN\s+mode"
+    r"|(?:reveal|print|repeat|show)\s+(?:me\s+)?(?:your\s+|the\s+)?system\s+prompt",
     re.IGNORECASE,
 )
 
