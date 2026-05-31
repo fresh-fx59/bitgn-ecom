@@ -243,7 +243,11 @@ def judge(input_: JudgeInput) -> Optional[JudgeVerdict]:
     prompt = _build_judge_prompt(input_)
     try:
         from bitgn_contest_agent import classifier as _cm
-        raw = _cm.raw_completion(prompt=prompt, system=_SYSTEM_PROMPT)
+        _prev_purpose = _cm.set_aux_purpose("judge")
+        try:
+            raw = _cm.raw_completion(prompt=prompt, system=_SYSTEM_PROMPT)
+        finally:
+            _cm.set_aux_purpose(_prev_purpose)
     except Exception as exc:
         _LOG.info("judge_enforcer: classifier call failed: %s", exc)
         return None

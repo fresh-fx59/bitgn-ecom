@@ -1196,6 +1196,58 @@ class AgentLoop:
             return adapter.format_retry_critique(reasons, session)
         return critique_injection(list(reasons))
 
+    def _emit_enforcer_mod(
+        self,
+        *,
+        enforcer: str,
+        refs_before,
+        refs_after,
+        family: str | None = None,
+        bypassed: bool = False,
+        at_step: int | None = None,
+    ) -> None:
+        """Additive observability (2026-05-31): record that *enforcer*
+        changed the reported answer's grounding_refs, capturing the
+        before/after sets so the diff is reconstructable from the trace
+        alone. Purely observational — never raises, never alters refs."""
+        try:
+            self._writer.append_enforcer_mod(
+                enforcer=enforcer,
+                refs_before=list(refs_before or []),
+                refs_after=list(refs_after or []),
+                family=family,
+                bypassed=bypassed,
+                at_step=at_step,
+            )
+        except Exception:  # noqa: BLE001
+            pass
+
+    def _set_refs(
+        self,
+        fn: "ReportTaskCompletion",
+        new_refs,
+        *,
+        enforcer: str,
+        family: str | None = None,
+    ) -> "ReportTaskCompletion":
+        """Update ``fn.grounding_refs`` and emit an enforcer_mod trace
+        event capturing the before/after sets.
+
+        Behaviourally IDENTICAL to ``fn.model_copy(update={"grounding_refs":
+        new_refs})`` — the only addition is the observational trace event.
+        The event is emitted only when the ref set actually changed so the
+        trace stays signal-dense."""
+        before = list(fn.grounding_refs or [])
+        after = list(new_refs or [])
+        if set(map(str, before)) != set(map(str, after)) or before != after:
+            self._emit_enforcer_mod(
+                enforcer=enforcer,
+                refs_before=before,
+                refs_after=after,
+                family=family,
+            )
+        return fn.model_copy(update={"grounding_refs": new_refs})
+
     def _post_process_terminal(
         self,
         fn: "ReportTaskCompletion",
@@ -1275,8 +1327,8 @@ class AgentLoop:
                                 f"reasons={_res.reasons[:3]}"
                             ),
                         )
-                        fn = fn.model_copy(
-                            update={"grounding_refs": _res.final_refs}
+                        fn = self._set_refs(
+                            fn, _res.final_refs, enforcer="judge_enforcer",
                         )
                         # Judge took the call — short-circuit the
                         # legacy chain to avoid double-filtering.
@@ -1307,7 +1359,9 @@ class AgentLoop:
                         f"{cleaned.stripped} reasons={cleaned.reasons}"
                     ),
                 )
-                fn = fn.model_copy(update={"grounding_refs": cleaned.refs})
+                fn = self._set_refs(
+                    fn, cleaned.refs, enforcer="refusal_cite_enforcer",
+                )
 
             # P5B — scrub non-actor person ids from the refusal
             # message body. Defense-in-depth for the prompt rule.
@@ -1384,8 +1438,8 @@ class AgentLoop:
                         f"reasons={sku_filtered.reasons}"
                     ),
                 )
-                fn = fn.model_copy(
-                    update={"grounding_refs": sku_filtered.kept}
+                fn = self._set_refs(
+                    fn, sku_filtered.kept, enforcer="sku_verifier",
                 )
 
         # Step 1c: cite-completer. Hardcoded action-family policy
@@ -1419,8 +1473,9 @@ class AgentLoop:
                         f"{completer_res.added}"
                     ),
                 )
-                fn = fn.model_copy(
-                    update={"grounding_refs": completer_res.refs}
+                fn = self._set_refs(
+                    fn, completer_res.refs, enforcer="cite_completer",
+                    family=completer_res.family,
                 )
 
             # Step 1c-ter (v0.1.117-pre): store back-completer.
@@ -1471,8 +1526,8 @@ class AgentLoop:
                             f"{len(sbr.added)} ref(s): {sbr.added}"
                         ),
                     )
-                    fn = fn.model_copy(
-                        update={"grounding_refs": sbr.refs}
+                    fn = self._set_refs(
+                        fn, sbr.refs, enforcer="store_back_completer",
                     )
 
             # v0.1.146 quote/pasted-list ref completer (t47 family). The
@@ -1519,11 +1574,9 @@ class AgentLoop:
                             f"{len(quote_added)} ref(s): {quote_added}"
                         ),
                     )
-                    fn = fn.model_copy(
-                        update={
-                            "grounding_refs": list(fn.grounding_refs)
-                            + quote_added
-                        }
+                    fn = self._set_refs(
+                        fn, list(fn.grounding_refs) + quote_added,
+                        enforcer="quote_ref_completer",
                     )
 
             # COUNT/AVAILABILITY candidate-SKU ref completer. PROD grader
@@ -1578,8 +1631,9 @@ class AgentLoop:
                             f"SKU ref(s): {crc_added}"
                         ),
                     )
-                    fn = fn.model_copy(
-                        update={"grounding_refs": list(fn.grounding_refs) + crc_added}
+                    fn = self._set_refs(
+                        fn, list(fn.grounding_refs) + crc_added,
+                        enforcer="count_ref_completer",
                     )
 
             # LLM-AS-JUDGE ref corrector. The /proc/catalog ref SET the grader
@@ -1652,7 +1706,7 @@ class AgentLoop:
                             f"{_corrected}"
                         ),
                     )
-                    fn = fn.model_copy(update={"grounding_refs": _new_refs})
+                    fn = self._set_refs(fn, _new_refs, enforcer="ref_judge")
 
             # v0.1.145/149 REFLESS count override. Computes the qualifying
             # count by replicating the grader's own observable computation
@@ -1865,11 +1919,9 @@ class AgentLoop:
                             f"{len(fraud_added)} ref(s): {fraud_added}"
                         ),
                     )
-                    fn = fn.model_copy(
-                        update={
-                            "grounding_refs": list(fn.grounding_refs)
-                            + fraud_added
-                        }
+                    fn = self._set_refs(
+                        fn, list(fn.grounding_refs) + fraud_added,
+                        enforcer="fraud_component_completer",
                     )
 
             # Step 1c-bis (v0.1.117-pre): refund payment back-completer.
@@ -1903,8 +1955,8 @@ class AgentLoop:
                             f"{len(rpr.added)} ref(s): {rpr.added}"
                         ),
                     )
-                    fn = fn.model_copy(
-                        update={"grounding_refs": rpr.refs}
+                    fn = self._set_refs(
+                        fn, rpr.refs, enforcer="refund_payment_completer",
                     )
 
         # Step 1c1 (addenda completer) — re-enabled in v0.1.85 with
@@ -1962,8 +2014,8 @@ class AgentLoop:
                         f"{addenda_res.added}"
                     ),
                 )
-                fn = fn.model_copy(
-                    update={"grounding_refs": addenda_res.refs}
+                fn = self._set_refs(
+                    fn, addenda_res.refs, enforcer="addenda_completer",
                 )
 
             # Step 1c1-bis (v0.1.117-pre+): catalog_strip enforcer.
@@ -1996,8 +2048,8 @@ class AgentLoop:
                             f"{len(csr.dropped)} ref(s): {csr.dropped[:5]}"
                         ),
                     )
-                    fn = fn.model_copy(
-                        update={"grounding_refs": csr.refs}
+                    fn = self._set_refs(
+                        fn, csr.refs, enforcer="catalog_strip_enforcer",
                     )
 
         # Step 1c2 (SKU completer, v0.1.98 P1): structured-input path.
@@ -2047,8 +2099,8 @@ class AgentLoop:
                             f"reasons={sku_spec_res.reasons[:3]}"
                         ),
                     )
-                    fn = fn.model_copy(
-                        update={"grounding_refs": sku_spec_res.refs}
+                    fn = self._set_refs(
+                        fn, sku_spec_res.refs, enforcer="sku_completer",
                     )
 
                     # v0.1.114: 2nd sku_verifier pass over the
@@ -2101,8 +2153,9 @@ class AgentLoop:
                                 f"reasons={post_filt.reasons[:3]}"
                             ),
                         )
-                        fn = fn.model_copy(
-                            update={"grounding_refs": post_filt.kept}
+                        fn = self._set_refs(
+                            fn, post_filt.kept,
+                            enforcer="sku_verifier_post_count",
                         )
 
                 # v0.1.106 count-override was REVERTED in v0.1.107.
@@ -2210,8 +2263,8 @@ class AgentLoop:
                             f"{yn_res.added[:5]}"
                         ),
                     )
-                    fn = fn.model_copy(
-                        update={"grounding_refs": yn_res.refs}
+                    fn = self._set_refs(
+                        fn, yn_res.refs, enforcer="yes_no_sku_completer",
                     )
 
                     # v0.1.114: 2nd sku_verifier pass over the
@@ -2270,8 +2323,9 @@ class AgentLoop:
                                 f"reasons={post_filtered.reasons[:3]}"
                             ),
                         )
-                        fn = fn.model_copy(
-                            update={"grounding_refs": post_filtered.kept}
+                        fn = self._set_refs(
+                            fn, post_filtered.kept,
+                            enforcer="sku_verifier_post_yes_no",
                         )
 
                 # Last-resort Checked-SKU back-completer (v0.1.117):
@@ -2302,8 +2356,8 @@ class AgentLoop:
                                 f"(SKU={csr.sku_found}): {csr.added[0]}"
                             ),
                         )
-                        fn = fn.model_copy(
-                            update={"grounding_refs": csr.refs}
+                        fn = self._set_refs(
+                            fn, csr.refs, enforcer="checked_sku_completer",
                         )
 
         # Step 1c3: fraud recall completer. ADDS canonical fraud
@@ -2346,8 +2400,9 @@ class AgentLoop:
                         f"{fraud_recall_res.added}"
                     ),
                 )
-                fn = fn.model_copy(
-                    update={"grounding_refs": fraud_recall_res.refs}
+                fn = self._set_refs(
+                    fn, fraud_recall_res.refs,
+                    enforcer="fraud_recall_completer",
                 )
 
         # Step 1d: fraud cluster filter. Drops cited
@@ -2394,8 +2449,9 @@ class AgentLoop:
                             f"reasons={fraud_filtered.reasons}"
                         ),
                     )
-                    fn = fn.model_copy(
-                        update={"grounding_refs": fraud_filtered.refs}
+                    fn = self._set_refs(
+                        fn, fraud_filtered.refs,
+                        enforcer="fraud_cluster_filter",
                     )
 
         # Step 2: per-model adapter hook (gpt-oss hallucinated-ref drop).
@@ -2562,6 +2618,23 @@ class AgentLoop:
             enforcer_action=enforcer_action,
         )
 
+    @staticmethod
+    def _aux_outcome_fields() -> dict:
+        """Gather this thread's run-level aux-LLM coverage for the outcome
+        record. Additive observability — makes a blackout (every aux call
+        400-failing) visible in one place. Best-effort; never raises."""
+        try:
+            from bitgn_contest_agent import classifier as _cov
+            attempted, succeeded = _cov.get_aux_coverage()
+            failures = _cov.get_aux_failures_by_type()
+            return {
+                "aux_attempted": attempted,
+                "aux_succeeded": succeeded,
+                "aux_failures_by_type": failures or None,
+            }
+        except Exception:  # noqa: BLE001
+            return {}
+
     def _finish_report(
         self,
         totals: "_Totals",
@@ -2580,6 +2653,7 @@ class AgentLoop:
             total_completion_tokens=totals.completion_tokens,
             total_cached_tokens=totals.cached_tokens,
             total_reasoning_tokens=totals.reasoning_tokens,
+            **self._aux_outcome_fields(),
         )
         self._writer.append_outcome(outcome)
         return AgentLoopResult(
@@ -2616,6 +2690,7 @@ class AgentLoop:
             total_completion_tokens=totals.completion_tokens,
             total_cached_tokens=totals.cached_tokens,
             total_reasoning_tokens=totals.reasoning_tokens,
+            **self._aux_outcome_fields(),
         )
         self._writer.append_outcome(outcome)
         return AgentLoopResult(
@@ -2647,6 +2722,7 @@ class AgentLoop:
             total_completion_tokens=totals.completion_tokens,
             total_cached_tokens=totals.cached_tokens,
             total_reasoning_tokens=totals.reasoning_tokens,
+            **self._aux_outcome_fields(),
         )
         self._writer.append_outcome(outcome)
         return AgentLoopResult(

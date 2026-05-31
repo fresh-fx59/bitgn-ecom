@@ -49,6 +49,7 @@ def _normalize_to_english(task_text: str) -> Optional[str]:
     The caller decides when to invoke this (typically after tier-1
     regex misses on the original text).
     """
+    _prev_purpose = classifier.set_aux_purpose("normalise")
     try:
         result = classifier.classify(
             system=(
@@ -66,6 +67,8 @@ def _normalize_to_english(task_text: str) -> Optional[str]:
             return english.strip()
     except Exception as exc:  # noqa: BLE001
         _LOG.warning("task text normalisation failed: %s", exc)
+    finally:
+        classifier.set_aux_purpose(_prev_purpose)
 
     return None
 
@@ -138,6 +141,7 @@ class Router:
             (c.skill.category, c.skill.classifier_hint or c.skill.description)
             for c in self._compiled
         ]
+        _prev_purpose = classifier.set_aux_purpose("classify")
         try:
             raw = classifier.classify(
                 system=_classifier_system_prompt(skill_meta),
@@ -146,6 +150,8 @@ class Router:
         except Exception as exc:  # noqa: BLE001 — router never breaks the main path
             _LOG.warning("classifier failed, degrading to UNKNOWN: %s", exc)
             return _UNKNOWN
+        finally:
+            classifier.set_aux_purpose(_prev_purpose)
 
         category, confidence = classifier.parse_response(
             raw, valid_categories=set(self._by_category),

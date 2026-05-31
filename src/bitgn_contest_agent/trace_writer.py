@@ -12,10 +12,13 @@ from pathlib import Path
 from typing import Any, Optional
 
 from bitgn_contest_agent.trace_schema import (
+    AUX_ERROR_MSG_MAXLEN,
     StepLLMStats,
     StepSessionAfter,
     StepToolResult,
     TraceArch,
+    TraceAuxCall,
+    TraceEnforcerMod,
     TraceEvent,
     TraceMeta,
     TraceOutcome,
@@ -156,6 +159,67 @@ class TraceWriter:
             ok=ok,
             error_code=error_code,
             origin=origin,
+        )
+        self._write(rec.model_dump(mode="json"))
+
+    def append_aux_call(
+        self,
+        *,
+        model: str,
+        purpose: Optional[str] = None,
+        attempts: int = 1,
+        ok: bool = True,
+        error_type: Optional[str] = None,
+        error_msg: Optional[str] = None,
+        latency_ms: Optional[int] = None,
+    ) -> None:
+        """Record one auxiliary-LLM transport call (classifier / task
+        normaliser / judge_enforcer / ref_judge). Additive observability:
+        the body is truncated to AUX_ERROR_MSG_MAXLEN so a blackout run
+        does not bloat the trace."""
+        if error_msg is not None and len(error_msg) > AUX_ERROR_MSG_MAXLEN:
+            error_msg = error_msg[:AUX_ERROR_MSG_MAXLEN]
+        rec = TraceAuxCall(
+            model=model,
+            purpose=purpose,
+            attempts=attempts,
+            ok=ok,
+            error_type=error_type,
+            error_msg=error_msg,
+            latency_ms=latency_ms,
+        )
+        self._write(rec.model_dump(mode="json"))
+
+    def append_enforcer_mod(
+        self,
+        *,
+        enforcer: str,
+        refs_before: list[str],
+        refs_after: list[str],
+        family: Optional[str] = None,
+        bypassed: bool = False,
+        at_step: Optional[int] = None,
+    ) -> None:
+        """Record one enforcer/completer that touched grounding_refs.
+
+        `refs_added` / `refs_removed` are derived here from before/after
+        (order-preserving) so the diff cannot drift from the sets the
+        caller passed."""
+        before = [str(r) for r in refs_before]
+        after = [str(r) for r in refs_after]
+        before_set = set(before)
+        after_set = set(after)
+        added = [r for r in after if r not in before_set]
+        removed = [r for r in before if r not in after_set]
+        rec = TraceEnforcerMod(
+            enforcer=enforcer,
+            refs_before=before,
+            refs_after=after,
+            refs_added=added,
+            refs_removed=removed,
+            family=family,
+            bypassed=bypassed,
+            at_step=at_step,
         )
         self._write(rec.model_dump(mode="json"))
 

@@ -23,7 +23,8 @@ import logging
 import os
 import re as _re
 import threading
-from typing import TYPE_CHECKING, Any, List
+import time as _time
+from typing import TYPE_CHECKING, Any, List, Optional
 
 import openai as _openai
 from pydantic import BaseModel
@@ -55,15 +56,22 @@ def _is_retryable_aux_error(exc: Exception) -> bool:
     return False
 
 
-def _call_with_retry(fn, *, attempts: int = 3) -> Any:
+def _call_with_retry(fn, *, attempts: int = 3, on_attempt=None) -> Any:
     """Call *fn()* up to *attempts* times, retrying on transient aux errors.
 
     Raises immediately on any non-retryable exception.  If all attempts are
     exhausted the last retryable exception is re-raised.  No sleep between
     attempts — linkapi 400s are immediate gateway glitches, not rate limits.
+
+    ``on_attempt`` (if given) is invoked with the 1-based attempt number
+    just before each transport try, so the caller can record the true
+    number of transport attempts in the aux_call trace event (including the
+    single attempt made for a non-retryable failure). Purely observational.
     """
     last: Exception | None = None
-    for _ in range(attempts):
+    for i in range(attempts):
+        if on_attempt is not None:
+            on_attempt(i + 1)
         try:
             return fn()
         except Exception as exc:  # noqa: BLE001
@@ -93,6 +101,8 @@ def _aux_cov() -> threading.local:
     if not hasattr(cov, "attempted"):
         cov.attempted = 0
         cov.succeeded = 0
+        cov.failures_by_type = {}
+        cov.purpose = None
     return cov
 
 
@@ -101,12 +111,33 @@ def reset_aux_coverage() -> None:
     cov = _aux_cov()
     cov.attempted = 0
     cov.succeeded = 0
+    cov.failures_by_type = {}
+    cov.purpose = None
 
 
 def get_aux_coverage() -> tuple[int, int]:
     """Return (attempted, succeeded) aux LLM calls for the calling thread."""
     cov = _aux_cov()
     return cov.attempted, cov.succeeded
+
+
+def get_aux_failures_by_type() -> dict[str, int]:
+    """Return a copy of this thread's aux-failure histogram keyed by the
+    exception class name (e.g. {"BadRequestError": 50}). Empty when no aux
+    call has failed. Used to surface a run-level blackout in the outcome."""
+    cov = _aux_cov()
+    return dict(getattr(cov, "failures_by_type", {}) or {})
+
+
+def set_aux_purpose(purpose: Optional[str]) -> Optional[str]:
+    """Tag subsequent aux calls on this thread with *purpose* (one of
+    classify / normalise / judge / ref_judge / completion). Returns the
+    previous purpose so callers can restore it. Purely observational — it
+    only labels the emitted aux_call trace event."""
+    cov = _aux_cov()
+    prev = getattr(cov, "purpose", None)
+    cov.purpose = purpose
+    return prev
 
 
 def set_inflight_semaphore(sem: threading.Semaphore | None) -> None:
@@ -319,21 +350,93 @@ def _llm_call(client: Any, **kwargs: Any) -> Any:
     Increments the thread-local aux-coverage counters: ``attempted`` once
     at entry (regardless of internal retries), ``succeeded`` only when the
     call returns without raising.  If ``_call_with_retry`` exhausts all
-    attempts and raises, ``succeeded`` is NOT incremented.
+    attempts and raises, ``succeeded`` is NOT incremented and the failure
+    is tallied in ``failures_by_type`` keyed by the exception class name.
+
+    Observability (2026-05-31): on every logical aux call this emits one
+    ``aux_call`` trace event (model, purpose, transport attempts, ok, and
+    on failure the error TYPE + truncated body) to the task's TraceWriter
+    if one is installed. Emitting NEVER changes the call's result — any
+    exception from the transport still propagates unchanged.
     """
     cov = _aux_cov()
     cov.attempted += 1
+    attempts_made = 0
+
+    def _note_attempt(n: int) -> None:
+        nonlocal attempts_made
+        attempts_made = n
 
     def _do() -> Any:
         sem = _inflight_semaphore
         if sem is not None:
             with sem:
-                return _call_with_retry(lambda: client.chat.completions.create(**kwargs))
-        return _call_with_retry(lambda: client.chat.completions.create(**kwargs))
+                return _call_with_retry(
+                    lambda: client.chat.completions.create(**kwargs),
+                    on_attempt=_note_attempt,
+                )
+        return _call_with_retry(
+            lambda: client.chat.completions.create(**kwargs),
+            on_attempt=_note_attempt,
+        )
 
-    result = _do()
+    started = _time.monotonic()
+    try:
+        result = _do()
+    except Exception as exc:  # noqa: BLE001
+        err_type = type(exc).__name__
+        cov.failures_by_type = dict(getattr(cov, "failures_by_type", {}) or {})
+        cov.failures_by_type[err_type] = cov.failures_by_type.get(err_type, 0) + 1
+        _emit_aux_call_trace(
+            model=kwargs.get("model", "?"),
+            attempts=attempts_made or 1,
+            ok=False,
+            error_type=err_type,
+            error_msg=str(getattr(exc, "message", "") or exc),
+            latency_ms=int((_time.monotonic() - started) * 1000),
+        )
+        raise
     cov.succeeded += 1
+    _emit_aux_call_trace(
+        model=kwargs.get("model", "?"),
+        attempts=attempts_made or 1,
+        ok=True,
+        latency_ms=int((_time.monotonic() - started) * 1000),
+    )
     return result
+
+
+def _emit_aux_call_trace(
+    *,
+    model: str,
+    attempts: int,
+    ok: bool,
+    error_type: Optional[str] = None,
+    error_msg: Optional[str] = None,
+    latency_ms: Optional[int] = None,
+) -> None:
+    """Write an aux_call trace event to the task's writer, if installed.
+
+    Best-effort and fully isolated: any failure here is swallowed so trace
+    instrumentation can never break an aux call. The purpose is read from
+    the per-thread coverage tag set by ``set_aux_purpose``."""
+    try:
+        from bitgn_contest_agent.arch_log import current_writer
+
+        writer = current_writer()
+        if writer is None:
+            return
+        writer.append_aux_call(
+            model=model,
+            purpose=getattr(_aux_cov(), "purpose", None),
+            attempts=attempts,
+            ok=ok,
+            error_type=error_type,
+            error_msg=error_msg,
+            latency_ms=latency_ms,
+        )
+    except Exception:  # noqa: BLE001  — observability must never break a call
+        pass
 
 
 _NON_REASONING_MODEL_MARKERS = (
@@ -368,7 +471,8 @@ def _stream_call_content(
     path drops `message.content` (returns null) for every reasoning model
     in its catalog. Streaming concatenates deltas correctly.
 
-    Always sends reasoning_effort in both shapes (flat + nested) — see
+    Sends reasoning_effort in both shapes (flat + nested) ONLY for
+    reasoning-capable models — plain chat models reject the args. See
     backend/openai_compat.py for the dual-shape rationale.
 
     Falls back to message.content read if the mock/test classifier

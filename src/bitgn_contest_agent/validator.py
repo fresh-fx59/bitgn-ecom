@@ -325,6 +325,9 @@ class StepValidator:
         reactive_injected_this_step: bool,
     ) -> Optional[str]:
         """Tier 2 LLM triggers. Each fires at most once."""
+        # Tag aux calls made by the trigger methods below so the aux_call
+        # trace event records purpose=verify (observational only).
+        classifier.set_aux_purpose("verify")
         leaning = step_obj.outcome_leaning
         tool = getattr(step_obj.function, "tool", "")
 
@@ -580,6 +583,7 @@ class StepValidator:
         self, session: Session, fn: ReportTaskCompletion,
     ) -> Optional[str]:
         """R4 — verify claimed mutations match actual mutations via LLM."""
+        classifier.set_aux_purpose("verify")
         actual = session.mutations
         claimed = fn.completed_steps_laconic
 

@@ -28,6 +28,11 @@ from bitgn_contest_agent.arch_constants import (
 
 TRACE_SCHEMA_VERSION = "1.0.0"
 
+# Max length of an aux-call error body persisted in a TraceAuxCall. Keeps
+# traces small while preserving the discriminating prefix of the error
+# (e.g. "Unrecognized request arguments: reasoning").
+AUX_ERROR_MSG_MAXLEN = 600
+
 
 ERROR_KIND_VALUES: frozenset[Optional[str]] = frozenset(
     {
@@ -194,6 +199,59 @@ class TraceEcomOp(_BaseRecord):
     origin: Optional[str] = None
 
 
+class TraceAuxCall(_BaseRecord):
+    """One auxiliary-LLM transport call (classifier / task normaliser /
+    judge_enforcer / ref_judge), logged by the single chokepoint
+    classifier._llm_call. Additive observability (2026-05-31).
+
+    Motivation: in a 100-task PROD run the aux model
+    (claude-haiku-4-5-20251001) 400-failed on EVERY call (dead on the
+    linkapi provider; the cheap fallbacks reject the reasoning param) and
+    the trace could not say which model was used, the failure reason, or
+    the per-call retry count. This record captures all of that.
+
+    `purpose` is a coarse tag of the caller (classify / normalise / judge
+    / ref_judge / completion). `attempts` is how many transport tries the
+    retry wrapper made for this logical call. On failure `error_type` is
+    the exception class name (e.g. BadRequestError) and `error_msg` is the
+    body truncated to AUX_ERROR_MSG_MAXLEN — enough to distinguish
+    "Unrecognized request arguments: reasoning" from "bad response status
+    code 400" from "model_not_found".
+    """
+    kind: Literal["aux_call"] = "aux_call"
+    model: str
+    purpose: Optional[str] = None
+    attempts: int = 1
+    ok: bool = True
+    error_type: Optional[str] = None
+    error_msg: Optional[str] = None
+    latency_ms: Optional[int] = None
+
+
+class TraceEnforcerMod(_BaseRecord):
+    """One enforcer / completer that modified the reported answer's
+    grounding_refs. Additive observability (2026-05-31).
+
+    The enforcer chain already emits free-text ARCH lines, but they don't
+    carry the before/after ref SETS in a parseable shape, so "which
+    enforcer added/removed which ref" could not be reconstructed from the
+    trace alone. This record makes the diff explicit.
+
+    `refs_added` / `refs_removed` are derived from before/after by the
+    writer so they cannot drift. `bypassed` is True when the enforcer ran
+    but its change was intentionally NOT applied (e.g. submit_anyway).
+    """
+    kind: Literal["enforcer_mod"] = "enforcer_mod"
+    enforcer: str
+    refs_before: List[str] = Field(default_factory=list)
+    refs_after: List[str] = Field(default_factory=list)
+    refs_added: List[str] = Field(default_factory=list)
+    refs_removed: List[str] = Field(default_factory=list)
+    family: Optional[str] = None
+    bypassed: bool = False
+    at_step: Optional[int] = None
+
+
 class TraceArch(_BaseRecord):
     kind: Literal["arch"] = "arch"
     at_step: Optional[int] = None      # None = pre-task (router)
@@ -230,11 +288,20 @@ class TraceOutcome(_BaseRecord):
     # plausible but the grader says no — the detail strings usually name
     # the expected value.
     score_detail: Optional[List[str]] = None
+    # Run-level auxiliary-LLM coverage (2026-05-31). Populated from the
+    # per-thread aux counters at terminal time so a blackout (every aux
+    # call 400-failing) is visible in ONE place without grepping the
+    # per-call aux_call events. Absent on traces written before this add.
+    aux_attempted: Optional[int] = None
+    aux_succeeded: Optional[int] = None
+    # Failure histogram keyed by exception class name, e.g.
+    # {"BadRequestError": 50}. None when nothing failed / pre-add.
+    aux_failures_by_type: Optional[dict[str, int]] = None
 
 
 TraceRecord = Union[
     TraceMeta, TraceTask, TracePrepass, TraceStep, TraceEvent,
-    TraceArch, TraceEcomOp, TraceOutcome,
+    TraceArch, TraceEcomOp, TraceAuxCall, TraceEnforcerMod, TraceOutcome,
 ]
 
 
@@ -246,6 +313,8 @@ _KIND_TO_MODEL: dict[str, type[_BaseRecord]] = {
     "event": TraceEvent,
     "arch": TraceArch,
     "ecom_op": TraceEcomOp,
+    "aux_call": TraceAuxCall,
+    "enforcer_mod": TraceEnforcerMod,
     "outcome": TraceOutcome,
 }
 

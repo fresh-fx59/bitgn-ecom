@@ -154,10 +154,13 @@ def judge_catalog_refs(
         + "\n\nCANDIDATE CATALOG RECORDS (cite paths only from here):\n"
         + "\n".join(lines)
     )
+    _prev_purpose = classifier.set_aux_purpose("ref_judge")
     try:
         out = classify_fn(system=_SYSTEM, user=user)
     except Exception:
         return None
+    finally:
+        classifier.set_aux_purpose(_prev_purpose)
     if not isinstance(out, dict):
         return None
     refs = out.get("catalog_refs")

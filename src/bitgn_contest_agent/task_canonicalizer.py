@@ -270,7 +270,11 @@ def canonicalize(
 
     try:
         from bitgn_contest_agent import classifier as _classifier
-        raw = _classifier.raw_completion(prompt=prompt)
+        _prev_purpose = _classifier.set_aux_purpose("normalise")
+        try:
+            raw = _classifier.raw_completion(prompt=prompt)
+        finally:
+            _classifier.set_aux_purpose(_prev_purpose)
     except Exception as exc:
         _LOG.info(
             "task_canonicalizer: classifier call failed: %s — falling back to raw text",

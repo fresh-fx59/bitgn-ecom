@@ -185,6 +185,7 @@ class ReactiveRouter:
         user = _reactive_classifier_user_msg(
             tool_name, path, tool_result_text,
         )
+        _prev_purpose = classifier.set_aux_purpose("classify")
         try:
             if backend is not None:
                 raw = classifier.classify_structured(
@@ -195,6 +196,8 @@ class ReactiveRouter:
         except Exception as exc:  # noqa: BLE001 — reactive router never breaks the main path
             _LOG.warning("reactive classifier failed, skipping: %s", exc)
             return None
+        finally:
+            classifier.set_aux_purpose(_prev_purpose)
 
         category, confidence = classifier.parse_response(
             raw, valid_categories=set(self._by_category),
