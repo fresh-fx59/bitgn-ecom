@@ -1708,6 +1708,47 @@ class AgentLoop:
                     )
                     fn = self._set_refs(fn, _new_refs, enforcer="ref_judge")
 
+            # CART/STAFF-SCOPED LLM-AS-JUDGE ref corrector. The grader checks
+            # the /proc/carts, /proc/staff, /proc/employees families as EXACT
+            # sets; the stable failures are PRECISION errors on those paths:
+            #   * cross-customer/identity DENIED_SECURITY → DROP the victim's
+            #     cart ref (the agent refused to touch it; cust != actor),
+            #   * authority DENIED_SECURITY → ADD the actor's /proc/employees
+            #     record (proof of missing role) IF the agent read it, drop the
+            #     basket,
+            #   * OK basket mutation → keep ONLY the modified basket (drop the
+            #     other baskets the agent read while searching).
+            # Reference-anchored, conservative (ABSTAINS on uncertainty — the
+            # grader is contradictory across denial shapes, memory
+            # project_grader_contradiction_basket_refusal), and STRICTLY scoped:
+            # NEVER touches /proc/catalog (owned by ref_judge+count_ref_completer
+            # — a broad judge there was NET-NEGATIVE). Env-gated default-off
+            # (BITGN_USE_CART_REF_JUDGE). See cart_ref_judge + its tests.
+            from bitgn_contest_agent import cart_ref_judge as _crj
+            if (
+                _crj.is_enabled()
+                and _crj.applies(task_text or "", list(fn.grounding_refs))
+            ):
+                _cur_cs = [p for p in fn.grounding_refs if _crj._is_cart_staff(p)]
+                _prev_p = _crj.classifier.set_aux_purpose("cart_ref_judge")
+                try:
+                    _corrected_cs = _crj.judge_cart_staff_refs(
+                        task_text or "",
+                        fn.message or "",
+                        fn.outcome,
+                        _cur_cs,
+                        session.seen_refs,
+                        actor_id=getattr(self, "_actor_id", None),
+                    )
+                except Exception:
+                    _corrected_cs = None
+                finally:
+                    _crj.classifier.set_aux_purpose(_prev_p)
+                if _corrected_cs is not None and set(_corrected_cs) != set(_cur_cs):
+                    _new_cs_refs = _crj.apply_correction(
+                        list(fn.grounding_refs), _corrected_cs)
+                    fn = self._set_refs(fn, _new_cs_refs, enforcer="cart_ref_judge")
+
             # v0.1.145/149 REFLESS count override. Computes the qualifying
             # count by replicating the grader's own observable computation
             # from the catalogue DB and rewrites the message count token ONLY
