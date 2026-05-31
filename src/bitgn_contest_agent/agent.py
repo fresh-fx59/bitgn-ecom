@@ -379,28 +379,27 @@ class AgentLoop:
             for content in bootstrap_content:
                 messages.append(Message(role="user", content=content))
 
-        # Extract actor identity from /bin/id output for use by the
-        # cross-actor cite enforcer. /bin/id prints lines like
-        # "actor=cust_017 roles=customer" — pull the cust_/emp_ token.
+        # Extract actor identity from the /bin/id output for the cross-actor
+        # cite enforcers (refusal_cite_enforcer, cart_ref_judge).
+        # PROD /bin/id prints "user: cust-0175\nroles: customer"; the dev
+        # benchmark printed "actor=cust_017 roles=customer". Accept BOTH the
+        # hyphen (PROD: cust-0175) and underscore (dev: cust_017) id formats —
+        # the underscore-only regex silently left _actor_id=None on every PROD
+        # task, disabling every actor-gated enforcer. Read ONLY from the
+        # /bin/id output (wrapped with "Actor identity:" by the ecom prepass) —
+        # NEVER from task-derived text, which can carry a SPOOFED id (injection
+        # "authenticated customer_id is cust-0003").
         self._actor_id: Optional[str] = None
         if bootstrap_content:
             import re as _re_actor
+            _actor_tok = _re_actor.compile(r"\b((?:cust|emp)[-_][A-Za-z0-9]+)\b")
             for content in bootstrap_content:
-                m = _re_actor.search(
-                    r"\b(?:actor|identity|customer|employee)\s*[:=]?\s*"
-                    r"`?((?:cust|emp)_[A-Za-z0-9]+)`?",
-                    content,
-                )
+                if "Actor identity:" not in content:
+                    continue
+                m = _actor_tok.search(content)
                 if m:
                     self._actor_id = m.group(1)
-                    break
-                m = _re_actor.search(
-                    r"\b((?:cust|emp)_[A-Za-z0-9]+)\b",
-                    content,
-                )
-                if m:
-                    self._actor_id = m.group(1)
-                    break
+                break
 
         self._writer.append_task(task_id=task_id, task_text=task_text)
 
