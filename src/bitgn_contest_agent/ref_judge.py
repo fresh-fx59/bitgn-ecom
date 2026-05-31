@@ -168,17 +168,41 @@ def judge_catalog_refs(
     allowed = {r.get("path") for r in candidate_records} | set(current_catalog_refs)
     corrected = [p for p in refs if _is_catalog(p) and p in allowed]
     if not corrected:
-        # Empty set is a VALID correction ONLY for a does-not-exist / NO answer
-        # (cite nothing — drop the near-miss the agent wrongly cited). On any
-        # other answer an empty result is treated as ABSTAIN, so the judge can
-        # never wrongly strip the refs of a YES/positive answer.
-        if _is_negative_answer(agent_answer):
+        # Empty set is a VALID correction ONLY for an EXISTENCE question
+        # ("does X exist?") answered NO — there cite nothing (drop the
+        # near-miss the agent wrongly cited; t006/t046). For AVAILABILITY
+        # ("do you have N of X?") or OCR ("can I buy this basket?") negatives
+        # the product DOES exist and the grader wants its record cited, so an
+        # empty LLM result there is treated as ABSTAIN (keep the agent's refs)
+        # — never strip. (Evidence: PROD v164 ref_judge wrongly stripped t002
+        # availability + t063 OCR to [].) On any positive answer empty = ABSTAIN.
+        if _is_negative_answer(agent_answer) and _is_existence_question(task_text):
             return []
         return None
     return corrected
 
 
 _NEG_ANSWER = _re.compile(r"\bfalse\b|false\s*\(|<\s*no\s*>|\bnein\b|\bno\b|\bnein\b", _re.I)
+
+# EXISTENCE question = asks whether a product matching the specs EXISTS at all.
+# AVAILABILITY ("do you have N", "how many", "in stock", "units") and OCR
+# ("buy this basket", "receipt") ask about stock of a product that DOES exist
+# — there a NO answer must still cite the resolved product, so they are NOT
+# existence questions and must not trigger the cite-nothing strip.
+_AVAILABILITY = _re.compile(
+    r"do you have\b|how many\b|in stock\b|\bunits?\b|available\b|"
+    r"buy this\b|receipt\b|same basket\b", _re.I)
+_EXISTENCE = _re.compile(
+    r"does such (a )?product exist|does (the|this|that|a|such)\b[^?]*\bexist|"
+    r"\bexist\b|is there a\b|do we (stock|carry|offer)\b|"
+    r"does .* (line|set|kit|model)\b", _re.I)
+
+
+def _is_existence_question(task_text: str) -> bool:
+    t = task_text or ""
+    if _AVAILABILITY.search(t):
+        return False
+    return bool(_EXISTENCE.search(t))
 
 
 def _is_negative_answer(answer: str) -> bool:
