@@ -72,7 +72,32 @@ Tests: `tests/local/test_but_not_ref_completer.py` (9). Full suite 938✓/3 skip
 - Net: dispatch caps the overall at ≈0.91 even if everything else is perfect.
   **Literal 100/100 (overall 1.0) is unreachable.**
 
-## Why fraud is deferred (not ignored)
+## Fraud — CRACKED the rule, but a deterministic override still loses to the LLM
+
+New capability: **`scripts/fraud_probe.py`** submits a deterministically-constructed
+fraud answer via the runtime `answer()` RPC (NO LLM inference, ~free — only
+rate-limit slots) and reads the grader's per-trial recall%/FP feedback. This gives
+ground-truth labels cheaply, so we reverse-engineered the rule across 4 probe runs:
+
+| Rule | Recall | 4-task avg score | verdict |
+|---|---|---|---|
+| `v1` cross∪cycle≥3 | 70–96% | ~0.48 | under-recall |
+| `seed` strong-rings(≥2cust/≥3city/≥3dev/≥3meth)+membership | 47–100% | ~0.48 | under-recall (t035→47%) |
+| **`compNT`** component(dev∨meth)+fanout+customer-membership | **100% always** | **~0.70** | recall-complete, FP-heavy |
+| agent (LLM, rerun) | ~100% | **~0.78** | best |
+
+- **The fraud rule is `compNT`:** link rows by shared device OR method; a component
+  is fraud iff it has fan-out (>1 customer/device/method); then ALL rows of any
+  customer appearing in a fraud component are fraud (membership — without it recall
+  drops to 88%). compNT hit **1.0 on a clean t075 instance** ("a few" FPs tolerated).
+- **But it can't beat the LLM.** compNT over-flags on dense instances. The FP source
+  is small single-customer 2-method/2-device clusters, which are **fraud in some
+  worlds (t035, t075) and legit in others (t015)** — identical structure, opposite
+  label. No count/geo/time threshold separates them. So a deterministic override
+  **regresses** (0.70 < 0.78). Fraud stays the agent's; documented in memory
+  `project_ecom_fraud_archive_structure`. The probe harness remains for any future rule.
+
+## (original) Why fraud was deferred
 - **No workspace fraud-rule doc exists** (search "fraud" across `/` → `[]`;
   `/docs/payments/` has no rule). The grader holds private ground truth.
 - Structure (4 archive TSVs analysed) = two planted archetypes:
