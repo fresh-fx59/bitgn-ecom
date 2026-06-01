@@ -59,6 +59,23 @@ does NOT fire on the count-LIST family (`count_ref_completer`'s domain).
 
 Tests: `tests/local/test_but_not_ref_completer.py` (9). Full suite 938✓/3 skip.
 
+## Over-clarification / unsupported family (t041, t049, t079) — read the agent's traces
+
+The agent refuses/clarifies tasks the grader expected it to complete:
+- **t049 (FIXED, v0.1.169):** refused checkout of `PT-DIG-PLAN-GARDEN-SHED`
+  (`OUTCOME_NONE_UNSUPPORTED`) because the SKU was absent from the basket store's
+  physical inventory → available 0. But `/docs/checkout.md` says *"Digital products
+  are fulfilled by access/download"* and they are `fulfillment_type=2` (PT-DIG-*) —
+  no physical inventory, always available. **Doc-backed deterministic fix:** the
+  pre-checkout inventory gate now excludes digital lines (gate only physical
+  `fulfillment_type=1`). Low-risk (only relaxes the gate for always-available goods).
+- **t041, t079 (NOT fixed — genuine 2-way ambiguity):** "two little batteries" →
+  DCF887-2AH vs -5AH; "bare metabo w18 125 grinder" → -BODY vs -FLAT. The agent
+  clarifies (defensibly) where the grader wanted a pick ("little"→smaller tier;
+  "bare" with no "flat-head"→BODY). These are LLM resolution heuristics; a prompt
+  nudge to resolve them is unvalidatable and risks over-action elsewhere
+  ([[feedback_pre_submit_checklist_hurts_recall]]). Left to the LLM; variance-bound.
+
 ## Why dispatch is a genuine ceiling (not a missing lever)
 - Score == grader "efficiency" = gain / **stochastic near-optimal reference**;
   the planner docstring states **"no perfect score."**
