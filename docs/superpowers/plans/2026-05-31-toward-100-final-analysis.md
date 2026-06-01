@@ -172,10 +172,31 @@ validate small deterministic gains — a +2/+3 is swamped by ±6 task-flips. The
 `fraud_probe`-style targeted ground-truth probe (per-task, no LLM) is the right
 tool for isolating effects cheaply; full $15 runs are too noisy for small deltas.
 
-**Net recommendation:** keep the digital-checkout fix (v0.1.169 code, sound);
-**leave but_not_completer OFF** (fragile). Expected band unchanged ~0.85–0.89.
+**Net recommendation:** keep the digital-checkout fix (v0.1.169 code, sound) and
+the security-denial recalibration (v0.1.170, below); **leave but_not_completer
+OFF** (proven net-zero — see below).
+
+## v0.1.169 follow-ups (post the run above)
+
+- **`but_not` proven NET-ZERO (not net-fragile/+1):** the exhaustive ground-truth
+  probe (`scripts/but_not_probe.py`, run-22SMh1, ~$0) found EXACTLY 4 `(but not)`
+  tasks — t002+t062 WANT the excluded SKU cited (battery variant), t022+t042 do
+  NOT (size variant). 2-help/2-hurt = net zero; stays off. (Supersedes the
+  earlier "+1 / 3-task" estimate.)
+- **gpt-5.5 evaluated + recalibrated (v0.1.170):** gpt-5.5 base = 0.8708/80
+  (less over-cautious → wins t041/t079/t095/t099/t076/t047, but UNDER-denies
+  security: t030/t098). Root cause was a rule conflict — the destructive-verb
+  "unresolved target → clarify" downgrade overrode an already-determined denial.
+  Fix = a SCOPE LIMIT (prompts.py): a determinable violation (authority claim by
+  an actor lacking the role, cross-customer mutation, identity-override) is
+  DENIED_SECURITY regardless of target resolution. Result: gpt-5.5 → **0.8910/80**
+  (flipped t030+t098+t072, no over-denial), LEVEL with the gpt-5.4 best. The fix
+  is model-agnostic + recall-guarded (helps gpt-5.4, cannot manufacture denials).
+  Details: memory `project_ecom_gpt55_vs_gpt54`.
 
 ## Honest expected ceiling
-~0.90–0.92 weighted / ~83–85 pass@1.0 at the current variance band. The residual
-gap is **dispatch (structural)** + **fraud/clarification/checkout (per-world
-variance)** — neither yields to a deterministic, locally-validatable fix.
+~0.89–0.91 weighted / ~80–82 pass@1.0 at the current variance band, for BOTH
+gpt-5.4 and gpt-5.5 (post-v0.1.170 they are level — no clear model winner). The
+residual gap is **dispatch (structural)** + **fraud / clarification / checkout
+(per-world variance)** — neither yields to a deterministic, locally-validatable
+fix. Literal 100/100 remains unreachable (dispatch efficiency ceiling).
