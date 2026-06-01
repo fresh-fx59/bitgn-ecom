@@ -20,6 +20,17 @@ Scoped NARROWLY to the YES/NO availability/existence family that carries a
 "but not <SKU>" clause (the grader's evidenced behaviour). It deliberately does
 NOT fire on the count-LIST family ("how many of these: A, B, C"), which is owned
 by count_ref_completer. Env-gated default-off (BITGN_USE_BUT_NOT_COMPLETER).
+
+⚠️ KEEP DEFAULT-OFF — VALIDATED NET-FRAGILE (PROD run-22SHuo, v0.1.169):
+fixed t002 + t062 (grader WANTED the excluded SKU cited) but BROKE t022
+(`(but not PT-BIT-ALP-HSS-25)` → grader marked HSS-25 as an EXTRA ref). Both
+t062 and t022 had NEGATIVE answers, so answer polarity does NOT discriminate —
+the grader's treatment of the named exclusion is INCONSISTENT across tasks and
+there is no reliable signal for when it wants the excluded record cited. Adding
+it unconditionally is an uncertain bet on every "(but not)" task, which violates
+the "abstain on uncertainty" enforcer principle. Net +1 on the current 3-task
+"(but not)" set (+t002 +t062 −t022), but unpredictable on re-instantiation /
+new tasks. Do NOT enable without a per-task discriminator.
 """
 from __future__ import annotations
 
