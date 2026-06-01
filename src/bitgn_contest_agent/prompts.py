@@ -428,6 +428,23 @@ Catalogue / SQL discipline (ECOM-specific):
                        inventory check IS a precondition, not a post-
                        hoc justification.
 
+                       DIGITAL-PRODUCT EXCEPTION (mandatory): a basket
+                       line whose catalogue record has
+                       `fulfillment_type` = 2 (a DIGITAL product —
+                       /docs/checkout.md: "Digital products are
+                       fulfilled by access/download", SKU prefix
+                       PT-DIG-*) has NO physical store inventory and is
+                       ALWAYS available. EXCLUDE such lines from the
+                       inventory gate entirely: a missing / zero store
+                       inventory row for a digital line is NORMAL and
+                       must NOT block checkout. Apply the on_hand /
+                       reserved gate ONLY to physical lines
+                       (fulfillment_type = 1). Refusing checkout
+                       OUTCOME_NONE_UNSUPPORTED because a digital line
+                       is absent from store inventory is a FALSE
+                       refusal (PROD t049: agent gated PT-DIG-PLAN-…,
+                       grader expected OK).
+
                        SQL-UNAVAILABLE / PROD FALLBACK (mandatory): the
                        inventory gate must NOT depend on /bin/sql. If
                        /bin/sql is absent or errors (common in PROD —
