@@ -21,16 +21,19 @@ Scoped NARROWLY to the YES/NO availability/existence family that carries a
 NOT fire on the count-LIST family ("how many of these: A, B, C"), which is owned
 by count_ref_completer. Env-gated default-off (BITGN_USE_BUT_NOT_COMPLETER).
 
-⚠️ KEEP DEFAULT-OFF — VALIDATED NET-FRAGILE (PROD run-22SHuo, v0.1.169):
-fixed t002 + t062 (grader WANTED the excluded SKU cited) but BROKE t022
-(`(but not PT-BIT-ALP-HSS-25)` → grader marked HSS-25 as an EXTRA ref). Both
-t062 and t022 had NEGATIVE answers, so answer polarity does NOT discriminate —
-the grader's treatment of the named exclusion is INCONSISTENT across tasks and
-there is no reliable signal for when it wants the excluded record cited. Adding
-it unconditionally is an uncertain bet on every "(but not)" task, which violates
-the "abstain on uncertainty" enforcer principle. Net +1 on the current 3-task
-"(but not)" set (+t002 +t062 −t022), but unpredictable on re-instantiation /
-new tasks. Do NOT enable without a per-task discriminator.
+⚠️ KEEP DEFAULT-OFF — VALIDATED NET-ZERO by exhaustive ground-truth probe
+(scripts/but_not_probe.py, run-22SMh1, ~$0). There are EXACTLY 4 "(but not)"
+tasks in PROD; citing the excluded SKU and reading the grader's missing/extra:
+  * t002 (…-3AH), t062 (…-5AH): excluded NOT flagged extra → grader WANTS it
+    cited (the excluded is a BATTERY/kit variant of the same tool, a candidate).
+  * t022 (…-190), t042 (…-19): excluded flagged EXTRA → grader does NOT want it
+    (a SIZE/dimension variant = a different product, not a candidate).
+So blind-add is 2-help / 2-hurt = NET ZERO and breaks 2 otherwise-stable tasks
+(t022, t042 — the latter's v0.1.169 regression was THIS, not variance). The
+split is a SEMANTIC candidate-set decision ("does the description match the
+excluded variant?") — ref_judge's (LLM) job, NOT a syntactic always-cite rule.
+No safe deterministic discriminator (battery-vs-size suffix parsing is brittle /
+world-specific). Do NOT enable.
 """
 from __future__ import annotations
 

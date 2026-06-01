@@ -154,12 +154,15 @@ churn flipped ~7 tasks down).
 - **t049 0→1.0** (digital-checkout exception)
 
 **But the run REVEALED two problems:**
-1. **`but_not_completer` is grader-fragile → DISABLED.** It broke **t022**
-   (`(but not PT-BIT-ALP-HSS-25)` — grader marked HSS-25 an EXTRA ref). t062 and
-   t022 both had NEGATIVE answers yet t062 wanted the excluded SKU and t022 did
-   not: the grader's `(but not X)` rule is **inconsistent across tasks**, so the
-   completer is an uncertain bet. Net only +1 on the current 3-task set but
-   unpredictable → kept default-off, marked net-fragile in code + memory.
+1. **`but_not_completer` is NET-ZERO → DISABLED** (later proven exhaustively by
+   `scripts/but_not_probe.py`, run-22SMh1, ~$0). There are EXACTLY **4** `(but
+   not)` tasks; the probe cited the excluded SKU and read the grader verdict:
+   **t002 (-3AH) + t062 (-5AH) WANT it cited** (battery/kit variant = a
+   candidate), **t022 (-190) + t042 (-19) do NOT** (size variant = a different
+   product, marked EXTRA). So blind-add is 2-help / 2-hurt = **net zero**, and
+   t042's regression in this run was `but_not` too (not variance). The split is a
+   SEMANTIC candidate-set decision — `ref_judge`'s (LLM) job, not a syntactic
+   always-cite rule; no safe deterministic discriminator. Kept default-off.
 2. **t051/t071 ("missing /docs/checkout.md")** were **variance**, not the
    digital change: the agent over-clarified on a genuine 2-active-basket
    ambiguity (separate code path). The t049 digital fix is sound and retained.
