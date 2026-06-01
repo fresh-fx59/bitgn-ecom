@@ -1707,6 +1707,59 @@ class AgentLoop:
                     )
                     fn = self._set_refs(fn, _new_refs, enforcer="ref_judge")
 
+            # "(but not <SKU>)" EXCLUSION-CITATION completer. For YES/NO
+            # availability questions that NAME a SKU after "but not", the grader
+            # requires that SKU's /proc/catalog record CITED (proof you looked it
+            # up to rule it out) — the only non-dispatch PERSISTENT ref failures
+            # (t002 missing K4-PIPE, t062 missing RMA235-AK30). The agent
+            # excludes the SKU and never cites it. ADD-ONLY (union, never
+            # rewrites the value); resolved against the live catalogue so a
+            # non-record token is dropped. Runs AFTER ref_judge so the required
+            # excluded ref cannot be stripped. Env-gated default-off
+            # (BITGN_USE_BUT_NOT_COMPLETER). See but_not_ref_completer + tests.
+            from bitgn_contest_agent import but_not_ref_completer as _bnc
+            if (
+                _bnc.is_enabled()
+                and fn.outcome == "OUTCOME_OK"
+                and _bnc.applies(task_text or "")
+            ):
+                import json as _json_bnc
+                from bitgn_contest_agent.adapter.ecom import Req_Find as _Req_Find_BNC
+
+                def _resolve_bnc(sku: str):
+                    try:
+                        tr = self._adapter.dispatch(_Req_Find_BNC(
+                            tool="find", name=f"{sku}.json", root="/proc/catalog",
+                            kind="files", limit=20))
+                        if not (tr.ok and tr.content):
+                            return None
+                        obj = _json_bnc.loads(tr.content)
+                        for p in (obj.get("paths") or []):
+                            if p.endswith(f"/{sku}.json"):
+                                return p
+                    except Exception:
+                        return None
+                    return None
+
+                try:
+                    bnc_added = _bnc.complete_refs(
+                        task_text or "", list(fn.grounding_refs), _resolve_bnc)
+                except Exception:
+                    bnc_added = []
+                if bnc_added:
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP,
+                        at_step=None,
+                        details=(
+                            f"but_not_ref_completer added excluded-SKU "
+                            f"ref(s): {bnc_added}"
+                        ),
+                    )
+                    fn = self._set_refs(
+                        fn, list(fn.grounding_refs) + bnc_added,
+                        enforcer="but_not_ref_completer",
+                    )
+
             # CART/STAFF-SCOPED LLM-AS-JUDGE ref corrector. The grader checks
             # the /proc/carts, /proc/staff, /proc/employees families as EXACT
             # sets; the stable failures are PRECISION errors on those paths:
