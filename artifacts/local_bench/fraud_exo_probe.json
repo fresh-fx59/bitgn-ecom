@@ -1,0 +1,1081 @@
+{
+  "run_id": "run-22SUqr56mnBKnfivXtiNTVxAQ",
+  "tasks": {
+    "t015": {
+      "trial_id": "vm2-LxyKgjfVB272KSH75APSBoDiGTg",
+      "header": "row_id\tarchive_payment_id\tcreated_at\tcustomer_ref\tstore_ref\tstore_city\tamount_cents\tcurrency\tpayment_method_fingerprint\tdevice_fingerprint\tobserved_lat\tobserved_lon\tsku\tarchive_channel",
+      "n_rows": 131,
+      "compNT_rows": 67,
+      "compNT_amount": "EUR 15539.50",
+      "exo_rows": 3,
+      "exo_amount": "EUR 789.70",
+      "exo_incidents": [
+        {
+          "rule": "archive_signal_city_hop",
+          "key": "device_fingerprint",
+          "key_value": "dev_arch_6K2yebF8s4qj",
+          "row_count": 3,
+          "city_count": 3,
+          "total_cents": 78970,
+          "diagnostics": {
+            "row_span": 3,
+            "row_density": 1.0,
+            "time_span_seconds": 576,
+            "channel_counts": {
+              "web": 3
+            },
+            "payment_fingerprint_count": 3,
+            "device_fingerprint_count": 1,
+            "score": 117.897
+          },
+          "row_ids": [
+            "AR-boqhSn",
+            "AR-2Kifkw",
+            "AR-WBh3Bb"
+          ],
+          "row_details": [
+            {
+              "index": 121,
+              "row_id": "AR-boqhSn",
+              "created_at": "2024-09-23T23:11:20+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 32990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0061",
+              "payment_method_fingerprint": "pm_arch_Uc7ZxfNRZ9NV",
+              "device_fingerprint": "dev_arch_6K2yebF8s4qj"
+            },
+            {
+              "index": 122,
+              "row_id": "AR-2Kifkw",
+              "created_at": "2024-09-23T23:16:08+00:00",
+              "store_city": "Graz",
+              "amount_cents": 21990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0068",
+              "payment_method_fingerprint": "pm_arch_U1Sx5Xxh7DgJ",
+              "device_fingerprint": "dev_arch_6K2yebF8s4qj"
+            },
+            {
+              "index": 123,
+              "row_id": "AR-WBh3Bb",
+              "created_at": "2024-09-23T23:20:56+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 23990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0075",
+              "payment_method_fingerprint": "pm_arch_VqSnepXcEp8G",
+              "device_fingerprint": "dev_arch_6K2yebF8s4qj"
+            }
+          ]
+        }
+      ],
+      "exo_score_sync": 0.0,
+      "exo_detail_sync": [],
+      "final_score": 0.5643132925033569,
+      "final_detail": [
+        "answer amount mismatch",
+        "archive fraud refs recovered ~56% EUR from fraud amount, and also marked a few payments as false positives."
+      ]
+    },
+    "t035": {
+      "trial_id": "vm2-LxyKgjfVB272KSH75APSBoDiGU2",
+      "header": "row_id\tarchive_payment_id\tcreated_at\tcustomer_ref\tstore_ref\tstore_city\tamount_cents\tcurrency\tpayment_method_fingerprint\tdevice_fingerprint\tobserved_lat\tobserved_lon\tsku\tarchive_channel",
+      "n_rows": 67,
+      "compNT_rows": 65,
+      "compNT_amount": "EUR 12975.80",
+      "exo_rows": 30,
+      "exo_amount": "EUR 6826.40",
+      "exo_incidents": [
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0023",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 27970,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 389,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 92.797
+          },
+          "row_ids": [
+            "AR-XkTzg9",
+            "AR-HSFoGK"
+          ],
+          "row_details": [
+            {
+              "index": 9,
+              "row_id": "AR-XkTzg9",
+              "created_at": "2024-03-16T23:21:36+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 7980,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0023",
+              "payment_method_fingerprint": "pm_arch_KTUtcby93x3U",
+              "device_fingerprint": "dev_arch_3bW1QQnMzR1J"
+            },
+            {
+              "index": 10,
+              "row_id": "AR-HSFoGK",
+              "created_at": "2024-03-16T23:28:05+00:00",
+              "store_city": "Salzburg",
+              "amount_cents": 19990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0023",
+              "payment_method_fingerprint": "pm_arch_KTUtcby93x3U",
+              "device_fingerprint": "dev_arch_5wLTeaxNXiLD"
+            }
+          ]
+        },
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0057",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 43770,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 133,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 94.377
+          },
+          "row_ids": [
+            "AR-JRYVmA",
+            "AR-aJ9Tdr"
+          ],
+          "row_details": [
+            {
+              "index": 11,
+              "row_id": "AR-JRYVmA",
+              "created_at": "2024-03-16T23:44:36+00:00",
+              "store_city": "Salzburg",
+              "amount_cents": 1790,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0057",
+              "payment_method_fingerprint": "pm_arch_TcKox7QXctqh",
+              "device_fingerprint": "dev_arch_LPN4c4d58QnK"
+            },
+            {
+              "index": 12,
+              "row_id": "AR-aJ9Tdr",
+              "created_at": "2024-03-16T23:46:49+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 41980,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0057",
+              "payment_method_fingerprint": "pm_arch_TcKox7QXctqh",
+              "device_fingerprint": "dev_arch_Fpxiq5K2qhme"
+            }
+          ]
+        },
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0092",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 58560,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 180,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 95.856
+          },
+          "row_ids": [
+            "AR-e7PG5d",
+            "AR-M58Cqv"
+          ],
+          "row_details": [
+            {
+              "index": 13,
+              "row_id": "AR-e7PG5d",
+              "created_at": "2024-03-17T00:01:36+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 49980,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0092",
+              "payment_method_fingerprint": "pm_arch_Pt5WnhEmN54p",
+              "device_fingerprint": "dev_arch_95SuaCoY6hq5"
+            },
+            {
+              "index": 14,
+              "row_id": "AR-M58Cqv",
+              "created_at": "2024-03-17T00:04:36+00:00",
+              "store_city": "Graz",
+              "amount_cents": 8580,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0092",
+              "payment_method_fingerprint": "pm_arch_Pt5WnhEmN54p",
+              "device_fingerprint": "dev_arch_5nKW5sTC1bNV"
+            }
+          ]
+        },
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0068",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 72470,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 209,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 97.247
+          },
+          "row_ids": [
+            "AR-Pvi24X",
+            "AR-3dNwPM"
+          ],
+          "row_details": [
+            {
+              "index": 15,
+              "row_id": "AR-Pvi24X",
+              "created_at": "2024-03-17T00:18:36+00:00",
+              "store_city": "Salzburg",
+              "amount_cents": 2490,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0068",
+              "payment_method_fingerprint": "pm_arch_3SZsg3C7Tmyv",
+              "device_fingerprint": "dev_arch_CzTU1E67pidC"
+            },
+            {
+              "index": 16,
+              "row_id": "AR-3dNwPM",
+              "created_at": "2024-03-17T00:22:05+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 69980,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0068",
+              "payment_method_fingerprint": "pm_arch_3SZsg3C7Tmyv",
+              "device_fingerprint": "dev_arch_4k6dPkwK6Uzx"
+            }
+          ]
+        },
+        {
+          "rule": "high_value_device_multicity",
+          "key": "device_fingerprint",
+          "key_value": "dev_arch_9UoHn2Yswr2a",
+          "row_count": 4,
+          "city_count": 3,
+          "total_cents": 214940,
+          "diagnostics": {
+            "row_span": 4,
+            "row_density": 1.0,
+            "time_span_seconds": 3338,
+            "channel_counts": {
+              "mobile_app": 3,
+              "web": 1
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 1,
+            "score": 205.994
+          },
+          "row_ids": [
+            "AR-cLFo9M",
+            "AR-MYjjFp",
+            "AR-e9wn8m",
+            "AR-2c2dME"
+          ],
+          "row_details": [
+            {
+              "index": 24,
+              "row_id": "AR-cLFo9M",
+              "created_at": "2024-03-21T03:49:47+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 38990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0009",
+              "payment_method_fingerprint": "pm_arch_R2z3R5unw1zc",
+              "device_fingerprint": "dev_arch_9UoHn2Yswr2a"
+            },
+            {
+              "index": 25,
+              "row_id": "AR-MYjjFp",
+              "created_at": "2024-03-21T04:03:49+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 77980,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0009",
+              "payment_method_fingerprint": "pm_arch_R2z3R5unw1zc",
+              "device_fingerprint": "dev_arch_9UoHn2Yswr2a"
+            },
+            {
+              "index": 26,
+              "row_id": "AR-e9wn8m",
+              "created_at": "2024-03-21T04:04:30+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 37990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0009",
+              "payment_method_fingerprint": "pm_arch_R2z3R5unw1zc",
+              "device_fingerprint": "dev_arch_9UoHn2Yswr2a"
+            },
+            {
+              "index": 27,
+              "row_id": "AR-2c2dME",
+              "created_at": "2024-03-21T04:45:25+00:00",
+              "store_city": "Graz",
+              "amount_cents": 59980,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0009",
+              "payment_method_fingerprint": "pm_arch_R2z3R5unw1zc",
+              "device_fingerprint": "dev_arch_9UoHn2Yswr2a"
+            }
+          ]
+        },
+        {
+          "rule": "rapid_customer_multicity",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0054",
+          "row_count": 12,
+          "city_count": 5,
+          "total_cents": 65480,
+          "diagnostics": {
+            "row_span": 12,
+            "row_density": 1.0,
+            "time_span_seconds": 234,
+            "channel_counts": {
+              "mobile_app": 12
+            },
+            "payment_fingerprint_count": 2,
+            "device_fingerprint_count": 2,
+            "score": 290.548
+          },
+          "row_ids": [
+            "AR-NmeRJc",
+            "AR-ChmUcN",
+            "AR-GezXsg",
+            "AR-YAeGCd",
+            "AR-NDCfVU",
+            "AR-jRhxY6",
+            "AR-LmT4oS",
+            "AR-Uc5zbA",
+            "AR-iuuu85",
+            "AR-LTRS5B",
+            "AR-WWFJ7o",
+            "AR-LZeztG"
+          ],
+          "row_details": [
+            {
+              "index": 29,
+              "row_id": "AR-NmeRJc",
+              "created_at": "2024-03-25T08:29:36+00:00",
+              "store_city": "Linz",
+              "amount_cents": 1290,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0054",
+              "payment_method_fingerprint": "pm_arch_4AiqHUC2tX7b",
+              "device_fingerprint": "dev_arch_7sz6NusZKmjG"
+            },
+            {
+              "index": 30,
+              "row_id": "AR-ChmUcN",
+              "created_at": "2024-03-25T08:29:55+00:00",
+              "store_city": "Linz",
+              "amount_cents": 9990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0054",
+              "payment_method_fingerprint": "pm_arch_SVhwFekhK1CS",
+              "device_fingerprint": "dev_arch_TGJXUBMevS89"
+            },
+            {
+              "index": 31,
+              "row_id": "AR-GezXsg",
+              "created_at": "2024-03-25T08:30:00+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0054",
+              "payment_method_fingerprint": "pm_arch_4AiqHUC2tX7b",
+              "device_fingerprint": "dev_arch_7sz6NusZKmjG"
+            },
+            {
+              "index": 32,
+              "row_id": "AR-YAeGCd",
+              "created_at": "2024-03-25T08:30:52+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 5990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0054",
+              "payment_method_fingerprint": "pm_arch_4AiqHUC2tX7b",
+              "device_fingerprint": "dev_arch_7sz6NusZKmjG"
+            },
+            {
+              "index": 33,
+              "row_id": "AR-NDCfVU",
+              "created_at": "2024-03-25T08:30:54+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 11990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0054",
+              "payment_method_fingerprint": "pm_arch_SVhwFekhK1CS",
+              "device_fingerprint": "dev_arch_TGJXUBMevS89"
+            },
+            {
+              "index": 34,
+              "row_id": "AR-jRhxY6",
+              "created_at": "2024-03-25T08:31:20+00:00",
+              "store_city": "Graz",
+              "amount_cents": 2490,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0054",
+              "payment_method_fingerprint": "pm_arch_4AiqHUC2tX7b",
+              "device_fingerprint": "dev_arch_7sz6NusZKmjG"
+            },
+            {
+              "index": 35,
+              "row_id": "AR-LmT4oS",
+              "created_at": "2024-03-25T08:31:21+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 1990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0054",
+              "payment_method_fingerprint": "pm_arch_SVhwFekhK1CS",
+              "device_fingerprint": "dev_arch_TGJXUBMevS89"
+            },
+            {
+              "index": 36,
+              "row_id": "AR-Uc5zbA",
+              "created_at": "2024-03-25T08:31:31+00:00",
+              "store_city": "Linz",
+              "amount_cents": 13990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0054",
+              "payment_method_fingerprint": "pm_arch_SVhwFekhK1CS",
+              "device_fingerprint": "dev_arch_TGJXUBMevS89"
+            },
+            {
+              "index": 37,
+              "row_id": "AR-iuuu85",
+              "created_at": "2024-03-25T08:32:12+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 4990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0054",
+              "payment_method_fingerprint": "pm_arch_4AiqHUC2tX7b",
+              "device_fingerprint": "dev_arch_7sz6NusZKmjG"
+            },
+            {
+              "index": 38,
+              "row_id": "AR-LTRS5B",
+              "created_at": "2024-03-25T08:32:54+00:00",
+              "store_city": "Salzburg",
+              "amount_cents": 1790,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0054",
+              "payment_method_fingerprint": "pm_arch_SVhwFekhK1CS",
+              "device_fingerprint": "dev_arch_TGJXUBMevS89"
+            },
+            {
+              "index": 39,
+              "row_id": "AR-WWFJ7o",
+              "created_at": "2024-03-25T08:33:26+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 4990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0054",
+              "payment_method_fingerprint": "pm_arch_4AiqHUC2tX7b",
+              "device_fingerprint": "dev_arch_7sz6NusZKmjG"
+            },
+            {
+              "index": 40,
+              "row_id": "AR-LZeztG",
+              "created_at": "2024-03-25T08:33:30+00:00",
+              "store_city": "Graz",
+              "amount_cents": 4990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0054",
+              "payment_method_fingerprint": "pm_arch_SVhwFekhK1CS",
+              "device_fingerprint": "dev_arch_TGJXUBMevS89"
+            }
+          ]
+        },
+        {
+          "rule": "high_value_device_multicity",
+          "key": "device_fingerprint",
+          "key_value": "dev_arch_XCZeBUdrL6Cj",
+          "row_count": 6,
+          "city_count": 4,
+          "total_cents": 199450,
+          "diagnostics": {
+            "row_span": 6,
+            "row_density": 1.0,
+            "time_span_seconds": 2141,
+            "channel_counts": {
+              "mobile_app": 6
+            },
+            "payment_fingerprint_count": 2,
+            "device_fingerprint_count": 1,
+            "score": 238.945
+          },
+          "row_ids": [
+            "AR-fxCQJZ",
+            "AR-dKZZFn",
+            "AR-FYhbwu",
+            "AR-2uXnKT",
+            "AR-eGrhpy",
+            "AR-GpmXzo"
+          ],
+          "row_details": [
+            {
+              "index": 61,
+              "row_id": "AR-fxCQJZ",
+              "created_at": "2024-04-20T02:42:40+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 31410,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0145",
+              "payment_method_fingerprint": "pm_arch_GvxZgiDbKtSv",
+              "device_fingerprint": "dev_arch_XCZeBUdrL6Cj"
+            },
+            {
+              "index": 62,
+              "row_id": "AR-dKZZFn",
+              "created_at": "2024-04-20T02:48:29+00:00",
+              "store_city": "Graz",
+              "amount_cents": 28640,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0145",
+              "payment_method_fingerprint": "pm_arch_EDmXmBT2GKPd",
+              "device_fingerprint": "dev_arch_XCZeBUdrL6Cj"
+            },
+            {
+              "index": 63,
+              "row_id": "AR-FYhbwu",
+              "created_at": "2024-04-20T02:58:46+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 31430,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0145",
+              "payment_method_fingerprint": "pm_arch_GvxZgiDbKtSv",
+              "device_fingerprint": "dev_arch_XCZeBUdrL6Cj"
+            },
+            {
+              "index": 64,
+              "row_id": "AR-2uXnKT",
+              "created_at": "2024-04-20T03:12:39+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 42990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0145",
+              "payment_method_fingerprint": "pm_arch_EDmXmBT2GKPd",
+              "device_fingerprint": "dev_arch_XCZeBUdrL6Cj"
+            },
+            {
+              "index": 65,
+              "row_id": "AR-eGrhpy",
+              "created_at": "2024-04-20T03:15:43+00:00",
+              "store_city": "Linz",
+              "amount_cents": 29990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0145",
+              "payment_method_fingerprint": "pm_arch_EDmXmBT2GKPd",
+              "device_fingerprint": "dev_arch_XCZeBUdrL6Cj"
+            },
+            {
+              "index": 66,
+              "row_id": "AR-GpmXzo",
+              "created_at": "2024-04-20T03:18:21+00:00",
+              "store_city": "Linz",
+              "amount_cents": 34990,
+              "archive_channel": "mobile_app",
+              "customer_ref": "arch_cust-0145",
+              "payment_method_fingerprint": "pm_arch_GvxZgiDbKtSv",
+              "device_fingerprint": "dev_arch_XCZeBUdrL6Cj"
+            }
+          ]
+        }
+      ],
+      "exo_score_sync": 0.0,
+      "exo_detail_sync": [],
+      "final_score": 0.911888837814331,
+      "final_detail": [
+        "answer amount mismatch",
+        "archive fraud refs recovered ~91% EUR from fraud amount, and also marked a few payments as false positives."
+      ]
+    },
+    "t055": {
+      "trial_id": "vm2-LxyKgjfVB272KSH75APSBoDiGUN",
+      "header": "row_id\tarchive_payment_id\tcreated_at\tcustomer_ref\tstore_ref\tstore_city\tamount_cents\tcurrency\tpayment_method_fingerprint\tdevice_fingerprint\tobserved_lat\tobserved_lon\tsku\tarchive_channel",
+      "n_rows": 145,
+      "compNT_rows": 69,
+      "compNT_amount": "EUR 15463.60",
+      "exo_rows": 12,
+      "exo_amount": "EUR 1849.20",
+      "exo_incidents": [
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0102",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 41970,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 578,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 94.197
+          },
+          "row_ids": [
+            "AR-d5mFwD",
+            "AR-Mv7q7V"
+          ],
+          "row_details": [
+            {
+              "index": 124,
+              "row_id": "AR-d5mFwD",
+              "created_at": "2024-07-05T07:13:01+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 11980,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0102",
+              "payment_method_fingerprint": "pm_arch_MoUU4KzFjJea",
+              "device_fingerprint": "dev_arch_GDWUxfeshjVB"
+            },
+            {
+              "index": 125,
+              "row_id": "AR-Mv7q7V",
+              "created_at": "2024-07-05T07:22:39+00:00",
+              "store_city": "Salzburg",
+              "amount_cents": 29990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0102",
+              "payment_method_fingerprint": "pm_arch_MoUU4KzFjJea",
+              "device_fingerprint": "dev_arch_7DFEWoRA6pVh"
+            }
+          ]
+        },
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0061",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 16960,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 338,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 91.696
+          },
+          "row_ids": [
+            "AR-SeJ35V",
+            "AR-TzoBCg"
+          ],
+          "row_details": [
+            {
+              "index": 126,
+              "row_id": "AR-SeJ35V",
+              "created_at": "2024-07-05T07:33:01+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 7980,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0061",
+              "payment_method_fingerprint": "pm_arch_EXhvhjvkYytz",
+              "device_fingerprint": "dev_arch_SM9jjXV1FUoB"
+            },
+            {
+              "index": 127,
+              "row_id": "AR-TzoBCg",
+              "created_at": "2024-07-05T07:38:39+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 8980,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0061",
+              "payment_method_fingerprint": "pm_arch_EXhvhjvkYytz",
+              "device_fingerprint": "dev_arch_5N2xN4A5hW2A"
+            }
+          ]
+        },
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0094",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 16970,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 455,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 91.697
+          },
+          "row_ids": [
+            "AR-gjm9t2",
+            "AR-7H16Vm"
+          ],
+          "row_details": [
+            {
+              "index": 128,
+              "row_id": "AR-gjm9t2",
+              "created_at": "2024-07-05T08:09:01+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 5980,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0094",
+              "payment_method_fingerprint": "pm_arch_DoN7GRv6eQYY",
+              "device_fingerprint": "dev_arch_GNtRjoXwXknZ"
+            },
+            {
+              "index": 129,
+              "row_id": "AR-7H16Vm",
+              "created_at": "2024-07-05T08:16:36+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 10990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0094",
+              "payment_method_fingerprint": "pm_arch_DoN7GRv6eQYY",
+              "device_fingerprint": "dev_arch_wCtFg2etTBoZ"
+            }
+          ]
+        },
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0060",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 5080,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 448,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 90.508
+          },
+          "row_ids": [
+            "AR-W9BxgY",
+            "AR-9JeRiE"
+          ],
+          "row_details": [
+            {
+              "index": 130,
+              "row_id": "AR-W9BxgY",
+              "created_at": "2024-07-05T08:37:01+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 3990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0060",
+              "payment_method_fingerprint": "pm_arch_EMTjaMiM2pZr",
+              "device_fingerprint": "dev_arch_PwxhzY7eMmy4"
+            },
+            {
+              "index": 131,
+              "row_id": "AR-9JeRiE",
+              "created_at": "2024-07-05T08:44:29+00:00",
+              "store_city": "Graz",
+              "amount_cents": 1090,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0060",
+              "payment_method_fingerprint": "pm_arch_EMTjaMiM2pZr",
+              "device_fingerprint": "dev_arch_5twkyHosHhZB"
+            }
+          ]
+        },
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0133",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 54970,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 409,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 95.497
+          },
+          "row_ids": [
+            "AR-C5eTAX",
+            "AR-JAYt3R"
+          ],
+          "row_details": [
+            {
+              "index": 132,
+              "row_id": "AR-C5eTAX",
+              "created_at": "2024-07-05T09:09:01+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 31980,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0133",
+              "payment_method_fingerprint": "pm_arch_AhtdYaxatXMw",
+              "device_fingerprint": "dev_arch_QsemP2vDzNRj"
+            },
+            {
+              "index": 133,
+              "row_id": "AR-JAYt3R",
+              "created_at": "2024-07-05T09:15:50+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 22990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0133",
+              "payment_method_fingerprint": "pm_arch_AhtdYaxatXMw",
+              "device_fingerprint": "dev_arch_TaenGDaARCa7"
+            }
+          ]
+        },
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0024",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 48970,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 555,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 94.897
+          },
+          "row_ids": [
+            "AR-TeWQMx",
+            "AR-a1Hhtn"
+          ],
+          "row_details": [
+            {
+              "index": 134,
+              "row_id": "AR-TeWQMx",
+              "created_at": "2024-07-05T09:33:01+00:00",
+              "store_city": "Salzburg",
+              "amount_cents": 10990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0024",
+              "payment_method_fingerprint": "pm_arch_KVGm544CwT6D",
+              "device_fingerprint": "dev_arch_GGSpZvE4rto5"
+            },
+            {
+              "index": 135,
+              "row_id": "AR-a1Hhtn",
+              "created_at": "2024-07-05T09:42:16+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 37980,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0024",
+              "payment_method_fingerprint": "pm_arch_KVGm544CwT6D",
+              "device_fingerprint": "dev_arch_SHQpfv8UYJjD"
+            }
+          ]
+        }
+      ],
+      "exo_score_sync": 0.0,
+      "exo_detail_sync": [],
+      "final_score": 0.5285391807556152,
+      "final_detail": [
+        "answer amount mismatch",
+        "archive fraud refs recovered ~53% EUR from fraud amount, and also marked a few payments as false positives."
+      ]
+    },
+    "t075": {
+      "trial_id": "vm2-LxyKgjfVB272KSH75APSBoDiGUi",
+      "header": "row_id\tarchive_payment_id\tcreated_at\tcustomer_ref\tstore_ref\tstore_city\tamount_cents\tcurrency\tpayment_method_fingerprint\tdevice_fingerprint\tobserved_lat\tobserved_lon\tsku\tarchive_channel",
+      "n_rows": 16,
+      "compNT_rows": 14,
+      "compNT_amount": "EUR 2701.20",
+      "exo_rows": 6,
+      "exo_amount": "EUR 544.20",
+      "exo_incidents": [
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0166",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 31970,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 386,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 93.197
+          },
+          "row_ids": [
+            "AR-Lne64v",
+            "AR-dqmoLJ"
+          ],
+          "row_details": [
+            {
+              "index": 0,
+              "row_id": "AR-Lne64v",
+              "created_at": "2024-04-27T22:39:59+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 21980,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0166",
+              "payment_method_fingerprint": "pm_arch_88kx9w6Ge3vN",
+              "device_fingerprint": "dev_arch_VpcGHQNqG4Z5"
+            },
+            {
+              "index": 1,
+              "row_id": "AR-dqmoLJ",
+              "created_at": "2024-04-27T22:46:25+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 9990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0166",
+              "payment_method_fingerprint": "pm_arch_88kx9w6Ge3vN",
+              "device_fingerprint": "dev_arch_FKMnCGFdxMjc"
+            }
+          ]
+        },
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0154",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 11480,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 492,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 91.148
+          },
+          "row_ids": [
+            "AR-D5K8UN",
+            "AR-4PdMLC"
+          ],
+          "row_details": [
+            {
+              "index": 2,
+              "row_id": "AR-D5K8UN",
+              "created_at": "2024-04-27T23:11:59+00:00",
+              "store_city": "Salzburg",
+              "amount_cents": 7990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0154",
+              "payment_method_fingerprint": "pm_arch_758SmHMY4m6K",
+              "device_fingerprint": "dev_arch_JpoVXV5dRKBg"
+            },
+            {
+              "index": 3,
+              "row_id": "AR-4PdMLC",
+              "created_at": "2024-04-27T23:20:11+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 3490,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0154",
+              "payment_method_fingerprint": "pm_arch_758SmHMY4m6K",
+              "device_fingerprint": "dev_arch_5HaAisgQ9L2A"
+            }
+          ]
+        },
+        {
+          "rule": "archive_customer_city_hop",
+          "key": "customer_ref",
+          "key_value": "arch_cust-0169",
+          "row_count": 2,
+          "city_count": 2,
+          "total_cents": 10970,
+          "diagnostics": {
+            "row_span": 2,
+            "row_density": 1.0,
+            "time_span_seconds": 457,
+            "channel_counts": {
+              "web": 2
+            },
+            "payment_fingerprint_count": 1,
+            "device_fingerprint_count": 2,
+            "score": 91.097
+          },
+          "row_ids": [
+            "AR-avReQm",
+            "AR-fPn7Up"
+          ],
+          "row_details": [
+            {
+              "index": 6,
+              "row_id": "AR-avReQm",
+              "created_at": "2024-04-27T23:39:59+00:00",
+              "store_city": "Vienna",
+              "amount_cents": 5980,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0169",
+              "payment_method_fingerprint": "pm_arch_XKXU4ko2AUwy",
+              "device_fingerprint": "dev_arch_KY7k15aisFNT"
+            },
+            {
+              "index": 7,
+              "row_id": "AR-fPn7Up",
+              "created_at": "2024-04-27T23:47:36+00:00",
+              "store_city": "Innsbruck",
+              "amount_cents": 4990,
+              "archive_channel": "web",
+              "customer_ref": "arch_cust-0169",
+              "payment_method_fingerprint": "pm_arch_XKXU4ko2AUwy",
+              "device_fingerprint": "dev_arch_HJaeYvvtfhyB"
+            }
+          ]
+        }
+      ],
+      "exo_score_sync": 0.0,
+      "exo_detail_sync": [],
+      "final_score": 0.20146600902080536,
+      "final_detail": [
+        "answer amount mismatch",
+        "archive fraud refs recovered ~20% EUR from fraud amount, and also marked a few payments as false positives."
+      ]
+    }
+  }
+}

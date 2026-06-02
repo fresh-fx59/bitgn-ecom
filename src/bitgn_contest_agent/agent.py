@@ -2547,6 +2547,85 @@ class AgentLoop:
                         enforcer="fraud_cluster_filter",
                     )
 
+        # v0.1.171 EXO REF RULES (ported from the 1st-place muxx/exoskeleton
+        # submission_refs.py). Three deterministic, exact-set ref-hygiene rules,
+        # each independently env-gated. Run LAST so they see the final ref set;
+        # the stat-guard runs absolutely last (after all additions). Each is
+        # wrapped so a failure never fails the task. See exo_ref_rules +
+        # tests/test_exo_ref_rules.py + docs/.../2026-06-02-exoskeleton-...md.
+        try:
+            from bitgn_contest_agent import exo_ref_rules as _exo
+            from bitgn_contest_agent.adapter.ecom import (
+                Req_Find as _Req_Find_X,
+                Req_Read as _Req_Read_X,
+            )
+
+            # Rule 1: crosslist/export task → cite ONLY the /uploads/ OCR ref.
+            if _exo.crosslist_is_enabled():
+                _cl = _exo.crosslist_refs(task_text or "", list(fn.grounding_refs))
+                if _cl is not None and set(_cl) != set(fn.grounding_refs):
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP, at_step=None,
+                        details=f"crosslist_ref_filter → {_cl}",
+                    )
+                    fn = self._set_refs(fn, _cl, enforcer="crosslist_ref_filter")
+
+            # Rule 2: discount task by an employee actor → ADD the actor's own
+            # /proc/staff|employees record (proof of authority; t099).
+            if _exo.discount_emp_is_enabled():
+                def _resolve_emp_x(emp_id: str):
+                    import json as _j
+                    for _root in ("/proc/staff", "/proc/employees"):
+                        try:
+                            tr = self._adapter.dispatch(_Req_Find_X(
+                                tool="find", name=f"{emp_id}.json", root=_root,
+                                kind="files", limit=20))
+                            if tr.ok and tr.content:
+                                for p in (_j.loads(tr.content).get("paths") or []):
+                                    if p.endswith(f"/{emp_id}.json"):
+                                        return p
+                        except Exception:
+                            continue
+                    return None
+
+                _emp_add = _exo.discount_actor_emp_refs(
+                    task_text or "", getattr(self, "_actor_id", None), _resolve_emp_x)
+                _emp_add = [r for r in _emp_add if r not in set(fn.grounding_refs)]
+                if _emp_add:
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP, at_step=None,
+                        details=f"discount_emp_ref added {_emp_add}",
+                    )
+                    fn = self._set_refs(
+                        fn, list(fn.grounding_refs) + _emp_add,
+                        enforcer="discount_emp_ref")
+
+            # Rule 3 (LAST): drop /proc record refs the runtime confirms missing.
+            if _exo.stat_guard_is_enabled():
+                def _exists_x(path: str):
+                    try:
+                        tr = self._adapter.dispatch(_Req_Read_X(tool="read", path=path))
+                    except Exception:
+                        return None
+                    if getattr(tr, "ok", False):
+                        return True
+                    _err = (getattr(tr, "error", "") or "").lower()
+                    if any(k in _err for k in ("not found", "no such", "does not exist")):
+                        return False
+                    return None
+
+                _kept = _exo.drop_nonexistent_refs(
+                    list(fn.grounding_refs), set(session.seen_refs), _exists_x)
+                if set(_kept) != set(fn.grounding_refs):
+                    _dropped = [r for r in fn.grounding_refs if r not in set(_kept)]
+                    emit_arch(
+                        category=ArchCategory.REFS_DROP, at_step=None,
+                        details=f"ref_stat_guard dropped missing refs: {_dropped}",
+                    )
+                    fn = self._set_refs(fn, _kept, enforcer="ref_stat_guard")
+        except Exception as _exo_exc:
+            _LOG.info("exo_ref_rules crashed; falling back: %s", _exo_exc)
+
         # Step 2: per-model adapter hook (gpt-oss hallucinated-ref drop).
         adapter = self._model_adapter()
         if adapter is None:

@@ -1,0 +1,63 @@
+{
+  "benchmark": "bitgn/ecom1-prod",
+  "run_id": "run-22SUyt1Hef9rMW7oySnPZdsSf",
+  "ts": "20260602T121949Z",
+  "targets": [
+    "t002",
+    "t005",
+    "t016",
+    "t076",
+    "t095",
+    "t099"
+  ],
+  "rows": [
+    {
+      "task_id": "t002",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 52.00009512901306,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t005",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 71.8030686378479,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t016",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 157.33709383010864,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t076",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 133.9890260696411,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t095",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 114.8386857509613,
+      "terminated_by": "report_completion"
+    },
+    {
+      "task_id": "t099",
+      "run_index": 0,
+      "score": 0.0,
+      "score_detail": [],
+      "wall_seconds": 72.18934631347656,
+      "terminated_by": "report_completion"
+    }
+  ]
+}

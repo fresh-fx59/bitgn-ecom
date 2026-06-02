@@ -59,3 +59,8 @@ artifacts/ws_snapshots/*_synth/
 # large/regenerable run dumps + scraped snapshots
 artifacts/raw_dumps/
 artifacts/ws_snapshots/*_scraped/
+
+# local A/B bench scaffolding (symlink dirs + scratch outputs, not source)
+artifacts/local_bench/ab_aux_root/
+artifacts/local_bench/sanity_root/
+artifacts/local_bench/ab_aux_DEAD2.json

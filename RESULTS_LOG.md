@@ -1,3 +1,7 @@
+> ⚠️ **HISTORICAL (2026-05-29/30, 53-task ecom1-dev).** Current PROD (100-task)
+> run history + state: `docs/HANDOFF_NEXT_SESSION.md` and the 2026-05-31 +
+> 2026-06-02 analysis plans under `docs/superpowers/plans/`. Kept for history.
+
 # ECOM run results — what actions led to what scores (2026-05-29/30 session)
 
 ## TL;DR — the 51.4→44.6 "drop" is SEED VARIANCE, not a regression

@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from typing import Annotated, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from pydantic.types import StringConstraints
 
 NonEmptyStr = Annotated[str, StringConstraints(min_length=1)]
@@ -152,6 +152,26 @@ class Req_Find(BaseModel):
     root: str = "/"
     kind: Literal["all", "files", "dirs"] = "all"
     limit: int = Field(default=10, ge=1, le=20)
+
+    @field_validator("kind", mode="before")
+    @classmethod
+    def _coerce_kind(cls, v: object) -> object:
+        # Models occasionally emit a singular/alias form (file/dir/directory/
+        # folder) instead of the enum all/files/dirs. Left uncoerced, this fails
+        # NextStep validation twice and aborts the whole trial with no answer
+        # (PROD run-22SV4N t095 = guaranteed 0). Map the obvious variants; leave
+        # anything else to raise as before.
+        if isinstance(v, str):
+            alias = {
+                "file": "files",
+                "dir": "dirs",
+                "directory": "dirs",
+                "directories": "dirs",
+                "folder": "dirs",
+                "folders": "dirs",
+            }
+            return alias.get(v.strip().lower(), v.strip().lower())
+        return v
 
 
 class Req_Search(BaseModel):

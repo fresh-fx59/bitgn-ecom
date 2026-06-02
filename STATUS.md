@@ -1,3 +1,8 @@
+> ⚠️ **SUPERSEDED / HISTORICAL (53-task ecom1-dev era, v0.1.120).** Current state
+> is **v0.1.171 on ecom1-PROD (100 tasks)** — see `docs/HANDOFF_NEXT_SESSION.md`
+> and `docs/superpowers/plans/2026-05-31-toward-100-final-analysis.md` +
+> `2026-06-02-exoskeleton-competitor-analysis.md`. Kept below for history only.
+
 # Status — BitGN ECOM contest agent, v0.1.120 (53-task surface)
 
 ## v0.1.118-120: harness batch-scoring + 4 grader-confirmed fixes (2026-05-29)
