@@ -32,6 +32,21 @@ ECOM-specific surface (vs the PAC1 lineage):
 
 ---
 
+## Architecture
+
+A full, current architecture overview — the model-as-dispatcher loop, the
+deterministic preflight and domain helpers, the ~20-step terminal enforcer
+chain, observability, cost, and an honest take on strengths and the score
+ceiling — is in `articles/`, in both languages:
+
+- [`articles/ARCHITECTURE.en.md`](articles/ARCHITECTURE.en.md) — English
+- [`articles/ARCHITECTURE.ru.md`](articles/ARCHITECTURE.ru.md) — Russian
+
+(The older `docs/ARCHITECTURE.md` is a PAC1-era historical reference and is
+superseded by the above for the current ECOM1 build.)
+
+---
+
 ## Quick start
 
 ### 1. Install
@@ -171,6 +186,7 @@ src/bitgn_contest_agent/
 artifacts/bench/    # Saved benchmark run summaries
 artifacts/raw_dumps/ # Per-process protobuf request/response dumps (auto-on for run-benchmark)
 artifacts/ws_snapshots/ # Local-replay workspaces for failed trials
+articles/           # Architecture overview (EN + RU) — current ECOM1 build
 docs/               # Design specs (PAC1-era, kept as historical reference)
 tests/              # Unit + coverage tests (500+ passing)
 ```
